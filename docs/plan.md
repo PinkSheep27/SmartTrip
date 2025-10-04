@@ -1,5 +1,8 @@
 # Structure & Ideation
 
+## Figma Design
+
+### https://www.figma.com/design/QXFAsym6CRzEx7MzlxOWtz/SmartTrip?node-id=0-1&p=f&m=draw
 ## Map
 
 ### Details
