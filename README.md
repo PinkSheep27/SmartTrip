@@ -1,7 +1,7 @@
 # SmartTrip
 
 ## Overview
-A travel booking system that consolidates multiple travel services into a single platform using TypeScript, React, Tailwing, and AWS services.
+A travel booking system that consolidates multiple travel services into a single platform using TypeScript, React, Tailwind, and AWS services.
 
 ## Problem Statement
  It’s annoying having to look through a bunch of different websites to find the best deals for flights, car rentals, hotels, and key places to visit.
@@ -24,8 +24,8 @@ A travel booking system that consolidates multiple travel services into a single
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/[yourusername]/expense-tracker
-   cd expense-tracker
+   git clone https://github.com/[yourusername]/SmartTrip
+   cd SmartTrip
    ```
 2. Install dependencies:
    ```bash
