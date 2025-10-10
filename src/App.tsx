@@ -4,11 +4,16 @@ import HomePage from './components/HomePage';
 
 function App() {
   return (
-    <>
-      <HomePage />
+  <>
+    <HomePage />
+
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+     <div className="flex gap-6">
       <LoginForm />
       <SignUpForm />
-    </>
+     </div>
+   </div>
+ </>
   );
 }
 
