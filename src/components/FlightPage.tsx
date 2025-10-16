@@ -59,7 +59,7 @@ const FlightPage: React.FC = () => {
             </>
           )}
         </div>
-        
+
         <div className="flex gap-6">
           <div className="p-4 border rounded-lg w-40 text-center">
             <strong>From:</strong> {departing || "—"}

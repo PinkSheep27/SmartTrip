@@ -18,7 +18,7 @@ import experiencesIconFilledImg from "../assets/favicons/experiences-filled-in-1
 
 //Import different pages
 import FlightPage from "./FlightPage";
-import DiningPage from "./DiningPage";
+import DiningPage from "./DiningComponents/DiningPage";
 
 const Navbar: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
