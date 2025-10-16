@@ -1,6 +1,7 @@
 import LoginForm from "./components/LoginForm";
 import SignUpForm from "./components/SignUpForm";
 import HomePage from './components/HomePage';
+import FlightPage from "./components/FlightPage";
 
 function App() {
   return (
@@ -13,6 +14,8 @@ function App() {
       <SignUpForm />
      </div>
    </div>
+
+  <FlightPage />
  </>
   );
 }
