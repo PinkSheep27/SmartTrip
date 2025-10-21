@@ -3,91 +3,83 @@ import { useState } from "react";
 import Heading from "./Heading";
 import RestaurantList from "./RestaurantList";
 
+import type { prices } from "./RestaurantCard";
+
+interface Restaurant {
+  id: string;
+  name: string;
+  cuisine: string;
+  rating: number;
+  distance: string;
+  price: prices;
+  tags: string[];
+  waitTime: string;
+}
+
 export default function DiningSelection() {
   const [currentFilter, setCurrentFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [moodMatch, setMoodMatch] = useState(false);
-  const [liveAvailability, setLiveAvailability] = useState(false);
-  const [groupDining, setGroupDining] = useState(false);
 
-  const restaurants = [
+  const restaurants: Restaurant[] = [
     {
+      id: "1",
       name: "Bella Napoli",
-      cuisine: "italian",
+      cuisine: "Italian",
       rating: 4.8,
       distance: "0.8 mi",
-      priceRange: "$$",
-      time: "25-35 min",
+      price: "$$",
       tags: ["Pizza", "Pasta", "Wine Bar"],
-      gradient: "from-indigo-500 to-purple-600",
-      mood: "Romantic",
-      liveWait: "5 min wait",
-      groupFriendly: true,
+      waitTime: "5 min wait",
     },
     {
+      id: "2",
       name: "Tokyo Drift",
-      cuisine: "asian",
+      cuisine: "Asian",
       rating: 4.9,
       distance: "1.2 mi",
-      priceRange: "$$$",
-      time: "30-40 min",
+      price: "$$$",
       tags: ["Sushi", "Ramen", "Sake"],
-      gradient: "from-pink-400 to-red-500",
-      mood: "Adventurous",
-      liveWait: "No wait",
-      groupFriendly: true,
+      waitTime: "No wait",
     },
     {
+      id: "3",
       name: "The Green Plate",
-      cuisine: "healthy",
+      cuisine: "Healthy",
       rating: 4.7,
       distance: "0.5 mi",
-      priceRange: "$$",
-      time: "15-25 min",
+      price: "$$",
       tags: ["Vegan", "Organic", "Smoothies"],
-      gradient: "from-teal-300 to-pink-200",
-      mood: "Energetic",
-      liveWait: "2 min wait",
-      groupFriendly: false,
+      waitTime: "2 min wait",
     },
     {
+      id: "4",
       name: "Burger Kingdom",
-      cuisine: "american",
+      cuisine: "American",
       rating: 4.6,
       distance: "1.5 mi",
-      priceRange: "$",
-      time: "20-30 min",
+      price: "$",
       tags: ["Burgers", "Fries", "Shakes"],
-      gradient: "from-orange-300 to-red-400",
-      mood: "Casual",
-      liveWait: "8 min wait",
-      groupFriendly: true,
+      waitTime: "8 min wait",
     },
     {
+      id: "5",
       name: "Sweet Escape",
-      cuisine: "dessert",
+      cuisine: "Dessert",
       rating: 4.9,
       distance: "0.3 mi",
-      priceRange: "$$",
-      time: "10-20 min",
+      price: "$$",
       tags: ["Cakes", "Ice Cream", "Coffee"],
-      gradient: "from-yellow-300 to-orange-400",
-      mood: "Happy",
-      liveWait: "No wait",
-      groupFriendly: false,
+      waitTime: "No wait",
     },
     {
+      id: "6",
       name: "Spice Route",
-      cuisine: "asian",
+      cuisine: "Asian",
       rating: 4.7,
       distance: "2.1 mi",
-      priceRange: "$$",
-      time: "35-45 min",
+      price: "$$",
       tags: ["Indian", "Curry", "Tandoori"],
-      gradient: "from-pink-500 to-yellow-400",
-      mood: "Adventurous",
-      liveWait: "12 min wait",
-      groupFriendly: true,
+      waitTime: "12 min wait",
     },
   ];
 
@@ -100,35 +92,104 @@ export default function DiningSelection() {
     { id: "dessert", label: "Desserts" },
   ];
 
-  const filteredRestaurants = restaurants.filter((r) => {
+  // Filtering logic
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    // Filter by cuisine category
     const matchesFilter =
-      currentFilter === "all" || r.cuisine === currentFilter;
+      currentFilter === "all" ||
+      restaurant.cuisine.toLowerCase() === currentFilter.toLowerCase();
+
+    // Filter by search term (searches name, cuisine, and tags)
     const matchesSearch =
-      r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.tags.some((tag) =>
+      searchTerm === "" ||
+      restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      restaurant.cuisine.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      restaurant.tags.some((tag) =>
         tag.toLowerCase().includes(searchTerm.toLowerCase())
       );
-    const matchesGroup = !groupDining || r.groupFriendly;
-    return matchesFilter && matchesSearch && matchesGroup;
+
+    return matchesFilter && matchesSearch;
   });
 
   return (
     <div>
-      <Navbar></Navbar>
-      <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600 p-5">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br bg-[#94C3D2] p-5">
+        <Navbar></Navbar>
+        <div className="max-w-7xl mx-auto pt-4">
           <Heading></Heading>
 
-          {/* <ControlPanel
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filters={filters}
-            currentFilter={currentFilter}
-            onFilterChange={setCurrentFilter}
-            moodMatch={moodMatch}
-            liveAvailability={liveAvailability}
-            groupDining={groupDining}
-          /> */}
+          {/* Search and Filter Controls */}
+          <div className="mb-8 animate-fade-in">
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search restaurants, cuisines, or dishes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-6 py-4 pl-12 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
+                />
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 mb-6">
+              {filters.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setCurrentFilter(filter.id)}
+                  className={`px-6 py-3 rounded-full font-semibold transition-all transform hover:scale-105 ${
+                    currentFilter === filter.id
+                      ? "bg-white text-amber-600 shadow-lg"
+                      : "bg-white/20 text-white hover:bg-white/30"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+
+            {searchTerm && (
+              <div className="mt-4 text-amber-50 text-sm">
+                Found {filteredRestaurants.length} restaurant
+                {filteredRestaurants.length !== 1 ? "s" : ""} matching "
+                {searchTerm}"
+              </div>
+            )}
+          </div>
 
           <RestaurantList restaurants={filteredRestaurants} />
         </div>
