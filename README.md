@@ -14,6 +14,7 @@ A travel booking system that consolidates multiple travel services into a single
 - **Cloud**: AWS (S3, Lambda, Aurora DSQL)
 - **Testing**: Vitest with 70% coverage target
 - **Deployment**: GitHub Actions CI/CD
+- **Live Colaboration**: WebSocket
 
 ## Prerequisites
 - Node.js 18.17.0 or higher
