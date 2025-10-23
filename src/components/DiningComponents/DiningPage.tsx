@@ -122,47 +122,39 @@ export default function DiningSelection() {
           <div className="mb-8 animate-fade-in">
             {/* Search Bar */}
             <div className="mb-6">
-              <div className="relative">
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search restaurants, cuisines, or dishes..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-6 py-4 pl-12 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
+                  />
+
+                  {/* Search Icon */}
+                  <svg
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+
                 <input
                   type="text"
-                  placeholder="Search restaurants, cuisines, or dishes..."
+                  placeholder="Enter city or zip code"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-6 py-4 pl-12 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
+                  className="flex-1 px-6 py-4 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
                 />
-                <svg
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
               </div>
             </div>
 
