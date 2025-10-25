@@ -1,4 +1,3 @@
-import { useState } from "react";
 import RestaurantCard from "./RestaurantCard";
 import type { RestaurantCardProps } from "./RestaurantCard";
 
