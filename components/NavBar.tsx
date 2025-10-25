@@ -1,5 +1,9 @@
+"use client";
+
 import React from "react";
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 //Logo
 import smartTripLogo from "../assets/logos/smarttrip-transparent-logo.png";
@@ -16,16 +20,12 @@ import hotelsIconFilledImg from "../assets/favicons/hotels-filled-in-100px.png";
 import carsIconFilledImg from "../assets/favicons/car-rental-filled-in-100px.png";
 import experiencesIconFilledImg from "../assets/favicons/experiences-filled-in-100px.png";
 
-//Import different pages
-import FlightPage from "./FlightPage";
-import DiningPage from "./DiningComponents/DiningPage";
-
 const Navbar: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const navLinks = [
     {
-      href: "/FlightPage",
+      href: "/FlightsPage",
       label: "Flights",
       iconOutlined: flightsIconOutlinedImg,
       iconFilled: flightsIconFilledImg,
@@ -48,13 +48,19 @@ const Navbar: React.FC = () => {
       iconOutlined: experiencesIconOutlinedImg,
       iconFilled: experiencesIconFilledImg,
     },
+    {
+      href: "/DiningPage",
+      label: "Dining",
+      iconOutlined: experiencesIconOutlinedImg,
+      iconFilled: experiencesIconFilledImg,
+    },
   ];
 
   return (
-    <nav className="bg-white shadow-lg rounded-full max-w-6xl mx-auto mt-6 px-6 py-3">
+    <div className="bg-white shadow-lg rounded-full max-w-6xl mx-auto mt-6 px-6 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img
+          <Image
             src={smartTripLogo}
             alt="SmartTrip Logo"
             className="h-8 w-auto"
@@ -67,11 +73,11 @@ const Navbar: React.FC = () => {
               onMouseEnter={() => setHoveredItem(link.label)}
               onMouseLeave={() => setHoveredItem(null)}
             >
-              <a
+              <Link
                 href={link.href}
                 className="flex items-center space-x-1 hover:text-teal-500 transition-colors"
               >
-                <img
+                <Image
                   src={
                     hoveredItem === link.label
                       ? link.iconFilled
@@ -81,7 +87,7 @@ const Navbar: React.FC = () => {
                   className="h-5 w-5"
                 />
                 <span>{link.label}</span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -100,7 +106,7 @@ const Navbar: React.FC = () => {
           </a>
         </div>
       </div>
-    </nav>
+    </div>
   );
 };
 

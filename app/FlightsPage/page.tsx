@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState } from "react";
-import Navbar from "./Navbar";
 
 const FlightPage: React.FC = () => {
   const [tripType, setTripType] = useState<"oneway" | "roundtrip">("roundtrip");
@@ -7,9 +8,7 @@ const FlightPage: React.FC = () => {
   const [arriving, setArriving] = useState("");
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <div className="min-h-screen bg-[#94C3D2]">
       <div className="flex flex-col items-center justify-center p-6">
         {/* Trip Type Selector */}
         <div className="flex gap-6 mb-6">
