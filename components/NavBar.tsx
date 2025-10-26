@@ -57,53 +57,52 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white shadow-lg rounded-full max-w-6xl mx-auto mt-6 px-6 py-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Image
-            src={smartTripLogo}
-            alt="SmartTrip Logo"
-            className="h-8 w-auto"
-          />
-        </div>
-        <ul className="hidden md:flex items-center space-x-8 text-gray-700 font-medium">
-          {navLinks.map((link) => (
-            <li
-              key={link.label}
-              onMouseEnter={() => setHoveredItem(link.label)}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              <Link
-                href={link.href}
-                className="flex items-center space-x-1 hover:text-teal-500 transition-colors"
+    <div className={`
+      fixed top-0 left-1/2 -translate-x-1/2 z-60 w-full max-w-6xl mt-6 px-6
+      opacity-100 pointer-events-auto
+    `}>
+      <div className="bg-white shadow-lg rounded-full px-6 py-3 w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Link href="/">
+              <Image
+                src={smartTripLogo}
+                alt="SmartTrip Logo"
+                className="h-8 w-auto cursor-pointer"
+              />
+            </Link>
+          </div>
+          <ul className="hidden md:flex items-center space-x-8 text-gray-700 font-medium">
+            {navLinks.map((link) => (
+              <li
+                key={link.label}
+                onMouseEnter={() => setHoveredItem(link.label)}
+                onMouseLeave={() => setHoveredItem(null)}
               >
-                <Image
-                  src={
-                    hoveredItem === link.label
-                      ? link.iconFilled
-                      : link.iconOutlined
-                  }
-                  alt={link.label}
-                  className="h-5 w-5"
-                />
-                <span>{link.label}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <div className="hidden md:flex items-center space-x-2">
-          <a
-            href="#"
-            className="px-5 py-2 text-teal-500 border border-teal-400 rounded-full hover:bg-teal-50 transition-colors"
-          >
-            Log In
-          </a>
-          <a
-            href="#"
-            className="px-5 py-2 text-white bg-teal-500 rounded-full hover:bg-teal-600 transition-colors"
-          >
-            Sign Up
-          </a>
+                <Link
+                  href={link.href}
+                  className="flex items-center space-x-1 hover:text-teal-500 transition-colors"
+                >
+                  <Image
+                    src={hoveredItem === link.label ? link.iconFilled : link.iconOutlined}
+                    alt={link.label}
+                    className="h-5 w-5"
+                    width={20}
+                    height={20}
+                  />
+                  <span>{link.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden md:flex items-center space-x-2">
+            <a href="#" className="px-5 py-2 text-teal-500 border border-teal-400 rounded-full hover:bg-teal-50 transition-colors">
+              Log In
+            </a>
+            <a href="#" className="px-5 py-2 text-white bg-teal-500 rounded-full hover:bg-teal-600 transition-colors">
+              Sign Up
+            </a>
+          </div>
         </div>
       </div>
     </div>
