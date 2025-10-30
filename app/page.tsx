@@ -11,6 +11,10 @@ const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setShowScrollButton(true);
     }, 1000);
@@ -20,7 +24,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
+      if (window.scrollY > 100) {
         setScrolled(true);
       } else {
         setScrolled(false);
@@ -33,16 +37,26 @@ const HomePage: React.FC = () => {
   
   const handleScrollClick = () => {
     window.scrollTo({
-      top: window.innerHeight / 2,
+      top: 200,
       behavior: "smooth"
     });
   };
 
   return (
     <>
+      <div className="absolute inset-0 flex items-start justify-center pt-44 z-20">
+            <Image
+              src={smartTripLogo}
+              alt="SmartTrip Logo"
+              width={500}
+              height={100}
+              className="w-2/3 max-w-[50rem]"
+            />
+      </div>
+
       <div 
         className={`
-          fixed inset-0 z-40 
+          fixed inset-0 z-10 
           ${scrolled ? 'pointer-events-none' : ''} 
         `}
       >
@@ -56,7 +70,7 @@ const HomePage: React.FC = () => {
           priority
           className={`
             transition-transform duration-1000 ease-in-out
-            ${scrolled ? 'scale-110' : 'scale-100'} 
+            ${scrolled ? 'scale-105' : 'scale-100'} 
           `}
         />
       </div>
@@ -64,23 +78,11 @@ const HomePage: React.FC = () => {
       
       <div 
         className={`
-          fixed inset-0 z-50 
+          fixed inset-0 z-50
           transition-opacity duration-1000 ease-in-out 
           ${scrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
         `}
-      >
-        
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Image
-            src={smartTripLogo}
-            alt="SmartTrip Logo"
-            width={500}
-            height={100}
-            className="w-2/3 max-w-xl"
-          />
-        </div>
-
-        
+      > 
         <div 
           className={`
             absolute bottom-16 left-1/2 -translate-x-1/2 
@@ -89,7 +91,7 @@ const HomePage: React.FC = () => {
           `}
         >
           <div 
-            className="flex flex-col items-center gap-3 cursor-pointer group pointer-events-auto" // Added pointer-events-auto here
+            className="flex flex-col items-center gap-3 cursor-pointer group pointer-events-auto"
             onClick={handleScrollClick}
           >
             
@@ -107,25 +109,52 @@ const HomePage: React.FC = () => {
       </div>
 
       <div className={`
-          min-h-screen bg-white relative z-10
+          min-h-screen relative z-30
           transition-opacity duration-1000 ease-in-out 
-          ${scrolled ? 'opacity-100' : 'opacity-0'} 
+          ${scrolled ? 'opacity-80' : 'opacity-0'} 
         `}
       > 
-        <main className="max-w-6xl mx-auto mt-10 p-8">
-          {/* Add pt-20 or similar top padding if NavBar overlap is an issue */}
-          <div className="bg-white rounded-lg shadow-md p-8"> 
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              Welcome to SmartTrip
-            </h1>
-            <p className="text-gray-600 text-lg">Plan Smarter, Relax Better.</p>
-            
-            {/* Placeholder */}
-            <div className="h-screen py-10">
-              <h2 className="text-2xl font-bold">Your Content Starts Here</h2>
-              <p>Add your other page components and sections below.</p>
+        <main className="relative top-50 text-center max-w-2/3 mx-auto text-white">
+            <div className="
+            bg-[#94C3D2] rounded-lg shadow-xl 
+            p-8 max-w-7/15 mt-[50vh]
+            min-h-75 max-h-100
+            "> 
+              <h1 className="text-4xl font-bold mb-4">
+                Welcome to SmartTrip
+              </h1>
+              <p className="text-gray-100 text-lg">
+                Plan Smarter, Relax Better.
+              </p>
+              <div className="py-10">
+                <h2 className="text-2xl font-bold">
+                  Your Content Starts Here
+                </h2>
+                <p className="text-gray-100">
+                  Add your other page components and sections below.
+                </p>
+              </div>
             </div>
-          </div>
+            <div className="
+              bg-[#94C3D2] rounded-lg shadow-xl 
+              p-8 max-w-7/15
+              min-h-75 max-h-100
+            "> 
+              <h1 className="text-4xl font-bold mb-4">
+                Welcome to SmartTrip
+              </h1>
+              <p className="text-gray-100 text-lg">
+                Plan Smarter, Relax Better.
+              </p>
+              <div className="py-10">
+                <h2 className="text-2xl font-bold">
+                  Your Content Starts Here
+                </h2>
+                <p className="text-gray-100">
+                  Add your other page components and sections below.
+                </p>
+              </div>
+            </div>
         </main>
       </div>
     </>
