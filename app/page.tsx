@@ -2,13 +2,29 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 import mainBackground from "@/assets/backgrounds/Main-Background.png";
 import smartTripLogo from "@/assets/logos/smarttrip-transparent-logo.png";
+import { header } from "framer-motion/client";
+
+const leftCardData = {
+  "Why SmartTrip?" : "Stop juggling dozens of tabs and endless spreadsheets. SmartTrip is your central command for travel, bringing every step of the planning process into one seamless platform.",
+  "Find Everything in One Place" : "Compare flights, hotels, car rentals, and discover dining and experiences on a single, interactive map. No more cross-referencing multiple sites for the best deal.",
+  "Plan Smarter, Not Harder" : "Instantly sort options by price, rating, or region to find exactly what you’re looking for. Our powerful filters cut through the noise, saving you time and stress.",
+  "Travel Better, Together" : "From building a shared itinerary in real-time to splitting payments effortlessly, we make group travel finally feel like a vacation."
+}
+
+const headers = Object.keys(leftCardData);
+type ContentKey = keyof typeof leftCardData;
 
 const HomePage: React.FC = () => {
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+  const currentHeader = headers[currentIndex] as ContentKey;
+  const currentText = leftCardData[currentHeader];
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -24,7 +40,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100) {
+      if (window.scrollY > 300) {
         setScrolled(true);
       } else {
         setScrolled(false);
@@ -34,12 +50,32 @@ const HomePage: React.FC = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (currentIndex == headers.length - 1) setCurrentIndex(0);
+      else setCurrentIndex(currentIndex + 1);
+    }, 5000);
+    return () => {
+      clearInterval(timer);
+    }
+  }, [currentIndex, headers.length])
   
   const handleScrollClick = () => {
     window.scrollTo({
       top: 200,
       behavior: "smooth"
     });
+  };
+
+  const goNext = () => {
+    if (currentIndex == headers.length - 1) setCurrentIndex(0);
+    if (currentIndex < headers.length - 1) setCurrentIndex(currentIndex + 1);
+  };
+
+  const goBack = () => {
+    if (currentIndex == 0) setCurrentIndex(headers.length - 1);
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
   };
 
   return (
@@ -70,7 +106,7 @@ const HomePage: React.FC = () => {
           priority
           className={`
             transition-transform duration-1000 ease-in-out
-            ${scrolled ? 'scale-105' : 'scale-100'} 
+            ${scrolled ? 'scale-106' : 'scale-101'} 
           `}
         />
       </div>
@@ -111,49 +147,104 @@ const HomePage: React.FC = () => {
       <div className={`
           min-h-screen relative z-30
           transition-opacity duration-1000 ease-in-out 
-          ${scrolled ? 'opacity-80' : 'opacity-0'} 
+          ${scrolled ? 'opacity-100' : 'opacity-0'} 
         `}
       > 
-        <main className="relative top-50 text-center max-w-2/3 mx-auto text-white">
+        <main className="
+          relative top-50 max-w-3/5 mx-auto 
+          text-white flex justify-between gap-8 mt-[50vh]
+          ">
             <div className="
-            bg-[#94C3D2] rounded-lg shadow-xl 
-            p-8 max-w-7/15 mt-[50vh]
-            min-h-75 max-h-100
-            "> 
-              <h1 className="text-4xl font-bold mb-4">
-                Welcome to SmartTrip
-              </h1>
-              <p className="text-gray-100 text-lg">
-                Plan Smarter, Relax Better.
-              </p>
-              <div className="py-10">
-                <h2 className="text-2xl font-bold">
-                  Your Content Starts Here
-                </h2>
-                <p className="text-gray-100">
-                  Add your other page components and sections below.
-                </p>
+              relative 
+              bg-[#94C3D2]/80 rounded-lg shadow-xl 
+              pt-10 pl-20 pr-20 pb-10 max-w-7/15
+              overflow-auto text-left
+              min-h-75 
+            ">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIndex}
+                  
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.4 }}
+            
+                  className="pb-10" 
+                >
+                  <h1 className="text-blue-500 text-4xl font-bold mb-6">
+                    {currentHeader}
+                  </h1>
+                  <p className="text-gray-100 text-lg">
+                    {currentText}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className="
+                    absolute top-1/2 -translate-y-1/2 left-4 
+                    w-12 h-12 bg-white rounded-full 
+                    flex items-center justify-center 
+                    shadow-xl cursor-pointer"
+                  aria-label="Previous slide"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="
+                    absolute top-1/2 -translate-y-1/2 right-4 
+                    w-12 h-12 bg-white/90 rounded-full 
+                    flex items-center justify-center 
+                    shadow-xl cursor-pointer"
+                  aria-label="Next Slide"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+              <div className="
+                absolute flex justify-center
+                bottom-10 left-0 right-0
+                space-x-2
+                pointer-events-none "
+              >
+                {headers.map((header, index) => (
+                  <div
+                    key={header}
+                    className={`
+                      w-3 h-3 rounded-full transition-colors duration-500
+                      ${currentIndex === index ? 'bg-gray-400' : 'bg-white'}
+                    `}
+                  />
+                ))}
               </div>
             </div>
+    
             <div className="
-              bg-[#94C3D2] rounded-lg shadow-xl 
-              p-8 max-w-7/15
-              min-h-75 max-h-100
+              bg-[#94C3D2]/80 rounded-lg shadow-xl 
+              p-10 max-w-7/15
+              overflow-auto text-left
+              min-h-75
             "> 
-              <h1 className="text-4xl font-bold mb-4">
-                Welcome to SmartTrip
+              <h1 className="text-blue-500 text-4xl font-bold mb-6">
+                Collaborative Planning
               </h1>
               <p className="text-gray-100 text-lg">
-                Plan Smarter, Relax Better.
+                Planning for trips is, most of the time, a hassle; especially when you’re 
+                planning with multiple people who have different ideas of a fun trip. 
+                That’s where SmartTrip comes in. We get rid of the hassle having to message 
+                a friend and then waiting a week for them to reply by directly allowing 
+                multiple people to add to a shared cart.
               </p>
-              <div className="py-10">
-                <h2 className="text-2xl font-bold">
-                  Your Content Starts Here
-                </h2>
-                <p className="text-gray-100">
-                  Add your other page components and sections below.
-                </p>
-              </div>
             </div>
         </main>
       </div>

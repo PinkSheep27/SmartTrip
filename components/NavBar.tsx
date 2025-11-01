@@ -13,12 +13,14 @@ import flightsIconOutlinedImg from "../assets/favicons/flights-outlined-100px.pn
 import hotelsIconOutlinedImg from "../assets/favicons/hotels-outlined-100px.png";
 import carsIconOutlinedImg from "../assets/favicons/car-rental-outlined-100px.png";
 import experiencesIconOutlinedImg from "../assets/favicons/experiences-outlined-100px.png";
+import diningIconOutlinedImg from "../assets/favicons/dining-outlined-100px.png";
 
 //filled in favicons for when hovered over
 import flightsIconFilledImg from "../assets/favicons/flights-filled-in-100px.png";
 import hotelsIconFilledImg from "../assets/favicons/hotels-filled-in-100px.png";
 import carsIconFilledImg from "../assets/favicons/car-rental-filled-in-100px.png";
 import experiencesIconFilledImg from "../assets/favicons/experiences-filled-in-100px.png";
+import diningIconFilledImg from "../assets/favicons/dining-filled-in-100px.png";
 
 const Navbar: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -51,8 +53,8 @@ const Navbar: React.FC = () => {
     {
       href: "/DiningPage",
       label: "Dining",
-      iconOutlined: experiencesIconOutlinedImg,
-      iconFilled: experiencesIconFilledImg,
+      iconOutlined: diningIconOutlinedImg,
+      iconFilled: diningIconFilledImg,
     },
   ];
 
@@ -61,14 +63,14 @@ const Navbar: React.FC = () => {
       fixed top-0 left-1/2 -translate-x-1/2 z-60 w-full max-w-6xl mt-6 px-6
       opacity-100 pointer-events-auto
     `}>
-      <div className="bg-white shadow-lg rounded-full px-6 py-3 w-full">
+      <div className="bg-white shadow-lg rounded-full px-6 py-6 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Link href="/">
               <Image
                 src={smartTripLogo}
                 alt="SmartTrip Logo"
-                className="h-8 w-auto cursor-pointer"
+                className="h-10 w-auto cursor-pointer"
               />
             </Link>
           </div>
@@ -96,10 +98,18 @@ const Navbar: React.FC = () => {
             ))}
           </ul>
           <div className="hidden md:flex items-center space-x-2">
-            <a href="#" className="px-5 py-2 text-teal-500 border border-teal-400 rounded-full hover:bg-teal-50 transition-colors">
+            <a href="/LoginPage" className="
+              px-5 py-2 text-[#94C3D2] border border-[#94C3D2] rounded-full 
+              hover:bg-[#94C3D2] hover:text-white transition-colors
+              ">
               Log In
             </a>
-            <a href="#" className="px-5 py-2 text-white bg-teal-500 rounded-full hover:bg-teal-600 transition-colors">
+            <a href="/SignUpPage" 
+              className="
+                px-5 py-2 text-[#94C3D2] border border-[#94C3D2] rounded-full 
+                hover:bg-[#94C3D2] hover:text-white transition-colors
+                "
+            >
               Sign Up
             </a>
           </div>
