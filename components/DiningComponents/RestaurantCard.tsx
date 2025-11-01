@@ -9,6 +9,9 @@ export interface RestaurantCardProps {
   distance?: string;
   waitTime?: string;
   tags: string[];
+  address?: string;
+  photo?: string | null;
+  isOpen?: boolean | undefined;
 }
 
 export default function RestaurantCard({
@@ -19,14 +22,18 @@ export default function RestaurantCard({
   price,
   waitTime,
   tags,
+  address,
+  photo,
+  isOpen,
 }: RestaurantCardProps) {
   return (
     <div className="bg-[#E8F3E8] rounded-3xl overflow-hidden shadow-xl hover:-translate-y-2 hover:scale-105 transition-all duration-500 cursor-pointer">
       {/* Image/Header Section */}
       <div
-        className={`h-56 bg-gradient-to-br ${getGradientByCuisine(
-          cuisine
-        )} relative`}
+        className="h-56 relative bg-cover bg-center"
+        style={{
+          backgroundImage: photo ? `url(${encodeURI(photo)})` : undefined,
+        }}
       >
         <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-m font-semibold text-indigo-600">
           {price}
@@ -41,15 +48,14 @@ export default function RestaurantCard({
             {rating}
           </div>
         </div>
-        <div className="">
-          <h4 className="text-sm font-semibold text-gray-700 truncate">
-            {cuisine}
-          </h4>
-        </div>
+        <h4 className="text-sm font-semibold text-gray-700 truncate mb-2">
+          {cuisine}
+        </h4>
         <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
-          <div className="flex items-center gap-1.5">{waitTime}</div>
+          {waitTime && (
+            <div className="flex items-center gap-1.5">{waitTime}</div>
+          )}
         </div>
-
         <div className="flex flex-wrap gap-2">
           {tags.map((tag, i) => (
             <span
@@ -63,17 +69,4 @@ export default function RestaurantCard({
       </div>
     </div>
   );
-}
-
-// Helper function to get gradient based on cuisine type
-function getGradientByCuisine(cuisine: string): string {
-  const gradients: Record<string, string> = {
-    italian: "from-indigo-500 to-purple-600",
-    asian: "from-pink-400 to-red-500",
-    healthy: "from-teal-300 to-pink-200",
-    american: "from-orange-300 to-red-400",
-    dessert: "from-yellow-300 to-orange-400",
-  };
-
-  return gradients[cuisine.toLowerCase()] || "from-gray-400 to-gray-600";
 }

@@ -15,102 +15,77 @@ interface Restaurant {
   price: prices;
   tags: string[];
   waitTime: string;
+  address?: string;
+  photo?: string | null;
+  isOpen?: boolean | undefined;
 }
 
 export default function DiningSelection() {
-  const [currentFilter, setCurrentFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const restaurants: Restaurant[] = [
-    {
-      id: "1",
-      name: "Bella Napoli",
-      cuisine: "Italian",
-      rating: 4.8,
-      distance: "0.8 mi",
-      price: "$$",
-      tags: ["Pizza", "Pasta", "Wine Bar"],
-      waitTime: "5 min wait",
-    },
-    {
-      id: "2",
-      name: "Tokyo Drift",
-      cuisine: "Asian",
-      rating: 4.9,
-      distance: "1.2 mi",
-      price: "$$$",
-      tags: ["Sushi", "Ramen", "Sake"],
-      waitTime: "No wait",
-    },
-    {
-      id: "3",
-      name: "The Green Plate",
-      cuisine: "Healthy",
-      rating: 4.7,
-      distance: "0.5 mi",
-      price: "$$",
-      tags: ["Vegan", "Organic", "Smoothies"],
-      waitTime: "2 min wait",
-    },
-    {
-      id: "4",
-      name: "Burger Kingdom",
-      cuisine: "American",
-      rating: 4.6,
-      distance: "1.5 mi",
-      price: "$",
-      tags: ["Burgers", "Fries", "Shakes"],
-      waitTime: "8 min wait",
-    },
-    {
-      id: "5",
-      name: "Sweet Escape",
-      cuisine: "Dessert",
-      rating: 4.9,
-      distance: "0.3 mi",
-      price: "$$",
-      tags: ["Cakes", "Ice Cream", "Coffee"],
-      waitTime: "No wait",
-    },
-    {
-      id: "6",
-      name: "Spice Route",
-      cuisine: "Asian",
-      rating: 4.7,
-      distance: "2.1 mi",
-      price: "$$",
-      tags: ["Indian", "Curry", "Tandoori"],
-      waitTime: "12 min wait",
-    },
-  ];
+  async function searchRestaurants() {
+    if (!searchLocation.trim()) {
+      setError("Please enter a location");
+      return;
+    }
 
-  const filters = [
-    { id: "all", label: "All Dining" },
-    { id: "italian", label: "Italian" },
-    { id: "asian", label: "Asian" },
-    { id: "american", label: "American" },
-    { id: "healthy", label: "Healthy" },
-    { id: "dessert", label: "Desserts" },
-  ];
+    setLoading(true);
+    setError("");
 
-  // Filtering logic
-  const filteredRestaurants = restaurants.filter((restaurant) => {
-    // Filter by cuisine category
-    const matchesFilter =
-      currentFilter === "all" ||
-      restaurant.cuisine.toLowerCase() === currentFilter.toLowerCase();
-
-    // Filter by search term (searches name, cuisine, and tags)
-    const matchesSearch =
-      searchTerm === "" ||
-      restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      restaurant.cuisine.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      restaurant.tags.some((tag) =>
-        tag.toLowerCase().includes(searchTerm.toLowerCase())
+    try {
+      // First, geocode the location to get coordinates
+      const geocodeResponse = await fetch(
+        `/api/geocode?address=${encodeURIComponent(searchLocation)}`
       );
 
-    return matchesFilter && matchesSearch;
-  });
+      if (!geocodeResponse.ok) {
+        throw new Error("Failed to find location");
+      }
+
+      const geocodeData = await geocodeResponse.json();
+
+      if (geocodeData.error || !geocodeData.location) {
+        throw new Error(geocodeData.error || "Location not found");
+      }
+
+      const { lat, lng } = geocodeData.location;
+
+      // Now search for restaurants near this location
+      const query = searchTerm.trim() || "restaurant";
+      const response = await fetch(
+        `/api/DiningRoute?query=${encodeURIComponent(
+          query
+        )}&location=${lat},${lng}&radius=3000`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch restaurants");
+      }
+
+      const data = await response.json();
+      setRestaurants(data);
+    } catch (error) {
+      console.error("Error:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch restaurants. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Allow search on Enter key
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      searchRestaurants();
+    }
+  };
 
   return (
     <div>
@@ -120,6 +95,37 @@ export default function DiningSelection() {
 
           {/* Search and Filter Controls */}
           <div className="mb-8 animate-fade-in">
+            {/* Location Search */}
+            <div className="flex justify-center mb-8">
+              <div className="flex items-center gap-4 w-full max-w-3xl">
+                <input
+                  type="text"
+                  placeholder="Enter city or zip code"
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1 px-6 py-4 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={searchRestaurants}
+                  disabled={loading}
+                  className={`px-6 py-4 rounded-2xl bg-amber-500 text-white font-semibold shadow-lg hover:bg-amber-600 transition-all ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {loading ? "Searching..." : "Search"}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                {error}
+              </div>
+            )}
+
             {/* Search Bar */}
             <div className="mb-6">
               <div className="flex items-center gap-4">
@@ -129,6 +135,7 @@ export default function DiningSelection() {
                     placeholder="Search restaurants, cuisines, or dishes..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={handleKeyPress}
                     className="w-full px-6 py-4 pl-12 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
                   />
 
@@ -146,46 +153,42 @@ export default function DiningSelection() {
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
-                </div>
 
-                <input
-                  type="text"
-                  placeholder="Enter city or zip code"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-6 py-4 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
-                />
+                  {/* Clear Button */}
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-6">
-              {filters.map((filter) => (
-                <button
-                  key={filter.id}
-                  onClick={() => setCurrentFilter(filter.id)}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all transform hover:scale-105 ${
-                    currentFilter === filter.id
-                      ? "bg-white text-amber-600 shadow-lg"
-                      : "bg-white/20 text-white hover:bg-white/30"
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-
-            {searchTerm && (
-              <div className="mt-4 text-amber-50 text-sm">
-                Found {filteredRestaurants.length} restaurant
-                {filteredRestaurants.length !== 1 ? "s" : ""} matching "
-                {searchTerm}"
+            {/* Loading Indicator */}
+            {loading && (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
               </div>
             )}
           </div>
 
-          <RestaurantList restaurants={filteredRestaurants} />
+          {!loading && <RestaurantList restaurants={restaurants} />}
         </div>
-
         <style>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(-20px); }
