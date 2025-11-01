@@ -15,7 +15,7 @@ interface Restaurant {
   price: prices;
   tags: string[];
   waitTime: string;
-  address?: string;
+  address: string;
   photo?: string | null;
   isOpen?: boolean | undefined;
 }
