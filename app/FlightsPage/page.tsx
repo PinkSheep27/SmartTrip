@@ -52,7 +52,7 @@ const FlightPage: React.FC = () => {
       returnDate: tripType === "roundtrip" ? returnDate : "",
     });
 
-    router.push(`/flights/results?${params.toString()}`);
+    router.push(`/FlightsPage/results?${params.toString()}`);
   };
 
   return (
