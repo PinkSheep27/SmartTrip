@@ -6,9 +6,11 @@ import { useSearchParams } from "next/navigation";
 const FlightResultsPage: React.FC = () => {
   const params = useSearchParams();
 
-  const departing = params.get("departing") || "—";
-  const arriving = params.get("arriving") || "—";
-  const tripType = params.get("tripType");
+  const tripType = params.get("tripType") || "";
+  const departing = params.get("departing") || "";
+  const arriving = params.get("arriving") || "";
+  const departureDate = params.get("departureDate") || "";
+  const returnDate = params.get("returnDate") || "";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -24,6 +26,18 @@ const FlightResultsPage: React.FC = () => {
           <div className="flex flex-col items-center">
             <span className="font-semibold text-gray-600">To:</span>
             <span className="text-lg">{arriving}</span>
+          </div>
+        )}
+
+        <div className="flex flex-col items-center">
+          <span className="font-semibold text-gray-600">Depart:</span>
+          <span className="text-lg">{departureDate}</span>
+        </div>
+
+        {tripType === "roundtrip" && (
+          <div className="flex flex-col items-center">
+            <span className="font-semibold text-gray-600">Return:</span>
+            <span className="text-lg">{returnDate}</span>
           </div>
         )}
       </div>
@@ -51,7 +65,7 @@ const FlightResultsPage: React.FC = () => {
               <div>
                 <h3 className="text-lg font-semibold">Flight Option {i}</h3>
                 <p className="text-gray-600">
-                  Airline • Departure Time • Duration
+                  Airline • {departing} → {arriving} • {departureDate}
                 </p>
               </div>
 
