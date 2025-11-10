@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "lucide-react": "^0.552.0",
     "framer-motion": "^12.23.24",
     "next": "16.0.0",
     "react": "19.2.0",
