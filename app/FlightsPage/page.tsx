@@ -57,33 +57,10 @@ const FlightPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#94C3D2] flex flex-col items-center pt-20">
-      {/* Trip Type Selector */}
-      <div className="flex gap-6 mb-6">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="tripType"
-            value="oneway"
-            checked={tripType === "oneway"}
-            onChange={() => setTripType("oneway")}
-          />
-          One-way
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="tripType"
-            value="roundtrip"
-            checked={tripType === "roundtrip"}
-            onChange={() => setTripType("roundtrip")}
-          />
-          Round-trip
-        </label>
-      </div>
+      
 
       {/* Airports Input */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mt-10">
         <input
           type="text"
           placeholder="Departing Airport"
@@ -107,7 +84,7 @@ const FlightPage: React.FC = () => {
       </div>
 
       {/* Dates Input */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mt-6">
         <input
           type="date"
           value={departureDate}
@@ -127,6 +104,30 @@ const FlightPage: React.FC = () => {
         )}
       </div>
 
+        {/* Trip Type Selector */}
+      <div className="flex gap-6 mt-8">
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="tripType"
+            value="oneway"
+            checked={tripType === "oneway"}
+            onChange={() => setTripType("oneway")}
+          />
+          One-way
+        </label>
+
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="tripType"
+            value="roundtrip"
+            checked={tripType === "roundtrip"}
+            onChange={() => setTripType("roundtrip")}
+          />
+          Round-trip
+        </label>
+      </div>
       {/* Search Button */}
       <button
         onClick={handleSearch}
