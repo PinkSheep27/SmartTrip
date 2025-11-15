@@ -5,25 +5,32 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { useUser } from '@auth0/nextjs-auth0/client';
+import LoginButton from "../../components/NavBarComponents/LoginButton";
+import SignUpButton from "../../components/NavBarComponents/SignUpButton";
+import LogoutButton from "../../components/NavBarComponents/LogoutButton";
+import Profile from "../../components/NavBarComponents/Profile";
+
 //Logo
-import smartTripLogo from "../assets/logos/smarttrip-transparent-logo.png";
+import smartTripLogo from "../../assets/logos/smarttrip-transparent-logo.png";
 
 //outlined favicons for when not hovered over
-import flightsIconOutlinedImg from "../assets/favicons/flights-outlined-100px.png";
-import hotelsIconOutlinedImg from "../assets/favicons/hotels-outlined-100px.png";
-import carsIconOutlinedImg from "../assets/favicons/car-rental-outlined-100px.png";
-import experiencesIconOutlinedImg from "../assets/favicons/experiences-outlined-100px.png";
-import diningIconOutlinedImg from "../assets/favicons/dining-outlined-100px.png";
+import flightsIconOutlinedImg from "../../assets/favicons/flights-outlined-100px.png";
+import hotelsIconOutlinedImg from "../../assets/favicons/hotels-outlined-100px.png";
+import carsIconOutlinedImg from "../../assets/favicons/car-rental-outlined-100px.png";
+import experiencesIconOutlinedImg from "../../assets/favicons/experiences-outlined-100px.png";
+import diningIconOutlinedImg from "../../assets/favicons/dining-outlined-100px.png";
 
 //filled in favicons for when hovered over
-import flightsIconFilledImg from "../assets/favicons/flights-filled-in-100px.png";
-import hotelsIconFilledImg from "../assets/favicons/hotels-filled-in-100px.png";
-import carsIconFilledImg from "../assets/favicons/car-rental-filled-in-100px.png";
-import experiencesIconFilledImg from "../assets/favicons/experiences-filled-in-100px.png";
-import diningIconFilledImg from "../assets/favicons/dining-filled-in-100px.png";
+import flightsIconFilledImg from "../../assets/favicons/flights-filled-in-100px.png";
+import hotelsIconFilledImg from "../../assets/favicons/hotels-filled-in-100px.png";
+import carsIconFilledImg from "../../assets/favicons/car-rental-filled-in-100px.png";
+import experiencesIconFilledImg from "../../assets/favicons/experiences-filled-in-100px.png";
+import diningIconFilledImg from "../../assets/favicons/dining-filled-in-100px.png";
 
 const Navbar: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const { user, isLoading } = useUser();
 
   const navLinks = [
     {
@@ -98,20 +105,21 @@ const Navbar: React.FC = () => {
             ))}
           </ul>
           <div className="hidden md:flex items-center space-x-2">
-            <a href="/LoginPage" className="
-              px-5 py-2 text-[#94C3D2] border border-[#94C3D2] rounded-full 
-              hover:bg-[#94C3D2] hover:text-white transition-colors
-              ">
-              Log In
-            </a>
-            <a href="/SignUpPage" 
-              className="
-                px-5 py-2 text-[#94C3D2] border border-[#94C3D2] rounded-full 
-                hover:bg-[#94C3D2] hover:text-white transition-colors
-                "
-            >
-              Sign Up
-            </a>
+            {isLoading && (
+              <div className="px-5 py-2 text-gray-500">Loading...</div>
+            )}
+            {!isLoading && !user && (
+              <>
+                <LoginButton />
+                <SignUpButton />
+              </>
+            )}
+            {!isLoading && user && (
+              <>
+                <Profile />
+                <LogoutButton />
+              </>
+            )}
           </div>
         </div>
       </div>
