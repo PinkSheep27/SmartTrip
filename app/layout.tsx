@@ -17,7 +17,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: layoutProps) {
   return (
     <html lang="en">
-      <body className="bg-white"> {/* Color was bg-[#94C3D2] */}
+      <body className="bg-white">
+        {" "}
+        {/* Color was bg-[#94C3D2] */}
         <NavBar />
         {children}
       </body>
