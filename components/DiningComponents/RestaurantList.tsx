@@ -24,6 +24,7 @@ export default function RestaurantList({ restaurants }: RestaurantListProps) {
             address={restaurant.address}
             tags={restaurant.tags}
             isOpen={restaurant.isOpen}
+            photo={(restaurant.photo)}
           />
         ))}
       </div>
