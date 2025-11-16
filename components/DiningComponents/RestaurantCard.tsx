@@ -43,6 +43,7 @@ export default function RestaurantCard({
         className="h-56 relative bg-cover bg-center"
         style={{
           backgroundImage: photo ? `url(${encodeURI(photo)})` : undefined,
+          backgroundColor: "#E2E8F0", // light gray fallback
         }}
       >
         <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-semibold text-indigo-600 shadow-sm">
