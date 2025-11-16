@@ -90,7 +90,7 @@ export default function DiningSelection() {
   return (
     <div>
       <div className="min-h-screen bg-gradient-to-br bg-[#94C3D2] p-5">
-        <div className="max-w-7xl mx-auto pt-4">
+        <div className="max-w-7xl mx-auto pt-28">
           <Heading></Heading>
 
           {/* Search and Filter Controls */}
