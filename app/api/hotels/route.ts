@@ -16,7 +16,7 @@ async function getAccessToken() {
   if (!apiKey || !apiSecret) {
     throw new Error("Amadeus API credentials not configured");
   }
-
+  //Request token
   const response = await fetch(
     "https://test.api.amadeus.com/v1/security/oauth2/token",
     {
@@ -44,6 +44,7 @@ async function getAccessToken() {
   return cachedToken;
 }
 
+//Obtain hotels within an area, not checking if it has a price or not
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const lng = Number(searchParams.get("lng"));
@@ -98,9 +99,7 @@ export async function GET(request: NextRequest) {
       chunks.push(allHotelIds.slice(i, i + MAX_PER_BATCH));
     }
 
-    let allOffers: any[] = [];
-
-    for (const [index, chunk] of chunks.entries()) {
+    const offerRequests = chunks.map((chunk, index) => {
       const hotelIds = chunk.join(",");
       const offersUrl = `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${hotelIds}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`;
 
@@ -110,29 +109,65 @@ export async function GET(request: NextRequest) {
         } hotels)...`
       );
 
-      const offersResponse = await fetch(offersUrl, {
+      return fetch(offersUrl, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.data) {
+            console.warn(`⚠️ Batch ${index + 1} returned no offers`);
+            return [];
+          }
+          console.log(
+            `✅ Batch ${index + 1}: received ${data.data.length} offers`
+          );
+          return data.data;
+        })
+        .catch((err) => {
+          console.warn(`⚠️ Batch ${index + 1} failed`, err);
+          return [];
+        });
+    });
 
-      const offersData = await offersResponse.json();
+    // Run all API calls in parallel
+    const allOffersArrays = await Promise.all(offerRequests);
 
-      if (!offersResponse.ok) {
-        console.warn(
-          `⚠️ Batch ${index + 1} failed:`,
-          offersData.errors?.[0]?.detail || offersData
-        );
-        continue;
-      }
+    // Flatten into a single array
+    const allOffers = allOffersArrays.flat();
 
-      if (offersData.data) {
-        allOffers = allOffers.concat(offersData.data);
-        console.log(
-          `✅ Batch ${index + 1}: received ${offersData.data.length} offers`
-        );
-      } else {
-        console.log(`⚠️ Batch ${index + 1}: no offers found`);
-      }
-    }
+    // for (const [index, chunk] of chunks.entries()) {
+    //   const hotelIds = chunk.join(",");
+    //   const offersUrl = `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${hotelIds}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`;
+
+    //   console.log(
+    //     `🔹 Fetching batch ${index + 1}/${chunks.length} (${
+    //       chunk.length
+    //     } hotels)...`
+    //   );
+
+    //   const offersResponse = await fetch(offersUrl, {
+    //     headers: { Authorization: `Bearer ${token}` },
+    //   });
+
+    //   const offersData = await offersResponse.json();
+
+    //   if (!offersResponse.ok) {
+    //     console.warn(
+    //       `⚠️ Batch ${index + 1} failed:`,
+    //       offersData.errors?.[0]?.detail || offersData
+    //     );
+    //     continue;
+    //   }
+
+    //   if (offersData.data) {
+    //     allOffers = allOffers.concat(offersData.data);
+    //     console.log(
+    //       `✅ Batch ${index + 1}: received ${offersData.data.length} offers`
+    //     );
+    //   } else {
+    //     console.log(`⚠️ Batch ${index + 1}: no offers found`);
+    //   }
+    // }
 
     console.log(`🎯 Total offers fetched: ${allOffers.length}`);
 
