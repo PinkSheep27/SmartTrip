@@ -15,6 +15,7 @@ interface Hotels {
 }
 
 function HotelsPage() {
+  //States of each input required
   const [searchLocation, setSearchLocation] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -24,13 +25,15 @@ function HotelsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  //Allows enter to be pressed for submission
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       searchHotels();
     }
   };
 
-  const searchHotels = async () => {
+  async function searchHotels() {
+    //Check if inputs are empty
     if (!searchLocation || !checkIn || !checkOut) {
       setError("Please fill in all search fields");
       return;
@@ -87,7 +90,7 @@ function HotelsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const sortedHotels = [...hotels].sort((a, b) => {
     if (sortBy === "price-low") return a.price - b.price;
@@ -98,8 +101,8 @@ function HotelsPage() {
 
   return (
     <div className="min-h-screen bg-[#94C3D2] py-16">
-      {/* Hero Section with Search Form */}
       <div className="bg-gradient-to-br from-[#94C3D2] to-[#7FB3C4] text-white py-16 px-6">
+        {/* Hero Section with Search Form */}
         <div className="max-w-7xl mx-auto">
           <h1 className="text-5xl font-bold mb-4 text-center">
             Find Your Perfect Stay
@@ -107,7 +110,7 @@ function HotelsPage() {
           <p className="text-xl text-center mb-12 text-white/90">
             Discover comfortable hotels at the best prices
           </p>
-
+          {/*Input Section for hotel search*/}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-1">
