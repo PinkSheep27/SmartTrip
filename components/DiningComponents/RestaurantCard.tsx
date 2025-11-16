@@ -13,7 +13,7 @@ export interface RestaurantCardProps {
   tags: string[];
   address?: string;
   photo?: string | null;
-  isOpen?: boolean | undefined;
+  isOpen?: boolean;
 }
 
 export default function RestaurantCard({
@@ -37,18 +37,28 @@ export default function RestaurantCard({
   }
 
   return (
-    <div className="bg-[#E8F3E8] rounded-3xl overflow-hidden shadow-lg hover:-translate-y-2 hover:scale-[1.02] transition-transform duration-500 cursor-pointer relative flex flex-col">
+    <div className="bg-[#E8F3E8] rounded-3xl overflow-hidden shadow-lg hover:-translate-y-2 hover:scale-[1.02] transition-transform duration-500 cursor-pointer flex flex-col">
       {/* Image/Header Section */}
-      <div
-        className="h-56 relative bg-cover bg-center"
-        style={{
-          backgroundImage: photo ? `url(${encodeURI(photo)})` : undefined,
-          backgroundColor: "#E2E8F0", // light gray fallback
-        }}
-      >
+      <div className="h-56 relative bg-gray-200 overflow-hidden">
+        {photo ? (
+          <img
+            src={photo}
+            alt={name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            No Image
+          </div>
+        )}
+
+        {/* Price badge */}
         <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-semibold text-indigo-600 shadow-sm">
           {price}
         </div>
+
+        {/* Open/Closed badge */}
         {isOpen !== undefined && (
           <div
             className={`absolute bottom-4 left-4 px-3 py-1 text-xs font-semibold rounded-full ${
@@ -71,21 +81,6 @@ export default function RestaurantCard({
             {rating}
           </div>
         </div>
-
-        {/* <h4 className="text-sm font-semibold text-gray-700 truncate mb-3">
-          {cuisine}
-        </h4> */}
-
-        {/* <div className="flex flex-wrap gap-3 mb-4 text-sm text-gray-600">
-          {tags.slice(0, 2).map((tag, i) => (
-            <span
-              key={i}
-              className="px-2.5 py-1 bg-white/70 text-gray-700 rounded-xl text-xs font-medium border border-gray-200"
-            >
-              {tag}
-            </span>
-          ))}
-        </div> */}
 
         {waitTime && (
           <div className="flex items-center gap-1.5">⏱ {waitTime}</div>
