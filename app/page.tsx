@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import mainBackground from "@/assets/backgrounds/Main-Background.png";
 import smartTripLogo from "@/assets/logos/smarttrip-transparent-logo.png";
-import { header } from "framer-motion/client";
 
 const leftCardData = {
   "Why SmartTrip?" : "Stop juggling dozens of tabs and endless spreadsheets. SmartTrip is your central command for travel, bringing every step of the planning process into one seamless platform.",
