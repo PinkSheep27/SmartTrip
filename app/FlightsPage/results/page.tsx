@@ -33,6 +33,9 @@ const FlightResultsPage: React.FC = () => {
   const returnDate = params.get("returnDate") || "";
 
   const [Flights, setFlights] = React.useState([]);
+  const [page, setPage] = React.useState(1);          // current page
+  const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
+  const [loading, setLoading] = React.useState(false);
 
 
   function formatShortDate(dateString: string) {
@@ -52,31 +55,63 @@ const FlightResultsPage: React.FC = () => {
     // Example → "6:29 AM"
   }
 
+  async function fetchFlights(reset = false) {
+    if (loading) return;
+    setLoading(true);
+
+    const query = new URLSearchParams({
+      tripType,
+      departing,
+      arriving,
+      departureDate,
+      returnDate,
+      page: page.toString(),
+      limit: "10", // number of flights per batch
+    });
+
+    const res = await fetch(`/api/searchFlights?${query.toString()}`);
+    const data = await res.json();
+    const newFlights = (data.flights || []).map((flight: any) => ({
+      ...flight,
+      airline: airlineLookup[flight.airline] || flight.airline,
+    }));
+
+    setFlights(prev => (reset ? newFlights : [...prev, ...newFlights]));
+    setHasMore(newFlights.length > 0);
+    setLoading(false);
+  }
+
   React.useEffect(() => {
-    async function fetchFlights() {
+    async function fetchFlights(reset = false) {
+      if (loading) return;
+      setLoading(true);
+
       const query = new URLSearchParams({
         tripType,
         departing,
         arriving,
         departureDate,
         returnDate,
+        page: page.toString(),
+        limit: "10",
       });
 
       const res = await fetch(`/api/searchFlights?${query.toString()}`);
       const data = await res.json();
-      
-      // Map airline codes → full names
-      const flightsWithNames = (data.flights || []).map((flight: any) => ({
+
+      const newFlights = (data.flights || []).map((flight: any) => ({
         ...flight,
         airline: airlineLookup[flight.airline] || flight.airline,
       }));
-      
-      setFlights(flightsWithNames);
+
+      setFlights(prev => reset ? newFlights : [...prev, ...newFlights]);
+      setHasMore(newFlights.length > 0);
+      setLoading(false);
     }
 
+    fetchFlights(page === 1); //reset if on first page
+  }, [tripType, departing, arriving, departureDate, returnDate, page]);
 
-    fetchFlights();
-  }, [tripType, departing, arriving, departureDate, returnDate]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -110,6 +145,7 @@ const FlightResultsPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-1">
+
         {/* Sorting Sidebar */}
         <div className="w-1/5 bg-white m-6 p-6 rounded-xl shadow-md">
           <h2 className="text-lg font-semibold mb-4">Sorting Options</h2>
@@ -122,7 +158,11 @@ const FlightResultsPage: React.FC = () => {
 
         {/* Flight Cards Section */}
         <div className="flex-1 m-6 space-y-6">
-          {Flights.length === 0 && (
+
+          {Flights.length === 0 && !loading && (
+            <p className="text-gray-600 text-lg">No flights found.</p>
+          )}
+          {Flights.length === 0 && loading && (
             <p className="text-gray-600 text-lg">Loading flights...</p>
           )}
 
@@ -148,15 +188,27 @@ const FlightResultsPage: React.FC = () => {
 
               {/* RIGHT: Price + Button */}
               <div className="text-right">
-                <p className="text-2xl font-bold text-blue-600">
-                  ${flight.price}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">${flight.price}</p>
                 <button className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                   Select
                 </button>
               </div>
             </div>
           ))}
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setPage(prev => prev + 1)}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                disabled={loading}
+              >
+                {loading ? "Loading..." : "Load More"}
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
