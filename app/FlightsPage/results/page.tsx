@@ -3,6 +3,26 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 
+const airlineLookup: { [code: string]: string } = {
+  "AA": "American Airlines",
+  "AS": "Alaska Airlines",
+  "B6": "JetBlue Airways",
+  "DL": "Delta Air Lines",
+  "F9": "Frontier Airlines",
+  "HA": "Hawaiian Airlines",
+  "NK": "Spirit Airlines",
+  "OO": "SkyWest Airlines",
+  "UA": "United Airlines",
+  "WN": "Southwest Airlines",
+  "YX": "Republic Airline",
+  "EV": "ExpressJet Airlines",
+  "MQ": "Envoy Air",
+  "9E": "Endeavor Air",
+  "G7": "GoJet Airlines",
+  "OH": "PSA Airlines",
+  // add more codes as needed
+};
+
 const FlightResultsPage: React.FC = () => {
   const params = useSearchParams();
 
@@ -11,6 +31,52 @@ const FlightResultsPage: React.FC = () => {
   const arriving = params.get("arriving") || "";
   const departureDate = params.get("departureDate") || "";
   const returnDate = params.get("returnDate") || "";
+
+  const [Flights, setFlights] = React.useState([]);
+
+
+  function formatShortDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  function formatTime(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    // Example → "6:29 AM"
+  }
+
+  React.useEffect(() => {
+    async function fetchFlights() {
+      const query = new URLSearchParams({
+        tripType,
+        departing,
+        arriving,
+        departureDate,
+        returnDate,
+      });
+
+      const res = await fetch(`/api/searchFlights?${query.toString()}`);
+      const data = await res.json();
+      
+      // Map airline codes → full names
+      const flightsWithNames = (data.flights || []).map((flight: any) => ({
+        ...flight,
+        airline: airlineLookup[flight.airline] || flight.airline,
+      }));
+      
+      setFlights(flightsWithNames);
+    }
+
+
+    fetchFlights();
+  }, [tripType, departing, arriving, departureDate, returnDate]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -56,21 +122,35 @@ const FlightResultsPage: React.FC = () => {
 
         {/* Flight Cards Section */}
         <div className="flex-1 m-6 space-y-6">
-          {/* Mock flight cards */}
-          {[1, 2, 3].map((i) => (
+          {Flights.length === 0 && (
+            <p className="text-gray-600 text-lg">Loading flights...</p>
+          )}
+
+          {Flights.map((flight: any, i: number) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center hover:shadow-lg transition-shadow"
             >
-              <div>
-                <h3 className="text-lg font-semibold">Flight Option {i}</h3>
+              {/* LEFT: Airline + Route + Times */}
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold">{flight.airline}</h3>
+
                 <p className="text-gray-600">
-                  Airline • {departing} → {arriving} • {departureDate}
+                  <span className="font-medium">{flight.departAirport}</span> →{" "}
+                  <span className="font-medium">{flight.arriveAirport}</span>
+                </p>
+
+                <p className="text-gray-500 text-sm">
+                  {formatShortDate(flight.departureTime)} •{" "}
+                  {formatTime(flight.departureTime)}
                 </p>
               </div>
 
+              {/* RIGHT: Price + Button */}
               <div className="text-right">
-                <p className="text-2xl font-bold text-blue-600">$350</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  ${flight.price}
+                </p>
                 <button className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                   Select
                 </button>
