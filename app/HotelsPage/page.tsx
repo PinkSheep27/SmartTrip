@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Star, Wifi } from "lucide-react";
 
 interface Hotels {
@@ -15,25 +15,31 @@ interface Hotels {
 }
 
 function HotelsPage() {
-  //States of each input required
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
+
+  const [start, setStart] = useState(0);
+  const [hotelsLoaded, setHotelsLoaded] = useState(50);
+  const [moreHotels, setMoreHotels] = useState(true);
+
   const [searchLocation, setSearchLocation] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
   const [sortBy, setSortBy] = useState("recommended");
+  const [hotelIds, setHotelIds] = useState<string[]>([]);
   const [hotels, setHotels] = useState<Hotels[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
 
-  //Allows enter to be pressed for submission
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      searchHotels();
+      getHotels();
     }
   };
 
-  async function searchHotels() {
-    //Check if inputs are empty
+  async function getHotels() {
     if (!searchLocation || !checkIn || !checkOut) {
       setError("Please fill in all search fields");
       return;
@@ -41,9 +47,14 @@ function HotelsPage() {
 
     setLoading(true);
     setError("");
+    setHotels([]);
+    setHotelIds([]);
+    setStart(0);
+    setHotelsLoaded(50);
+    setMoreHotels(true);
 
     try {
-      // Get geocode
+      // Step 1: Get geocode
       const geocodeResponse = await fetch(
         `/api/geocode?address=${encodeURIComponent(searchLocation)}`
       );
@@ -60,26 +71,27 @@ function HotelsPage() {
 
       const { lat, lng } = geocodeData.location;
 
-      // Search hotels (token is handled server-side now)
-      const response = await fetch(
-        `/api/hotels?lat=${lat}&lng=${lng}&checkInDate=${checkIn}&checkOutDate=${checkOut}&adults=${guests}`,
-        {
-          method: "GET",
-        }
-      );
+      // Step 2: Get all hotel IDs in the area
+      const hotelsResponse = await fetch(`/api/hotels?lat=${lat}&lng=${lng}`);
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!hotelsResponse.ok) {
+        const errorData = await hotelsResponse.json();
         throw new Error(errorData.error || "Failed to search hotels");
       }
 
-      const data = await response.json();
+      const hotelsData = await hotelsResponse.json();
 
-      setHotels(data.hotels || []);
-
-      if (data.hotels?.length === 0) {
-        setError("No hotels found for the selected dates and location");
+      if (!hotelsData.allHotelIds || hotelsData.allHotelIds.length === 0) {
+        setError("No hotels found in this location");
+        setLoading(false);
+        return;
       }
+
+      console.log(`Found ${hotelsData.allHotelIds.length} total hotels`);
+      setHotelIds(hotelsData.allHotelIds);
+
+      // Step 3: Load first batch with prices
+      await loadFirstBatch(hotelsData.allHotelIds);
     } catch (err) {
       console.error("Search error:", err);
       setError(
@@ -92,6 +104,150 @@ function HotelsPage() {
     }
   }
 
+  async function loadFirstBatch(ids: string[]) {
+    if (ids.length === 0) return;
+
+    try {
+      const chunk = ids.slice(0, 50);
+      const idsParam = chunk.join(",");
+
+      console.log("Loading first batch of hotels with prices...");
+
+      const res = await fetch(
+        `/api/hotels/hotelsPrice?hotelIds=${encodeURIComponent(
+          idsParam
+        )}&checkInDate=${checkIn}&checkOutDate=${checkOut}&adults=${guests}`
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch hotel offers");
+      }
+
+      const data = await res.json();
+
+      console.log(
+        `First batch: ${data.hotels?.length || 0} hotels with prices`
+      );
+
+      if (data.hotels && data.hotels.length > 0) {
+        setHotels(data.hotels);
+        setStart(50);
+        setHotelsLoaded(100);
+      } else {
+        // If no hotels in first batch, try next batch
+        if (ids.length > 50) {
+          await loadNextBatch(ids, 50, 100);
+        } else {
+          setMoreHotels(false);
+          setError("No hotels available for the selected dates");
+        }
+      }
+    } catch (err) {
+      console.error("Error loading first batch:", err);
+      setError("Failed to load hotels. Please try again.");
+    }
+  }
+
+  async function loadNextBatch(
+    ids: string[],
+    startIdx: number,
+    endIdx: number
+  ) {
+    const chunk = ids.slice(startIdx, endIdx);
+    if (chunk.length === 0) {
+      setMoreHotels(false);
+      return;
+    }
+
+    const idsParam = chunk.join(",");
+
+    try {
+      const res = await fetch(
+        `/api/hotels/hotelsPrice?hotelIds=${encodeURIComponent(
+          idsParam
+        )}&checkInDate=${checkIn}&checkOutDate=${checkOut}&adults=${guests}`
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch hotel offers");
+
+      const data = await res.json();
+
+      if (data.hotels && data.hotels.length > 0) {
+        setHotels((prev) => [...prev, ...data.hotels]);
+        setStart(endIdx);
+        setHotelsLoaded(endIdx + 50);
+      } else if (endIdx < ids.length) {
+        // No offers in this batch, try next one
+        await loadNextBatch(ids, endIdx, endIdx + 50);
+      } else {
+        setMoreHotels(false);
+      }
+    } catch (err) {
+      console.error("Error loading batch:", err);
+    }
+  }
+
+  const loadMoreHotels = useCallback(async () => {
+    if (
+      hotelIds.length === 0 ||
+      start >= hotelIds.length ||
+      !moreHotels ||
+      loadingMore
+    ) {
+      setMoreHotels(false);
+      return;
+    }
+
+    setLoadingMore(true);
+
+    try {
+      await loadNextBatch(hotelIds, start, hotelsLoaded);
+    } catch (err) {
+      console.error("Error loading more hotels:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [
+    hotelIds,
+    start,
+    hotelsLoaded,
+    moreHotels,
+    loadingMore,
+    checkIn,
+    checkOut,
+    guests,
+  ]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (!loadMoreRef.current || hotels.length === 0) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !loadingMore &&
+          moreHotels &&
+          hotelIds.length > 0
+        ) {
+          console.log("Loading more hotels...");
+          loadMoreHotels();
+        }
+      },
+      {
+        threshold: 0.5,
+        rootMargin: "100px",
+      }
+    );
+
+    obs.observe(loadMoreRef.current);
+    return () => obs.disconnect();
+  }, [loadMoreHotels, loadingMore, moreHotels, hotelIds.length, hotels.length]);
+
   const sortedHotels = [...hotels].sort((a, b) => {
     if (sortBy === "price-low") return a.price - b.price;
     if (sortBy === "price-high") return b.price - a.price;
@@ -102,7 +258,6 @@ function HotelsPage() {
   return (
     <div className="min-h-screen bg-[#94C3D2] py-16">
       <div className="bg-gradient-to-br from-[#94C3D2] to-[#7FB3C4] text-white py-16 px-6">
-        {/* Hero Section with Search Form */}
         <div className="max-w-7xl mx-auto">
           <h1 className="text-5xl font-bold mb-4 text-center">
             Find Your Perfect Stay
@@ -110,7 +265,7 @@ function HotelsPage() {
           <p className="text-xl text-center mb-12 text-white/90">
             Discover comfortable hotels at the best prices
           </p>
-          {/*Input Section for hotel search*/}
+
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-1">
@@ -174,7 +329,7 @@ function HotelsPage() {
             </div>
 
             <button
-              onClick={searchHotels}
+              onClick={getHotels}
               disabled={loading}
               className={`w-full mt-6 bg-gradient-to-r from-orange-400 to-orange-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-[1.02] shadow-lg ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
@@ -192,10 +347,8 @@ function HotelsPage() {
         </div>
       </div>
 
-      {/* Results Section */}
       {hotels.length > 0 && (
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Sort Bar */}
           <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <span className="text-gray-700 font-medium">
@@ -218,7 +371,6 @@ function HotelsPage() {
             </div>
           </div>
 
-          {/* Hotel Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {sortedHotels.map((hotel) => (
               <div
@@ -289,6 +441,22 @@ function HotelsPage() {
                 </div>
               </div>
             ))}
+
+            {loadingMore && (
+              <div className="col-span-full flex justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+              </div>
+            )}
+
+            {moreHotels && !loadingMore && (
+              <div ref={loadMoreRef} className="h-px col-span-full"></div>
+            )}
+
+            {!moreHotels && hotels.length > 0 && (
+              <div className="col-span-full text-center py-8 text-gray-600">
+                All available hotels loaded
+              </div>
+            )}
           </div>
         </div>
       )}
