@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const airlineLookup: { [code: string]: string } = {
@@ -23,7 +23,7 @@ const airlineLookup: { [code: string]: string } = {
   // add more codes as needed
 };
 
-const FlightResultsPage: React.FC = () => {
+const FlightResultsContent: React.FC = () => {
   const params = useSearchParams();
 
   const tripType = params.get("tripType") || "";
@@ -212,6 +212,14 @@ const FlightResultsPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const FlightResultsPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="p-10 text-center">Loading search results...</div>}>
+      <FlightResultsContent />
+    </Suspense>
   );
 };
 
