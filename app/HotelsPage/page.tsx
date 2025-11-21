@@ -8,7 +8,6 @@ import {
   Users,
   Calendar,
   Search,
-  Heart,
   ChevronRight,
 } from "lucide-react";
 
