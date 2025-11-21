@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from "@auth0/nextjs-auth0/client";
 import LoginButton from "../../components/NavBarComponents/LoginButton";
 import SignUpButton from "../../components/NavBarComponents/SignUpButton";
 import LogoutButton from "../../components/NavBarComponents/LogoutButton";
@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
       iconFilled: flightsIconFilledImg,
     },
     {
-      href: "#",
+      href: "/HotelsPage",
       label: "Hotels",
       iconOutlined: hotelsIconOutlinedImg,
       iconFilled: hotelsIconFilledImg,
@@ -66,10 +66,12 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className={`
+    <div
+      className={`
       fixed top-0 left-1/2 -translate-x-1/2 z-60 w-full max-w-6xl mt-6 px-6
-      opacity-100 pointer-events-auto
-    `}>
+      opacity-100 pointer-events-auto 
+    `}
+    >
       <div className="bg-white shadow-lg rounded-full px-6 py-6 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -93,7 +95,11 @@ const Navbar: React.FC = () => {
                   className="flex items-center space-x-1 hover:text-teal-500 transition-colors"
                 >
                   <Image
-                    src={hoveredItem === link.label ? link.iconFilled : link.iconOutlined}
+                    src={
+                      hoveredItem === link.label
+                        ? link.iconFilled
+                        : link.iconOutlined
+                    }
                     alt={link.label}
                     className="h-5 w-5"
                     width={20}

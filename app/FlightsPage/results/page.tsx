@@ -47,7 +47,7 @@ const FlightResultsContent: React.FC = () => {
   const [tripTypeState, setTripTypeState] = React.useState(tripType);
   const [departingState, setDepartingState] = React.useState(departing);
   const [arrivingState, setArrivingState] = React.useState(arriving);
-  const [departureDateState, setDepartureDateState] = React.useState(departureDate);
+  const [departureDateState, setDepartureDateState] = React.useState(departureDate);s
   const [returnDateState, setReturnDateState] = React.useState(returnDate);
 
   const [Flights, setFlights] = React.useState<Flight[]>([]);
