@@ -70,9 +70,26 @@ export async function GET(req: Request) {
       max: "10",
     };
 
-    if (tripType === "roundtrip") {
-      params.returnDate = returnDate;
-    }
+    // Validate arriving airport
+if (!arriving || arriving.length !== 3) {
+  return NextResponse.json(
+    { flights: [], error: "Arrival airport must be a 3-letter code" },
+    { status: 400 }
+  );
+}
+
+params.destinationLocationCode = arriving;
+
+// Only add returnDate for roundtrip
+if (tripType === "roundtrip") {
+  if (!returnDate) {
+    return NextResponse.json(
+      { flights: [], error: "Return date required for roundtrip" },
+      { status: 400 }
+    );
+  }
+  params.returnDate = returnDate;
+}
 
     // Call Amadeus API
     const res = await fetch(
