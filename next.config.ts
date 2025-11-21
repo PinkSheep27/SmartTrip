@@ -2,7 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    optimizeCss: false, // Disable LightningCSS to avoid Vercel native binary errors
+    optimizeCss: false, // disables LightningCSS pipeline
+    swcPlugins: [], // ensures SWC fallback behavior
+  },
+  typescript: {
+    ignoreBuildErrors: false,
   },
 };
 
