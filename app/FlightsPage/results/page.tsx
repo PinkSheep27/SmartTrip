@@ -3,6 +3,7 @@
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
+
 const airlineLookup: { [code: string]: string } = {
   "AA": "American Airlines",
   "AS": "Alaska Airlines",
@@ -23,20 +24,45 @@ const airlineLookup: { [code: string]: string } = {
   // add more codes as needed
 };
 
+type Flight = {
+  airline: string;
+  departAirport: string;
+  arriveAirport: string;
+  departureTime: string;
+  duration: string;
+  price: number | string;
+};
+
 const FlightResultsContent: React.FC = () => {
   const params = useSearchParams();
 
+  //Initial Read Params from URL
   const tripType = params.get("tripType") || "";
   const departing = params.get("departing") || "";
   const arriving = params.get("arriving") || "";
   const departureDate = params.get("departureDate") || "";
   const returnDate = params.get("returnDate") || "";
 
-  const [Flights, setFlights] = React.useState([]);
+  // Editable state for user input
+  const [tripTypeState, setTripTypeState] = React.useState(tripType);
+  const [departingState, setDepartingState] = React.useState(departing);
+  const [arrivingState, setArrivingState] = React.useState(arriving);
+  const [departureDateState, setDepartureDateState] = React.useState(departureDate);
+  const [returnDateState, setReturnDateState] = React.useState(returnDate);
+
+  const [Flights, setFlights] = React.useState<Flight[]>([]);
   const [page, setPage] = React.useState(1);          // current page
   const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
   const [loading, setLoading] = React.useState(false);
+  const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")  
+  const [airlineFilter, setAirlineFilter] = React.useState("");
+  
+  // Get today's date in YYYY-MM-DD format for min attribute
+  const today = new Date().toISOString().split("T")[0];
 
+  
+  const filteredFlights = Flights.filter(f => airlineFilter === "" || f.airline === airlineFilter);
+  const sortedFlights = sortFlights(Flights, sortBy);
 
   function formatShortDate(dateString: string) {
     const date = new Date(dateString);
@@ -55,105 +81,219 @@ const FlightResultsContent: React.FC = () => {
     // Example → "6:29 AM"
   }
 
-  async function fetchFlights(reset = false) {
-    if (loading) return;
-    setLoading(true);
-
-    const query = new URLSearchParams({
-      tripType,
-      departing,
-      arriving,
-      departureDate,
-      returnDate,
-      page: page.toString(),
-      limit: "10", // number of flights per batch
-    });
-
-    const res = await fetch(`/api/searchFlights?${query.toString()}`);
-    const data = await res.json();
-    const newFlights = (data.flights || []).map((flight: any) => ({
-      ...flight,
-      airline: airlineLookup[flight.airline] || flight.airline,
-    }));
-
-    setFlights(prev => (reset ? newFlights : [...prev, ...newFlights]));
-    setHasMore(newFlights.length > 0);
-    setLoading(false);
-  }
+  
 
   React.useEffect(() => {
     async function fetchFlights(reset = false) {
       if (loading) return;
       setLoading(true);
 
-      const query = new URLSearchParams({
-        tripType,
-        departing,
-        arriving,
-        departureDate,
-        returnDate,
-        page: page.toString(),
-        limit: "10",
-      });
+      const query: { [key: string]: string } = {
+      tripType: tripTypeState,
+      departing: departingState,
+      departureDate: departureDateState,
+      page: page.toString(),
+      limit: "10",
+    };
 
-      const res = await fetch(`/api/searchFlights?${query.toString()}`);
+    // Only include arriving and returnDate for roundtrip
+    if (tripTypeState === "roundtrip") {
+      query.arriving = arrivingState;
+      query.returnDate = returnDateState;
+    }
+
+    const searchParams = new URLSearchParams(query);
+
+    try {
+      const res = await fetch(`/api/searchFlights?${searchParams.toString()}`);
       const data = await res.json();
 
-      const newFlights = (data.flights || []).map((flight: any) => ({
+      const newFlights: Flight[] = (data.flights || []).map((flight: any) => ({
         ...flight,
         airline: airlineLookup[flight.airline] || flight.airline,
       }));
 
       setFlights(prev => reset ? newFlights : [...prev, ...newFlights]);
       setHasMore(newFlights.length > 0);
+    } catch (err) {
+      console.error("Error fetching flights:", err);
+      setFlights([]);
+      setHasMore(false);
+    } finally {
       setLoading(false);
     }
+  }
 
     fetchFlights(page === 1); //reset if on first page
-  }, [tripType, departing, arriving, departureDate, returnDate, page]);
+  }, [tripTypeState, departingState, arrivingState, departureDateState, returnDateState, page]);
 
+  function sortFlights(flights: Flight[], sortBy: string) {
+  if (sortBy === "") return flights;
+
+  const sorted = [...flights];
+
+  switch (sortBy) {
+    case "price":
+      sorted.sort((a, b) => Number(a.price) - Number(b.price));
+      break;
+
+    case "departure":
+      sorted.sort(
+        (a, b) =>
+          new Date(a.departureTime).getTime() -
+          new Date(b.departureTime).getTime()
+      );
+      break;
+
+    case "duration":
+      sorted.sort((a, b) => {
+        const toMinutes = (d: string) => {
+          const hours = d.match(/(\d+)H/)?.[1] ?? 0;
+          const minutes = d.match(/(\d+)M/)?.[1] ?? 0;
+          return Number(hours) * 60 + Number(minutes);
+        };
+        return toMinutes(a.duration) - toMinutes(b.duration);
+      });
+      break;
+
+    case "airline":
+      sorted.sort((a, b) => a.airline.localeCompare(b.airline));
+      break;
+  }
+
+  return sorted;
+}
+
+  const uniqueAirlines = Array.from(new Set(Flights.map(f => f.airline)));
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-40">
 
       {/* Top Filter / Info Bar */}
       <div className="bg-white shadow-md rounded-xl p-4 flex justify-around items-center m-6">
         <div className="flex flex-col items-center">
           <span className="font-semibold text-gray-600">From:</span>
-          <span className="text-lg">{departing}</span>
+          <span className="text-lg">{departingState}</span>
         </div>
 
-        {tripType === "roundtrip" && (
+        
           <div className="flex flex-col items-center">
             <span className="font-semibold text-gray-600">To:</span>
-            <span className="text-lg">{arriving}</span>
+            <span className="text-lg">{arrivingState}</span>
           </div>
-        )}
+        
 
         <div className="flex flex-col items-center">
           <span className="font-semibold text-gray-600">Depart:</span>
-          <span className="text-lg">{departureDate}</span>
+          <span className="text-lg">{departureDateState}</span>
         </div>
 
-        {tripType === "roundtrip" && (
+        {tripTypeState === "roundtrip" && (
           <div className="flex flex-col items-center">
             <span className="font-semibold text-gray-600">Return:</span>
-            <span className="text-lg">{returnDate}</span>
+            <span className="text-lg">{returnDateState}</span>
           </div>
         )}
       </div>
+  
+  {/* Editable Departure / Arrival Inputs */}
+      <div className="flex justify-center space-x-4 mb-6">
+        <input
+          type="text"
+          value={departingState}
+          onChange={e => setDepartingState(e.target.value)}
+          placeholder="Departing Airport"
+          className="border rounded px-3 py-1"
+        />
+        
+        <input
+          type="text"
+          value={arrivingState}
+          onChange={e => setArrivingState(e.target.value)}
+          placeholder="Arrival Airport"
+          className="border rounded px-3 py-1"
+        />
+
+        <input
+          type="date"
+          value={departureDateState}
+          onChange={e => setDepartureDateState(e.target.value)}
+          className="border rounded px-3 py-1"
+          min={today}
+        />
+        {tripTypeState === "roundtrip" && (
+        <input
+          type="date"
+          value={returnDateState}
+          onChange={e => setReturnDateState(e.target.value)}
+          className="border rounded px-3 py-1"
+          min={departureDateState || today} 
+        />
+  )}
+        
+        <button
+          onClick={() => setPage(1)} // triggers useEffect to refetch
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Search
+        </button>
+      </div>
+  {/* Editable Trip type selection */}
+    <div className="flex gap-6 mb-4 justify-center">
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="tripType"
+        value="oneway"
+        checked={tripTypeState === "oneway"}
+        onChange={() => setTripTypeState("oneway")}
+      />
+      One-way
+    </label>
+
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="tripType"
+        value="roundtrip"
+        checked={tripTypeState === "roundtrip"}
+        onChange={() => setTripTypeState("roundtrip")}
+      />
+      Round-trip
+    </label>
+  </div>
 
       {/* Main Content */}
       <div className="flex flex-1">
 
-        {/* Sorting Sidebar */}
-        <div className="w-1/5 bg-white m-6 p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold mb-4">Sorting Options</h2>
-          <ul className="space-y-3 text-gray-700">
-            <li>🕓 Departure Time</li>
-            <li>💰 Price</li>
-            <li>⏱ Duration</li>
-          </ul>
+    {/* Sort & Filter Bar */}
+    <div className="flex flex-col items-center mb-6">
+        <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+          <span className="font-semibold text-gray-700">Sort by:</span>
+          <select
+            className="border rounded px-2 py-1"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+          >
+            <option value="">None</option>
+            <option value="departure">Departure</option>
+            <option value="price">Price</option>
+            <option value="duration">Duration</option>
+            <option value="airline">Airline</option>
+          </select>
+
+        <span className="font-semibold text-gray-700">Airline:</span>
+          <select
+            className="border rounded px-2 py-1"
+            value={airlineFilter}
+            onChange={(e) => setAirlineFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            {uniqueAirlines.map((airline) => (
+              <option key={airline} value={airline}>{airline}</option>
+            ))}
+          </select>
+        </div>
         </div>
 
         {/* Flight Cards Section */}
@@ -166,7 +306,7 @@ const FlightResultsContent: React.FC = () => {
             <p className="text-gray-600 text-lg">Loading flights...</p>
           )}
 
-          {Flights.map((flight: any, i: number) => (
+          {sortedFlights.map((flight: any, i: number) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center hover:shadow-lg transition-shadow"
