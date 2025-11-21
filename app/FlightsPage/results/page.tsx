@@ -3,6 +3,7 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 
+
 const airlineLookup: { [code: string]: string } = {
   "AA": "American Airlines",
   "AS": "Alaska Airlines",
@@ -23,6 +24,15 @@ const airlineLookup: { [code: string]: string } = {
   // add more codes as needed
 };
 
+type Flight = {
+  airline: string;
+  departAirport: string;
+  arriveAirport: string;
+  departureTime: string;
+  duration: string;
+  price: number | string;
+};
+
 const FlightResultsPage: React.FC = () => {
   const params = useSearchParams();
 
@@ -32,12 +42,16 @@ const FlightResultsPage: React.FC = () => {
   const departureDate = params.get("departureDate") || "";
   const returnDate = params.get("returnDate") || "";
 
-  const [Flights, setFlights] = React.useState([]);
+  const [Flights, setFlights] = React.useState<Flight[]>([]);
   const [page, setPage] = React.useState(1);          // current page
   const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
   const [loading, setLoading] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")  
+  const [airlineFilter, setAirlineFilter] = React.useState("");
   
+  
+  const filteredFlights = Flights.filter(f => airlineFilter === "" || f.airline === airlineFilter);
+  const sortedFlights = sortFlights(Flights, sortBy);
 
   function formatShortDate(dateString: string) {
     const date = new Date(dateString);
@@ -89,7 +103,7 @@ const FlightResultsPage: React.FC = () => {
     fetchFlights(page === 1); //reset if on first page
   }, [tripType, departing, arriving, departureDate, returnDate, page]);
 
-  function sortFlights(flights: any[], sortBy: string) {
+  function sortFlights(flights: Flight[], sortBy: string) {
   if (sortBy === "") return flights;
 
   const sorted = [...flights];
@@ -126,7 +140,7 @@ const FlightResultsPage: React.FC = () => {
   return sorted;
 }
 
-const sortedFlights = sortFlights(Flights, sortBy);
+  const uniqueAirlines = Array.from(new Set(Flights.map(f => f.airline)));
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pt-40">
@@ -161,37 +175,37 @@ const sortedFlights = sortFlights(Flights, sortBy);
       {/* Main Content */}
       <div className="flex flex-1">
 
-        {/* Sorting Sidebar */}
-        <div className="w-1/5 bg-white m-6 p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold mb-4">Sorting Options</h2>
-          <ul className="space-y-3 text-gray-700">
-            <li
-    className="cursor-pointer hover:text-blue-600"
-    onClick={() => setSortBy("departure")}
-  >
-     Departure Time
-  </li>
+        {/* Sort & Filter Bar */}
+    {/* Sort & Filter Bar */}
+{/* Sort & Filter Bar */}
+<div className="flex flex-col items-center mb-6">
+  <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+    <span className="font-semibold text-gray-700">Sort by:</span>
+    <select
+      className="border rounded px-2 py-1"
+      value={sortBy}
+      onChange={(e) => setSortBy(e.target.value as any)}
+    >
+      <option value="">None</option>
+      <option value="departure">Departure</option>
+      <option value="price">Price</option>
+      <option value="duration">Duration</option>
+      <option value="airline">Airline</option>
+    </select>
 
-  <li
-    className="cursor-pointer hover:text-blue-600"
-    onClick={() => setSortBy("price")}
-  >
-     Price
-  </li>
-  <li
-    className="cursor-pointer hover:text-blue-600"
-    onClick={() => setSortBy("duration")}
-  >
-     Duration
-  </li>
-  <li
-    className="cursor-pointer hover:text-blue-600"
-    onClick={() => setSortBy("airline")}
-  >
-    Airline
-  </li>
-          </ul>
-        </div>
+    <span className="font-semibold text-gray-700">Airline:</span>
+    <select
+      className="border rounded px-2 py-1"
+      value={airlineFilter}
+      onChange={(e) => setAirlineFilter(e.target.value)}
+    >
+      <option value="">All</option>
+      {uniqueAirlines.map((airline) => (
+        <option key={airline} value={airline}>{airline}</option>
+      ))}
+    </select>
+  </div>
+</div>
 
         {/* Flight Cards Section */}
         <div className="flex-1 m-6 space-y-6">
