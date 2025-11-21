@@ -129,7 +129,7 @@ const FlightResultsPage: React.FC = () => {
 const sortedFlights = sortFlights(Flights, sortBy);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-40">
 
       {/* Top Filter / Info Bar */}
       <div className="bg-white shadow-md rounded-xl p-4 flex justify-around items-center m-6">
