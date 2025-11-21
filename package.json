@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^4.12.1",
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.552.0",
@@ -22,7 +23,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.0.0",
+    "eslint-config-next": "^15.5.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
