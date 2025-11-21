@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   const lat = Number(searchParams.get("lat"));
   const radius = searchParams.get("radius") || "25";
 
-  if (!lng || !lat) {
+  if (isNaN(lng) || isNaN(lat)) {
     return NextResponse.json(
       { error: "Missing required parameters: lng, lat" },
       { status: 400 }
@@ -67,19 +67,21 @@ export async function GET(request: NextRequest) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const hotelsData = await hotelsResponse.json();
-
     if (!hotelsResponse.ok) {
-      throw new Error(
-        hotelsData.errors?.[0]?.detail || "Failed to fetch hotels"
-      );
+      let body;
+      try {
+        body = await hotelsResponse.json();
+      } catch {
+        body = {};
+      }
+      throw new Error(body.errors?.[0]?.detail || "Failed to fetch hotels");
     }
 
-    // Extract just the hotel IDs and basic info
-    const allHotels = hotelsData.map((hotelOffer: any) => {
-      const hotel = hotelOffer.hotel;
-      const offer = hotelOffer.offers[0];
+    const hotelsData = await hotelsResponse.json();
+    const rawHotels = Array.isArray(hotelsData.data) ? hotelsData.data : [];
 
+    // Extract just the hotel IDs and basic info
+    const allHotels = hotelsData.data.map((hotel: any) => {
       return {
         id: hotel.hotelId,
         name: hotel.name,
