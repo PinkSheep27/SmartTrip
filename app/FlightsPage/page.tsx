@@ -28,7 +28,7 @@ const FlightPage: React.FC = () => {
       return;
     }
 
-    if (tripType === "roundtrip" && !arriving) {
+    if (!arriving) {
       alert("ERROR: Please enter an arriving airport.");
       return;
     }
@@ -47,7 +47,7 @@ const FlightPage: React.FC = () => {
     const params = new URLSearchParams({
       tripType,
       departing,
-      arriving: tripType === "roundtrip" ? arriving : "",
+      arriving,
       departureDate,
       returnDate: tripType === "roundtrip" ? returnDate : "",
     });
@@ -69,7 +69,7 @@ const FlightPage: React.FC = () => {
           className="p-3 border rounded-lg w-56"
         />
 
-        {tripType === "roundtrip" && (
+        
           <>
             <span className="text-2xl">→</span>
             <input
@@ -80,7 +80,7 @@ const FlightPage: React.FC = () => {
               className="p-3 border rounded-lg w-56"
             />
           </>
-        )}
+      
       </div>
 
       {/* Dates Input */}
