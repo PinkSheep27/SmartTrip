@@ -36,7 +36,8 @@ const FlightResultsPage: React.FC = () => {
   const [page, setPage] = React.useState(1);          // current page
   const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
   const [loading, setLoading] = React.useState(false);
-
+  const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")  
+  
 
   function formatShortDate(dateString: string) {
     const date = new Date(dateString);
@@ -55,31 +56,7 @@ const FlightResultsPage: React.FC = () => {
     // Example → "6:29 AM"
   }
 
-  async function fetchFlights(reset = false) {
-    if (loading) return;
-    setLoading(true);
-
-    const query = new URLSearchParams({
-      tripType,
-      departing,
-      arriving,
-      departureDate,
-      returnDate,
-      page: page.toString(),
-      limit: "10", // number of flights per batch
-    });
-
-    const res = await fetch(`/api/searchFlights?${query.toString()}`);
-    const data = await res.json();
-    const newFlights = (data.flights || []).map((flight: any) => ({
-      ...flight,
-      airline: airlineLookup[flight.airline] || flight.airline,
-    }));
-
-    setFlights(prev => (reset ? newFlights : [...prev, ...newFlights]));
-    setHasMore(newFlights.length > 0);
-    setLoading(false);
-  }
+  
 
   React.useEffect(() => {
     async function fetchFlights(reset = false) {
@@ -112,6 +89,44 @@ const FlightResultsPage: React.FC = () => {
     fetchFlights(page === 1); //reset if on first page
   }, [tripType, departing, arriving, departureDate, returnDate, page]);
 
+  function sortFlights(flights: any[], sortBy: string) {
+  if (sortBy === "") return flights;
+
+  const sorted = [...flights];
+
+  switch (sortBy) {
+    case "price":
+      sorted.sort((a, b) => Number(a.price) - Number(b.price));
+      break;
+
+    case "departure":
+      sorted.sort(
+        (a, b) =>
+          new Date(a.departureTime).getTime() -
+          new Date(b.departureTime).getTime()
+      );
+      break;
+
+    case "duration":
+      sorted.sort((a, b) => {
+        const toMinutes = (d: string) => {
+          const hours = d.match(/(\d+)H/)?.[1] ?? 0;
+          const minutes = d.match(/(\d+)M/)?.[1] ?? 0;
+          return Number(hours) * 60 + Number(minutes);
+        };
+        return toMinutes(a.duration) - toMinutes(b.duration);
+      });
+      break;
+
+    case "airline":
+      sorted.sort((a, b) => a.airline.localeCompare(b.airline));
+      break;
+  }
+
+  return sorted;
+}
+
+const sortedFlights = sortFlights(Flights, sortBy);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -150,9 +165,31 @@ const FlightResultsPage: React.FC = () => {
         <div className="w-1/5 bg-white m-6 p-6 rounded-xl shadow-md">
           <h2 className="text-lg font-semibold mb-4">Sorting Options</h2>
           <ul className="space-y-3 text-gray-700">
-            <li>🕓 Departure Time</li>
-            <li>💰 Price</li>
-            <li>⏱ Duration</li>
+            <li
+    className="cursor-pointer hover:text-blue-600"
+    onClick={() => setSortBy("departure")}
+  >
+     Departure Time
+  </li>
+
+  <li
+    className="cursor-pointer hover:text-blue-600"
+    onClick={() => setSortBy("price")}
+  >
+     Price
+  </li>
+  <li
+    className="cursor-pointer hover:text-blue-600"
+    onClick={() => setSortBy("duration")}
+  >
+     Duration
+  </li>
+  <li
+    className="cursor-pointer hover:text-blue-600"
+    onClick={() => setSortBy("airline")}
+  >
+    Airline
+  </li>
           </ul>
         </div>
 
@@ -166,7 +203,7 @@ const FlightResultsPage: React.FC = () => {
             <p className="text-gray-600 text-lg">Loading flights...</p>
           )}
 
-          {Flights.map((flight: any, i: number) => (
+          {sortedFlights.map((flight: any, i: number) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center hover:shadow-lg transition-shadow"
