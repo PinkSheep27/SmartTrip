@@ -76,14 +76,28 @@ export async function GET(request: NextRequest) {
     }
 
     // Extract just the hotel IDs and basic info
-    const allHotelIds =
-      hotelsData.data?.map((hotel: any) => hotel.hotelId) || [];
+    const allHotels = hotelsData.map((hotelOffer: any) => {
+      const hotel = hotelOffer.hotel;
+      const offer = hotelOffer.offers[0];
 
-    console.log(`Found ${allHotelIds.length} hotels in the area`);
+      return {
+        id: hotel.hotelId,
+        name: hotel.name,
+        image: `https://via.placeholder.com/800x600?text=${encodeURIComponent(
+          hotel.name
+        )}`,
+        location: hotel.address?.cityName || "Unknown location",
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+      };
+    });
+    console.log(`Found ${allHotels.length} hotels in the area`);
+    const allHotelIds = allHotels.map((hotel: any) => hotel.id);
 
     return NextResponse.json({
+      allHotels,
+      totalHotels: allHotels.length,
       allHotelIds,
-      totalHotels: allHotelIds.length,
     });
   } catch (error) {
     console.error("Hotels search error:", error);

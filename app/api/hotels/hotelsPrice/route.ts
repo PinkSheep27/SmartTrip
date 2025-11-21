@@ -100,15 +100,11 @@ export async function GET(request: NextRequest) {
             hotel.name
           )}`,
           rating: hotel.rating || 0,
-          reviews: 0,
           price: Math.round(parseFloat(offer.price.total)),
           location: hotel.address?.cityName || "Unknown location",
-          amenities: hotel.amenities || [],
-          distance: hotel.address?.lines?.[0] || "Location available",
           latitude: hotel.latitude,
           longitude: hotel.longitude,
           currency: offer.price.currency || "USD",
-          offerId: offer.id,
         };
       });
 

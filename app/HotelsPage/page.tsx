@@ -9,8 +9,8 @@ interface Hotels {
   price: number;
   rating: number;
   location: string;
-  amenities: string[];
-  distance: string;
+  amenities?: string[];
+  distance?: string;
   currency: string;
 }
 
@@ -87,8 +87,13 @@ function HotelsPage() {
         return;
       }
 
-      console.log(`Found ${hotelsData.allHotelIds.length} total hotels`);
-      setHotelIds(hotelsData.allHotelIds);
+      console.log(`Found ${hotelsData.allHotels.length} total hotels`);
+      // setHotelIds(hotelsData.allHotelIds);
+      //Save hotels and its infos locally
+      setHotels(hotelsData.allHotels);
+
+      //Take out all hotelIds from list of hotels and store in a new arr
+      setHotelIds(hotels.map((hotel) => hotel.id));
 
       // Step 3: Load first batch with prices
       await loadFirstBatch(hotelsData.allHotelIds);
@@ -130,7 +135,9 @@ function HotelsPage() {
       );
 
       if (data.hotels && data.hotels.length > 0) {
-        setHotels(data.hotels);
+        //Save into a temp const for merging
+        const hotelPrices = data.hotels;
+        mergeHotelData(hotelPrices);
         setStart(50);
         setHotelsLoaded(100);
       } else {
@@ -254,6 +261,16 @@ function HotelsPage() {
     if (sortBy === "rating") return b.rating - a.rating;
     return 0;
   });
+  //Combines hotels basic information with hotel prices
+  function mergeHotelData(hotelPrices: any) {
+    //Hashmap for easy lookup
+    const hotelMap = Object.fromEntries(hotels.map((h: Hotels) => [h.id, h]));
+    const merged = hotelPrices.map((offerHotel: any) => ({
+      ...hotelMap[offerHotel.id],
+      ...offerHotel,
+    }));
+    setHotels(merged);
+  }
 
   return (
     <div className="min-h-screen bg-[#94C3D2] py-16">
@@ -412,7 +429,7 @@ function HotelsPage() {
                     {hotel.distance}
                   </div>
 
-                  {hotel.amenities?.length > 0 && (
+                  {hotel.amenities && hotel.amenities?.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {hotel.amenities
                         .slice(0, 4)
