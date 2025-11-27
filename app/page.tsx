@@ -261,12 +261,12 @@ const HomePage: React.FC = () => {
               Mission Statement
             </h1>
             <p className="text-center text-gray-100 text-lg">
-              At SmartTrip, our mission is to revolutionize the way the world travels together. 
-              We believe that while the journey is better shared, the planning process shouldn't drive 
-              you apart. For too long, group trips have been stifled by the chaos of scattered spreadsheets 
-              and endless message threads. We exist to bridge the gap between a dream vacation and a booked 
-              itinerary by creating a unified, democratic space for discovery and coordination. 
-              By removing the friction of split payments and streamlining communication, we empower you to 
+              At SmartTrip, our mission is to revolutionize the way the world travels together.
+              We believe that while the journey is better shared, the planning process shouldn't drive
+              you apart. For too long, group trips have been stifled by the chaos of scattered spreadsheets
+              and endless message threads. We exist to bridge the gap between a dream vacation and a booked
+              itinerary by creating a unified, democratic space for discovery and coordination.
+              By removing the friction of split payments and streamlining communication, we empower you to
               focus less on the logistics and more on the memories you’re about to create.
             </p>
           </div>
