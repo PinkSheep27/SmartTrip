@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
       iconFilled: carsIconFilledImg,
     },
     {
-      href: "#",
+      href: "/ExperiencePage",
       label: "Experiences",
       iconOutlined: experiencesIconOutlinedImg,
       iconFilled: experiencesIconFilledImg,
