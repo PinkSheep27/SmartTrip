@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import NavBar from "@/app/NavBar/NavBar";
+import NavBar from "@/app/NavBar/page";
 
 type layoutProps = {
   children: React.ReactNode;

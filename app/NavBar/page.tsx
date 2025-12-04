@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import LoginButton from "../../components/NavBarComponents/LoginButton";
 import SignUpButton from "../../components/NavBarComponents/SignUpButton";
+import Profile from "../../components/NavBarComponents/Profile";
 import LiveCart from "../../components/LiveCartComponents/LiveCart";
 import { ShoppingCart, X } from "lucide-react";
 
@@ -113,6 +114,10 @@ const Navbar: React.FC = () => {
                 </>
               ) : (
                 <div className="flex items-center gap-4">
+                  <Link href="/Profile" className="cursor-pointer hover:opacity-80 transition-opacity">
+                    <Profile user={user} />
+                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="px-4 py-2 text-sm text-red-500 border border-red-200 rounded-full hover:bg-red-50 cursor-pointer"

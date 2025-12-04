@@ -1,16 +1,24 @@
 "use client";
 import React from 'react';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { User } from '@supabase/supabase-js';
 
-export default function Profile() {
-  const { user } = useUser();
+interface ProfileProps {
+  user: User | null;
+}
 
-  // You can add an image here later if you want
-  // e.g., <img src={user?.picture} alt={user?.name} />
-  
+export default function Profile({ user }: ProfileProps) {
+  if (!user) return null;
+
+  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0];
+
   return (
-    <span className="px-3 text-gray-700">
-      {user?.name || user?.email}
-    </span>
+    <div className="flex items-center gap-3">
+      <div className="h-8 w-8 rounded-full bg-[#94C3D2] text-white flex items-center justify-center font-bold">
+        {displayName?.charAt(0).toUpperCase()}
+      </div>
+      <span className="px-3 text-gray-700 hidden md:block">
+        {displayName}
+      </span>
+    </div>
   );
 }
