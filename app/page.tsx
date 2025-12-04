@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import LiveCart from "@/components/LiveCartComponents/LiveCart";
 
 import mainBackground from "@/assets/backgrounds/Main-Background.png";
 import smartTripLogo from "@/assets/logos/smarttrip-transparent-logo.png";
