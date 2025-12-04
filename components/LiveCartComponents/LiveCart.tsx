@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ShoppingCart, Plane, Hotel, X } from "lucide-react";
 
-// Define the shape of your cart item based on your schema
 type CartItem = {
   id: number;
   category: string;
@@ -16,7 +15,6 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
   const supabase = createClient();
 
   useEffect(() => {
-    // 1. Fetch initial data
     const fetchItems = async () => {
       const { data } = await supabase
         .from("cart_items")
@@ -28,7 +26,6 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
 
     fetchItems();
 
-    // 2. Subscribe to REALTIME changes
     const channel = supabase
       .channel("realtime-cart")
       .on(

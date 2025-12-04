@@ -92,7 +92,8 @@ const Navbar: React.FC = () => {
             {user && (
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
-                className={`relative p-2 rounded-full transition-all ${isCartOpen ? 'bg-gray-100 rotate-90' : 'hover:bg-gray-50'}`}
+                className={`relative p-2 rounded-full transition-all cursor-pointer ${isCartOpen ? 'bg-gray-100 rotate-90' : 'hover:bg-gray-50'
+                  }`}
               >
                 {isCartOpen ? (
                   <X className="w-6 h-6 text-gray-600" />
@@ -114,7 +115,7 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={handleLogout}
-                    className="px-4 py-2 text-sm text-red-500 border border-red-200 rounded-full hover:bg-red-50"
+                    className="px-4 py-2 text-sm text-red-500 border border-red-200 rounded-full hover:bg-red-50 cursor-pointer"
                   >
                     Log Out
                   </button>
@@ -126,7 +127,7 @@ const Navbar: React.FC = () => {
 
         {user && isCartOpen && (
           <div className="absolute top-24 right-0 w-96 z-50 animate-in fade-in slide-in-from-top-5 duration-200">
-            {/* Hardcoded cartId={1} for now - update when you have real trips */}
+            {/* Hardcoded for now - update for real items */}
             <LiveCart cartId={1} onClose={() => setIsCartOpen(false)} />
           </div>
         )}
