@@ -1,0 +1,262 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tower Hill",
+        "country": "United Kingdom",
+        "country_code": "gb",
+        "state": "England",
+        "county": "Greater London",
+        "city": "London",
+        "postcode": "EC3N 4DJ",
+        "district": "London Borough of Tower Hamlets",
+        "suburb": "Whitechapel",
+        "quarter": "Tower Hill",
+        "street": "Trinity Place",
+        "iso3166_2": "GB-ENG",
+        "iso3166_2_sublevel": "GB-TWH",
+        "lon": -0.0766986,
+        "lat": 51.5098481,
+        "state_code": "ENG",
+        "formatted": "Tower Hill, Trinity Place, London, EC3N 4DJ, United Kingdom",
+        "address_line1": "Tower Hill",
+        "address_line2": "Trinity Place, London, EC3N 4DJ, United Kingdom",
+        "categories": [
+          "public_transport",
+          "public_transport.subway",
+          "wheelchair",
+          "wheelchair.yes"
+        ],
+        "details": [
+          "details",
+          "details.facilities",
+          "details.wiki_and_media"
+        ],
+        "datasource": {
+          "sourcename": "openstreetmap",
+          "attribution": "© OpenStreetMap contributors",
+          "license": "Open Database License",
+          "url": "https://www.openstreetmap.org/copyright",
+          "raw": {
+            "line": "District;Circle",
+            "name": "Tower Hill",
+            "layer": -2,
+            "osm_id": 6260922569,
+            "subway": "yes",
+            "covered": "yes",
+            "name:da": "Tower Hill",
+            "name:ru": "Тауэр Хилл",
+            "name:uk": "Тауер Хілл",
+            "network": "London Underground",
+            "railway": "station",
+            "ref:crs": "ZTH",
+            "station": "subway",
+            "location": "underground",
+            "operator": "London Underground",
+            "osm_type": "n",
+            "wikidata": "Q1475207",
+            "fare_zone": 1,
+            "wikipedia": "en:Tower Hill tube station",
+            "wheelchair": "yes",
+            "public_transport": "station",
+            "wikimedia_commons": "Category:Tower Hill tube station"
+          }
+        },
+        "operator": "London Underground",
+        "network": "London Underground",
+        "name_international": {
+          "da": "Tower Hill",
+          "ru": "Тауэр Хилл",
+          "uk": "Тауер Хілл"
+        },
+        "ref_other": {
+          "crs": "ZTH"
+        },
+        "facilities": {
+          "wheelchair": true
+        },
+        "wiki_and_media": {
+          "wikidata": "Q1475207",
+          "wikipedia": "en:Tower Hill tube station",
+          "wikimedia_commons": "Category:Tower Hill tube station"
+        },
+        "distance": 442,
+        "place_id": "51ec23a6fa84a2b3bf591eefd7b342c14940f00103f901c9182e750100000092030a546f7765722048696c6c"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.0766986, 51.5098480991712]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Aldgate",
+        "country": "United Kingdom",
+        "country_code": "gb",
+        "state": "England",
+        "county": "Greater London",
+        "city": "City of London",
+        "postcode": "EC3N 1AB",
+        "suburb": "Aldgate",
+        "street": "St. Botolph Row",
+        "iso3166_2": "GB-ENG",
+        "iso3166_2_sublevel": "GB-LND",
+        "lon": -0.0757186,
+        "lat": 51.5142477,
+        "state_code": "ENG",
+        "formatted": "Aldgate, St. Botolph Row, City of London, EC3N 1AB, United Kingdom",
+        "address_line1": "Aldgate",
+        "address_line2": "St. Botolph Row, City of London, EC3N 1AB, United Kingdom",
+        "categories": [
+          "public_transport",
+          "public_transport.subway"
+        ],
+        "details": [
+          "details",
+          "details.facilities",
+          "details.wiki_and_media"
+        ],
+        "datasource": {
+          "sourcename": "openstreetmap",
+          "attribution": "© OpenStreetMap contributors",
+          "license": "Open Database License",
+          "url": "https://www.openstreetmap.org/copyright",
+          "raw": {
+            "line": "Metropolitan",
+            "name": "Aldgate",
+            "osm_id": 3788735981,
+            "subway": "yes",
+            "name:da": "Aldgate Station",
+            "name:ru": "Олдгейт",
+            "network": "London Underground",
+            "railway": "station",
+            "ref:crs": "ZAD",
+            "station": "subway",
+            "operator": "London Underground",
+            "osm_type": "n",
+            "wikidata": "Q782929",
+            "fare_zone": 1,
+            "platforms": 4,
+            "wikipedia": "en:Aldgate tube station",
+            "wheelchair": "no",
+            "public_transport": "station",
+            "wikimedia_commons": "Category:Aldgate tube station",
+            "public_transport:version": 2
+          }
+        },
+        "operator": "London Underground",
+        "network": "London Underground",
+        "name_international": {
+          "da": "Aldgate Station",
+          "ru": "Олдгейт"
+        },
+        "ref_other": {
+          "crs": "ZAD"
+        },
+        "facilities": {
+          "wheelchair": false
+        },
+        "wiki_and_media": {
+          "wikidata": "Q782929",
+          "wikipedia": "en:Aldgate tube station",
+          "wikimedia_commons": "Category:Aldgate tube station"
+        },
+        "distance": 729,
+        "place_id": "517aebb24e4b62b3bf5991fd5cded2c14940f00103f901ed85d3e100000000920307416c6467617465"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.0757186, 51.5142476991706]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Aldgate East",
+        "country": "United Kingdom",
+        "country_code": "gb",
+        "state": "England",
+        "county": "Greater London",
+        "city": "London",
+        "postcode": "E1 7RA",
+        "district": "London Borough of Tower Hamlets",
+        "suburb": "Whitechapel",
+        "quarter": "Spitalfields",
+        "street": "Whitechapel High Street",
+        "iso3166_2": "GB-ENG",
+        "iso3166_2_sublevel": "GB-TWH",
+        "lon": -0.070839,
+        "lat": 51.5156185,
+        "state_code": "ENG",
+        "formatted": "Aldgate East, Whitechapel High Street, London, E1 7RA, United Kingdom",
+        "address_line1": "Aldgate East",
+        "address_line2": "Whitechapel High Street, London, E1 7RA, United Kingdom",
+        "categories": [
+          "public_transport",
+          "public_transport.subway",
+          "wheelchair",
+          "wheelchair.limited"
+        ],
+        "details": [
+          "details",
+          "details.facilities",
+          "details.wiki_and_media"
+        ],
+        "datasource": {
+          "sourcename": "openstreetmap",
+          "attribution": "© OpenStreetMap contributors",
+          "license": "Open Database License",
+          "url": "https://www.openstreetmap.org/copyright",
+          "raw": {
+            "line": "District;Hammersmith & City",
+            "name": "Aldgate East",
+            "osm_id": 4984999298,
+            "subway": "yes",
+            "name:ru": "Альдгейт-ист",
+            "network": "London Underground",
+            "railway": "station",
+            "ref:crs": "ZAE",
+            "station": "subway",
+            "operator": "London Underground",
+            "osm_type": "n",
+            "wikidata": "Q1431064",
+            "fare_zone": 1,
+            "wikipedia": "en:Aldgate East tube station",
+            "wheelchair": "limited",
+            "public_transport": "station",
+            "wheelchair:description": "You can change between the District line westbound and the Hammersmith & City line westbound (Access from platform to train by manual boarding ramp). You can change between the District line eastbound and the Hammersmith & City line eastbound.",
+            "public_transport:version": 2
+          }
+        },
+        "operator": "London Underground",
+        "network": "London Underground",
+        "name_international": {
+          "ru": "Альдгейт-ист"
+        },
+        "ref_other": {
+          "crs": "ZAE"
+        },
+        "facilities": {
+          "wheelchair": true,
+          "wheelchair_details": {
+            "condition": "limited",
+            "description": "You can change between the District line westbound and the Hammersmith & City line westbound (Access from platform to train by manual boarding ramp). You can change between the District line eastbound and the Hammersmith & City line eastbound."
+          }
+        },
+        "wiki_and_media": {
+          "wikidata": "Q1431064",
+          "wikipedia": "en:Aldgate East tube station"
+        },
+        "distance": 794,
+        "place_id": "51290648348122b2bf59279377c9ffc14940f00103f901820d21290100000092030c416c64676174652045617374"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.070839, 51.5156184991704]
+      }
+    }
+  ]
+}
