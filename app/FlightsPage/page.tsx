@@ -1,7 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import AutocompleteInput, { Suggestion } from '@/components/AutocompleteInput';
+
+const debounce = (func: Function, delay: number) => {
+  // ... (implementation)
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 const FlightPage: React.FC = () => {
   const router = useRouter();
@@ -17,9 +27,62 @@ const FlightPage: React.FC = () => {
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
 
+  const [departingSuggestions, setDepartingSuggestions] = useState<Suggestion[]>([]);
+  const [arrivingSuggestions, setArrivingSuggestions] = useState<Suggestion[]>([]);
+  const [focusedInput, setFocusedInput] = useState<"departing" | "arriving" | null>(null);
+
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = new Date().toISOString().split("T")[0];
 
+  const fetchSuggestions = useCallback(
+    debounce(async (keyword: string, inputType: "departing" | "arriving") => {
+      if (keyword.length < 2) {
+        inputType === "departing" ? setDepartingSuggestions([]) : setArrivingSuggestions([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/airportAutocomplete?keyword=${keyword}`);
+        const data = await res.json();
+        
+        const setSuggestions = inputType === "departing" ? setDepartingSuggestions : setArrivingSuggestions;
+        setSuggestions(data.suggestions || []);
+        
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    }, 300), 
+    []
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, inputType: "departing" | "arriving") => {
+    const value = e.target.value;
+    
+    if (inputType === "departing") {
+      setDeparting(value);
+      setArrivingSuggestions([]); // Clear other list when typing
+    } else {
+      setArriving(value);
+      setDepartingSuggestions([]); // Clear other list
+    }
+    
+    fetchSuggestions(value, inputType);
+  };
+
+  const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
+    // Set the state to the IATA code (e.g., "JFK")
+    const code = suggestion.code; 
+    
+    if (inputType === "departing") {
+      setDeparting(code);
+      setDepartingSuggestions([]);
+    } else {
+      setArriving(code);
+      setArrivingSuggestions([]);
+    }
+    setFocusedInput(null); // Clear focus
+  };
+  
   // Handle search
   const handleSearch = () => {
     // Basic validation
@@ -58,28 +121,38 @@ const FlightPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#94C3D2] flex flex-col items-center pt-20">
       
-
       {/* Airports Input */}
       <div className="flex items-center gap-4 mt-10">
-        <input
-          type="text"
-          placeholder="Departing Airport"
-          value={departing}
-          onChange={(e) => setDeparting(e.target.value)}
-          className="p-3 border rounded-lg w-56"
-        />
-
         
-          <>
-            <span className="text-2xl">→</span>
-            <input
-              type="text"
-              placeholder="Arriving Airport"
-              value={arriving}
-              onChange={(e) => setArriving(e.target.value)}
-              className="p-3 border rounded-lg w-56"
-            />
-          </>
+        {/* REPLACED with AutocompleteInput */}
+        <AutocompleteInput
+          value={departing}
+          placeholder="Departing Airport/City"
+          inputType="departing"
+          onChange={handleInputChange}
+          onSelect={handleSelectSuggestion}
+          suggestions={departingSuggestions}
+          isFocused={focusedInput === "departing"}
+          onFocus={() => setFocusedInput("departing")}
+          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
+          className="p-3 border rounded-lg w-56" // Pass your custom styling
+        />
+        
+        <span className="text-2xl">→</span>
+
+        {/* REPLACED with AutocompleteInput */}
+        <AutocompleteInput
+          value={arriving}
+          placeholder="Arriving Airport/City"
+          inputType="arriving"
+          onChange={handleInputChange}
+          onSelect={handleSelectSuggestion}
+          suggestions={arrivingSuggestions}
+          isFocused={focusedInput === "arriving"}
+          onFocus={() => setFocusedInput("arriving")}
+          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
+          className="p-3 border rounded-lg w-56" // Pass your custom styling
+        />
       
       </div>
 
