@@ -21,7 +21,10 @@ export default function RestaurantList({ restaurants }: RestaurantListProps) {
             rating={restaurant.rating}
             price={restaurant.price}
             waitTime={restaurant.waitTime}
+            address={restaurant.address}
             tags={restaurant.tags}
+            isOpen={restaurant.isOpen}
+            photo={restaurant.photo}
           />
         ))}
       </div>

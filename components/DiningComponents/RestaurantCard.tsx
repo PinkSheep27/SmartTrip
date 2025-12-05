@@ -1,3 +1,5 @@
+import { Star } from "lucide-react";
+
 export type prices = "$" | "$$" | "$$$";
 
 export interface RestaurantCardProps {
@@ -9,6 +11,9 @@ export interface RestaurantCardProps {
   distance?: string;
   waitTime?: string;
   tags: string[];
+  address?: string;
+  photo?: string | null;
+  isOpen?: boolean;
 }
 
 export default function RestaurantCard({
@@ -19,61 +24,74 @@ export default function RestaurantCard({
   price,
   waitTime,
   tags,
+  address,
+  photo,
+  isOpen,
 }: RestaurantCardProps) {
+  function toTitleCase(str: string) {
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
   return (
-    <div className="bg-[#E8F3E8] rounded-3xl overflow-hidden shadow-xl hover:-translate-y-2 hover:scale-105 transition-all duration-500 cursor-pointer">
+    <div className="bg-[#E8F3E8] rounded-3xl overflow-hidden shadow-lg hover:-translate-y-2 hover:scale-[1.02] transition-transform duration-500 cursor-pointer flex flex-col">
       {/* Image/Header Section */}
-      <div
-        className={`h-56 bg-gradient-to-br ${getGradientByCuisine(
-          cuisine
-        )} relative`}
-      >
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-m font-semibold text-indigo-600">
+      <div className="h-56 relative bg-gray-200 overflow-hidden">
+        {photo ? (
+          <img
+            src={photo}
+            alt={name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            No Image
+          </div>
+        )}
+
+        {/* Price badge */}
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-semibold text-indigo-600 shadow-sm">
           {price}
         </div>
+
+        {/* Open/Closed badge */}
+        {isOpen !== undefined && (
+          <div
+            className={`absolute bottom-4 left-4 px-3 py-1 text-xs font-semibold rounded-full ${
+              isOpen ? "bg-green-600 text-white" : "bg-red-500 text-white"
+            }`}
+          >
+            {isOpen ? "Open Now" : "Closed"}
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="text-xl font-bold text-gray-800">{name}</h3>
-          <div className="flex items-center gap-1 bg-green-200 px-3 py-1 rounded-full font-semibold text-gray-600 text-sm">
+      <div className="flex flex-col flex-grow p-5 relative">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-bold text-gray-900 leading-tight">
+            {toTitleCase(name)}
+          </h3>
+          <div className="flex items-center gap-1 bg-green-100 px-2.5 py-1 rounded-full font-semibold text-gray-700 text-sm shadow-sm">
+            <Star className="w-4 h-4 fill-yellow-400 stroke-yellow-400" />
             {rating}
           </div>
         </div>
-        <div className="">
-          <h4 className="text-sm font-semibold text-gray-700 truncate">
-            {cuisine}
-          </h4>
-        </div>
-        <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
-          <div className="flex items-center gap-1.5">{waitTime}</div>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag, i) => (
-            <span
-              key={i}
-              className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-xl text-xs font-medium"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {waitTime && (
+          <div className="flex items-center gap-1.5">⏱ {waitTime}</div>
+        )}
+
+        {address && (
+          <div className="mt-auto pt-3 text-sm text-gray-700 border-t border-gray-200/50 flex items-start">
+            <span className="truncate">{address}</span>
+          </div>
+        )}
       </div>
     </div>
   );
-}
-
-// Helper function to get gradient based on cuisine type
-function getGradientByCuisine(cuisine: string): string {
-  const gradients: Record<string, string> = {
-    italian: "from-indigo-500 to-purple-600",
-    asian: "from-pink-400 to-red-500",
-    healthy: "from-teal-300 to-pink-200",
-    american: "from-orange-300 to-red-400",
-    dessert: "from-yellow-300 to-orange-400",
-  };
-
-  return gradients[cuisine.toLowerCase()] || "from-gray-400 to-gray-600";
 }
