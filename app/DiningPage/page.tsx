@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Heading from "@/components/DiningComponents/Heading";
-import RestaurantList from "@/components/DiningComponents/RestaurantList";
 
 import type { prices } from "@/components/DiningComponents/RestaurantCard";
+import RestaurantCard from "@/components/DiningComponents/RestaurantCard";
 
 interface Restaurant {
   id: string;
@@ -86,6 +86,14 @@ export default function DiningSelection() {
       searchRestaurants();
     }
   };
+
+  async function addToCart(rest: Restaurant) {
+    try {
+      //Call API to add to db, live cart update
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div>
@@ -189,7 +197,26 @@ export default function DiningSelection() {
             )}
           </div>
 
-          {!loading && <RestaurantList restaurants={restaurants} />}
+          {!loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {restaurants.map((restaurant) => (
+                <RestaurantCard
+                  key={restaurant.id}
+                  name={restaurant.name}
+                  id={restaurant.id}
+                  cuisine={restaurant.cuisine}
+                  rating={restaurant.rating}
+                  price={restaurant.price}
+                  waitTime={restaurant.waitTime}
+                  address={restaurant.address}
+                  tags={restaurant.tags}
+                  isOpen={restaurant.isOpen}
+                  photo={restaurant.photo}
+                  addToCart={async () => addToCart(restaurant)}
+                />
+              ))}
+            </div>
+          )}
         </div>
         <style>{`
         @keyframes fade-in {

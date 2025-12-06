@@ -14,6 +14,7 @@ export interface RestaurantCardProps {
   address?: string;
   photo?: string | null;
   isOpen?: boolean;
+  addToCart: () => void | Promise<void>;
 }
 
 export default function RestaurantCard({
@@ -27,6 +28,7 @@ export default function RestaurantCard({
   address,
   photo,
   isOpen,
+  addToCart,
 }: RestaurantCardProps) {
   function toTitleCase(str: string) {
     return str
@@ -86,11 +88,19 @@ export default function RestaurantCard({
           <div className="flex items-center gap-1.5">⏱ {waitTime}</div>
         )}
 
-        {address && (
-          <div className="mt-auto pt-3 text-sm text-gray-700 border-t border-gray-200/50 flex items-start">
-            <span className="truncate">{address}</span>
-          </div>
-        )}
+        <div className="flex justify-between">
+          {address && (
+            <div className="mt-auto pt-3 text-sm text-gray-700 border-t border-gray-200/50 flex items-start">
+              <span className="truncate">{address}</span>
+            </div>
+          )}
+          <button
+            onClick={addToCart}
+            className="text-sm px-2 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2 group"
+          >
+            <span>Add to Cart &gt;</span>
+          </button>
+        </div>
       </div>
     </div>
   );

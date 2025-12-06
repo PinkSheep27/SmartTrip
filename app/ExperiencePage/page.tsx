@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MapPin, Search } from "lucide-react";
 
-export interface Attraction {
+export interface Attractions {
   id: string;
   name: string;
   description: string;
@@ -18,7 +18,7 @@ export default function ExperiencePage() {
   const [selectedType, setSelectedType] = useState("tourism.attraction");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
-  const [attractions, setAttractions] = useState<Attraction[]>([]);
+  const [attractions, setAttractions] = useState<Attractions[]>([]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
@@ -76,6 +76,14 @@ export default function ExperiencePage() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function addToCart(event: Attractions) {
+    try {
+      //Call API to add to db, live cart update
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -205,8 +213,11 @@ export default function ExperiencePage() {
                     </div>
                     {/* View Details Button */}
                     <div className="h-16 mt-4 pt-4 border-t border-gray-200 flex justify-end pr-4">
-                      <button className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center justify-center space-x-2 group">
-                        <span>View Details &gt;</span>
+                      <button
+                        onClick={() => addToCart(attraction)}
+                        className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center justify-center space-x-2 group"
+                      >
+                        <span>Add to Cart &gt;</span>
                       </button>
                     </div>
                   </div>
