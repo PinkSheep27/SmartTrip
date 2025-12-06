@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Attraction } from "@/app/ExperiencePage/page";
+import { Attractions } from "@/app/ExperiencePage/page";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([], { status: 200 });
     }
 
-    const attractions: Attraction[] = data.features.map((feature: any) => {
+    const attractions: Attractions[] = data.features.map((feature: any) => {
       const p = feature.properties;
       return {
         id:
