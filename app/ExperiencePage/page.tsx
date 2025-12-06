@@ -129,7 +129,7 @@ export default function ExperiencePage() {
                     </option>
                     <option value="entertainment">Entertainment</option>
                     <option value="leisure.park">Parks</option>
-                    <option value="tourism.sights">Memorials</option>
+                    <option value="memorial">Memorials</option>
                     <option value="adult">Adult(21+)</option>
                     <option value="beach">Beaches</option>
                     <option value="natural">Nature</option>
@@ -172,7 +172,7 @@ export default function ExperiencePage() {
                 {attractions.length}
               </span>
             </p>
-            {/* Attractions List: one per row */}
+            {/*Attractions List*/}
             <div className="flex flex-col gap-6">
               {attractions.map((attraction) => (
                 <div
