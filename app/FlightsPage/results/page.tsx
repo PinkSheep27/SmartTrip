@@ -115,7 +115,7 @@ const FlightResultsContent: React.FC = () => {
 
   // Handle selecting a suggestion (sets the IATA code)
   const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
-    // We set the state to the IATA code (e.g., "JFK")
+    // Set the state to the IATA code (e.g., "JFK")
     const code = suggestion.code; 
     
     if (inputType === "departing") {
@@ -267,7 +267,7 @@ const FlightResultsContent: React.FC = () => {
   {/* Editable Departure / Arrival Inputs */}
       <div className="flex justify-center space-x-4 mb-6">
        
-       {/* DEPARTING INPUT - NOW CLEAN */}
+       {/* DEPARTING INPUT */}
         <AutocompleteInput
           value={departingState}
           placeholder="Departing Airport/City"
@@ -281,7 +281,7 @@ const FlightResultsContent: React.FC = () => {
           className="border rounded px-3 py-1"
         />
 
-        {/* ARRIVING INPUT - NOW CLEAN */}
+        {/* ARRIVING INPUT */}
         <AutocompleteInput
           value={arrivingState}
           placeholder="Arrival Airport/City"

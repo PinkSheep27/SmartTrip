@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import AutocompleteInput, { Suggestion } from '@/components/AutocompleteInput';
 
 const debounce = (func: Function, delay: number) => {
-  // ... (implementation)
   let timeoutId: NodeJS.Timeout;
   return (...args: any) => {
     clearTimeout(timeoutId);
@@ -124,7 +123,7 @@ const FlightPage: React.FC = () => {
       {/* Airports Input */}
       <div className="flex items-center gap-4 mt-10">
         
-        {/* REPLACED with AutocompleteInput */}
+        {/* Departing Input */}
         <AutocompleteInput
           value={departing}
           placeholder="Departing Airport/City"
@@ -140,7 +139,7 @@ const FlightPage: React.FC = () => {
         
         <span className="text-2xl">→</span>
 
-        {/* REPLACED with AutocompleteInput */}
+        {/* Arriving Input */}
         <AutocompleteInput
           value={arriving}
           placeholder="Arriving Airport/City"
