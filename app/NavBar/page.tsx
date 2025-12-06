@@ -31,14 +31,18 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
       setLoading(false);
     };
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -46,11 +50,36 @@ const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { href: "/FlightsPage", label: "Flights", iconOutlined: flightsIconOutlinedImg, iconFilled: flightsIconFilledImg },
-    { href: "/HotelsPage", label: "Hotels", iconOutlined: hotelsIconOutlinedImg, iconFilled: hotelsIconFilledImg },
-    { href: "#", label: "Cars", iconOutlined: carsIconOutlinedImg, iconFilled: carsIconFilledImg },
-    { href: "#", label: "Experiences", iconOutlined: experiencesIconOutlinedImg, iconFilled: experiencesIconFilledImg },
-    { href: "/DiningPage", label: "Dining", iconOutlined: diningIconOutlinedImg, iconFilled: diningIconFilledImg },
+    {
+      href: "/FlightsPage",
+      label: "Flights",
+      iconOutlined: flightsIconOutlinedImg,
+      iconFilled: flightsIconFilledImg,
+    },
+    {
+      href: "/HotelsPage",
+      label: "Hotels",
+      iconOutlined: hotelsIconOutlinedImg,
+      iconFilled: hotelsIconFilledImg,
+    },
+    {
+      href: "#",
+      label: "Cars",
+      iconOutlined: carsIconOutlinedImg,
+      iconFilled: carsIconFilledImg,
+    },
+    {
+      href: "/ExperiencePage",
+      label: "Experiences",
+      iconOutlined: experiencesIconOutlinedImg,
+      iconFilled: experiencesIconFilledImg,
+    },
+    {
+      href: "/DiningPage",
+      label: "Dining",
+      iconOutlined: diningIconOutlinedImg,
+      iconFilled: diningIconFilledImg,
+    },
   ];
 
   const handleLogout = async () => {
@@ -64,7 +93,11 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Link href="/">
-              <Image src={smartTripLogo} alt="SmartTrip Logo" className="h-10 w-auto cursor-pointer" />
+              <Image
+                src={smartTripLogo}
+                alt="SmartTrip Logo"
+                className="h-10 w-auto cursor-pointer"
+              />
             </Link>
           </div>
 
@@ -75,9 +108,16 @@ const Navbar: React.FC = () => {
                 onMouseEnter={() => setHoveredItem(link.label)}
                 onMouseLeave={() => setHoveredItem(null)}
               >
-                <Link href={link.href} className="flex items-center space-x-1 hover:text-teal-500 transition-colors">
+                <Link
+                  href={link.href}
+                  className="flex items-center space-x-1 hover:text-teal-500 transition-colors"
+                >
                   <Image
-                    src={hoveredItem === link.label ? link.iconFilled : link.iconOutlined}
+                    src={
+                      hoveredItem === link.label
+                        ? link.iconFilled
+                        : link.iconOutlined
+                    }
                     alt={link.label}
                     className="h-5 w-5"
                     width={20}
@@ -93,8 +133,9 @@ const Navbar: React.FC = () => {
             {user && (
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
-                className={`relative p-2 rounded-full transition-all cursor-pointer ${isCartOpen ? 'bg-gray-100 rotate-90' : 'hover:bg-gray-50'
-                  }`}
+                className={`relative p-2 rounded-full transition-all cursor-pointer ${
+                  isCartOpen ? "bg-gray-100 rotate-90" : "hover:bg-gray-50"
+                }`}
               >
                 {isCartOpen ? (
                   <X className="w-6 h-6 text-gray-600" />
@@ -114,7 +155,10 @@ const Navbar: React.FC = () => {
                 </>
               ) : (
                 <div className="flex items-center gap-4">
-                  <Link href="/Profile" className="cursor-pointer hover:opacity-80 transition-opacity">
+                  <Link
+                    href="/Profile"
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  >
                     <Profile user={user} />
                   </Link>
 

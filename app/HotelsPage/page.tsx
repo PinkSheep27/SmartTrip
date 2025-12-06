@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import {
-  MapPin,
-  Star,
-  Wifi,
-  Users,
-  Calendar,
-  Search,
-  ChevronRight,
-} from "lucide-react";
+import { MapPin, Star, Wifi, Users, Calendar, Search } from "lucide-react";
 
 interface Hotels {
   id: string;
@@ -251,6 +243,14 @@ function HotelsPage() {
     checkOut,
     guests,
   ]);
+
+  async function addToCart(event: Hotels) {
+    try {
+      //Call API to add to db, live cart update
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
     // Skip running the effect on the first render
@@ -527,9 +527,11 @@ function HotelsPage() {
                         </p>
                       </div>
 
-                      <button className="px-8 py-4 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2 group">
-                        <span>View Deal</span>
-                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <button
+                        onClick={() => addToCart(hotel)}
+                        className="px-8 py-4 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2 group"
+                      >
+                        <span>Add to Cart &gt;</span>
                       </button>
                     </div>
                   </div>
