@@ -128,12 +128,11 @@ export default function ExperiencePage() {
                       Interesting Places
                     </option>
                     <option value="entertainment">Entertainment</option>
-                    <option value="leisure">Leisure</option>
-                    <option value="recreation.park">Parks</option>
-                    <option value="memorial">Memorials</option>
+                    <option value="leisure.park">Parks</option>
+                    <option value="tourism.sights">Memorials</option>
                     <option value="adult">Adult(21+)</option>
                     <option value="beach">Beaches</option>
-                    <option value="nature">Nature</option>
+                    <option value="natural">Nature</option>
                   </select>
                 </div>
               </div>
