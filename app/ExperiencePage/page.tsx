@@ -167,8 +167,11 @@ export default function ExperiencePage() {
         {attractions.length > 0 && (
           <div className="relative max-w-7xl mx-auto px-6 pb-16">
             {/* Total Experiences Rendered */}
-            <p className="text-lg text-white mt-4">
-              Total Experiences Rendered: {attractions.length}
+            <p className="mt-4 inline-block bg-gray-400 backdrop-blur-sm px-4 py-2 rounded-xl text-white text-lg font-medium border border-white/20 mb-4">
+              Total Experiences Rendered:
+              <span className="ml-2 font-semibold text-yellow-300">
+                {attractions.length}
+              </span>
             </p>
             {/* Attractions List: one per row */}
             <div className="flex flex-col gap-6">
