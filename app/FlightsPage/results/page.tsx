@@ -81,8 +81,36 @@ const FlightResultsContent: React.FC = () => {
     // Example → "6:29 AM"
   }
 
-  
+  //Add to Cart stuff
+  //---------------BEGIN------------------------
+  async function addToCart(flight: Flight) {
+    try {
+      // Create a unique ID since one isn't provided by the simplified API response
+      const uniqueId = `${flight.airline}-${flight.departAirport}-${flight.departureTime}`;
 
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: 1, // Hardcoded to 1 for testing (matches the LiveCart default)
+          category: "flight",
+          externalId: uniqueId, 
+          data: flight, // Sending the full flight object
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add to cart");
+      }
+
+      alert("✅ Flight added to cart!");
+    } catch (error) {
+      console.error("Error adding flight:", error);
+      alert("❌ Error adding flight. Check console.");
+    }
+  }
+  //--------------------END--------------------------
   React.useEffect(() => {
     async function fetchFlights(reset = false) {
       if (loading) return;
@@ -329,9 +357,13 @@ const FlightResultsContent: React.FC = () => {
               {/* RIGHT: Price + Button */}
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-600">${flight.price}</p>
-                <button className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <button 
+                onClick={() => addToCart(flight)}
+                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
+                >
                   Select
                 </button>
+                
               </div>
             </div>
           ))}
