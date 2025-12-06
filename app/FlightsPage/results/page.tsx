@@ -2,6 +2,7 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import AutocompleteInput, { Suggestion } from '@/components/AutocompleteInput';
 
 
 const airlineLookup: { [code: string]: string } = {
@@ -33,6 +34,15 @@ type Flight = {
   price: number | string;
 };
 
+//Debounce 
+const debounce = (func: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
 const FlightResultsContent: React.FC = () => {
   const params = useSearchParams();
 
@@ -60,7 +70,64 @@ const FlightResultsContent: React.FC = () => {
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = new Date().toISOString().split("T")[0];
 
-  
+  type Suggestion = { code: string; name: string; type: string };
+  const [departingSuggestions, setDepartingSuggestions] = React.useState<Suggestion[]>([]);
+  const [arrivingSuggestions, setArrivingSuggestions] = React.useState<Suggestion[]>([]);
+  const [focusedInput, setFocusedInput] = React.useState<"departing" | "arriving" | null>(null);
+
+  // Function to fetch suggestions (Debounced)
+  const fetchSuggestions = React.useCallback(
+    debounce(async (keyword: string, inputType: "departing" | "arriving") => {
+      if (keyword.length < 2) {
+        inputType === "departing" ? setDepartingSuggestions([]) : setArrivingSuggestions([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/airportAutocomplete?keyword=${keyword}`);
+        const data = await res.json();
+        
+        const setSuggestions = inputType === "departing" ? setDepartingSuggestions : setArrivingSuggestions;
+        setSuggestions(data.suggestions || []);
+        
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    }, 300), // 300ms debounce delay
+    []
+  );
+
+  // Handle change for the input fields (calls fetchSuggestions)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, inputType: "departing" | "arriving") => {
+    const value = e.target.value;
+    
+    if (inputType === "departing") {
+      setDepartingState(value);
+      setArrivingSuggestions([]); // Clear other list when typing in this one
+    } else {
+      setArrivingState(value);
+      setDepartingSuggestions([]); // Clear other list
+    }
+    
+    // Fetch suggestions with debounce
+    fetchSuggestions(value, inputType);
+  };
+
+  // Handle selecting a suggestion (sets the IATA code)
+  const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
+    // Set the state to the IATA code (e.g., "JFK")
+    const code = suggestion.code; 
+    
+    if (inputType === "departing") {
+      setDepartingState(code);
+      setDepartingSuggestions([]);
+    } else {
+      setArrivingState(code);
+      setArrivingSuggestions([]);
+    }
+    setFocusedInput(null); // Clear focus
+  };
+
   const filteredFlights = Flights.filter(f => airlineFilter === "" || f.airline === airlineFilter);
   const sortedFlights = sortFlights(Flights, sortBy);
 
@@ -91,6 +158,7 @@ const FlightResultsContent: React.FC = () => {
       const query: { [key: string]: string } = {
       tripType: tripTypeState,
       departing: departingState,
+      arriving: arrivingState,
       departureDate: departureDateState,
       page: page.toString(),
       limit: "10",
@@ -198,22 +266,35 @@ const FlightResultsContent: React.FC = () => {
   
   {/* Editable Departure / Arrival Inputs */}
       <div className="flex justify-center space-x-4 mb-6">
-        <input
-          type="text"
+       
+       {/* DEPARTING INPUT */}
+        <AutocompleteInput
           value={departingState}
-          onChange={e => setDepartingState(e.target.value)}
-          placeholder="Departing Airport"
-          className="border rounded px-3 py-1"
-        />
-        
-        <input
-          type="text"
-          value={arrivingState}
-          onChange={e => setArrivingState(e.target.value)}
-          placeholder="Arrival Airport"
+          placeholder="Departing Airport/City"
+          inputType="departing"
+          onChange={handleInputChange}
+          onSelect={handleSelectSuggestion}
+          suggestions={departingSuggestions}
+          isFocused={focusedInput === "departing"}
+          onFocus={() => setFocusedInput("departing")}
+          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
           className="border rounded px-3 py-1"
         />
 
+        {/* ARRIVING INPUT */}
+        <AutocompleteInput
+          value={arrivingState}
+          placeholder="Arrival Airport/City"
+          inputType="arriving"
+          onChange={handleInputChange}
+          onSelect={handleSelectSuggestion}
+          suggestions={arrivingSuggestions}
+          isFocused={focusedInput === "arriving"}
+          onFocus={() => setFocusedInput("arriving")}
+          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
+          className="border rounded px-3 py-1"
+        />
+        
         <input
           type="date"
           value={departureDateState}
