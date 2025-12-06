@@ -1,17 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  MapPin,
-  Star,
-  Clock,
-  DollarSign,
-  Search,
-  ChevronRight,
-  Ticket,
-  Heart,
-  Sparkles,
-} from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 
 export interface Attraction {
   id: string;
@@ -25,11 +15,10 @@ export interface Attraction {
 
 export default function ExperiencePage() {
   const [searchLocation, setSearchLocation] = useState("");
-  const [selectedType, setSelectedType] = useState("interesting_places");
+  const [selectedType, setSelectedType] = useState("tourism.attraction");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
   const [attractions, setAttractions] = useState<Attraction[]>([]);
-  const [sortBy, setSortBy] = useState("recommended");
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
@@ -91,33 +80,20 @@ export default function ExperiencePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#94C3D2] via-[#7FB3C4] to-[#6AA3B3]">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-60 -left-40 w-96 h-96 bg-cyan-300/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-        <div className="absolute bottom-20 right-1/3 w-64 h-64 bg-teal-300/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
+    <div className="min-h-screen bg-[#94C3D2] py-32">
       {/* Header Section */}
-      <div className="relative pt-20 pb-12">
+      <div className="relative pb-24">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            <span className="text-white font-semibold text-sm">
-              Discover Amazing Experiences
-            </span>
-          </div>
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 tracking-tight">
+          <h1 className="text-5xl text-white font-bold mb-3 drop-shadow-lg">
             Explore Local Attractions
           </h1>
-          <p className="text-xl md:text-2xl text-cyan-100 max-w-3xl mx-auto">
+          <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto opacity-95">
             Find the best tours, activities, and experiences in your destination
           </p>
         </div>
 
         {/* Search Section */}
-        <div className="relative max-w-4xl mx-auto px-6 pb-12">
+        <div className="relative max-w-4xl mx-auto px-6 pb-12 pt-4">
           <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 transform hover:scale-[1.01] transition-all">
             <div className="space-y-6">
               {/* Location Input and Type Dropdown */}
@@ -148,7 +124,9 @@ export default function ExperiencePage() {
                     onChange={(e) => setSelectedType(e.target.value)}
                     className="w-full px-4 py-5 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] focus:ring-4 focus:ring-cyan-100 text-gray-800 font-medium cursor-pointer hover:border-gray-300 transition-all bg-white"
                   >
-                    <option value="tourism">Interesting Places</option>
+                    <option value="tourism.attraction">
+                      Interesting Places
+                    </option>
                     <option value="entertainment">Entertainment</option>
                     <option value="leisure">Leisure</option>
                     <option value="recreation.park">Parks</option>
@@ -188,12 +166,16 @@ export default function ExperiencePage() {
         {/* Results Section */}
         {attractions.length > 0 && (
           <div className="relative max-w-7xl mx-auto px-6 pb-16">
+            {/* Total Experiences Rendered */}
+            <p className="text-lg text-white mt-4">
+              Total Experiences Rendered: {attractions.length}
+            </p>
             {/* Attractions List: one per row */}
             <div className="flex flex-col gap-6">
               {attractions.map((attraction) => (
                 <div
                   key={attraction.id}
-                  className="w-full bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 group transform hover:-translate-y-1"
+                  className="w-full bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 group transform hover:-translate-y-1"
                 >
                   <div className="flex flex-col md:flex-row">
                     {/* Content Section */}
@@ -214,13 +196,13 @@ export default function ExperiencePage() {
                         </div>
 
                         {/* Description */}
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-1">
-                          {attraction.description}
-                        </p>
+                        {/* <p className="text-sm text-gray-600 mb-4 line-clamp-1">
+                    {attraction.description}
+                  </p> */}
                       </div>
                     </div>
-                    {/*View Details Button */}
-                    <div className="h-16 mt-4 pt-4 border-t border-gray-100 flex justify-end pr-4">
+                    {/* View Details Button */}
+                    <div className="h-16 mt-4 pt-4 border-t border-gray-200 flex justify-end pr-4">
                       <button className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center justify-center space-x-2 group">
                         <span>View Details &gt;</span>
                       </button>
