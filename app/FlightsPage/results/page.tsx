@@ -2,7 +2,7 @@
 
 import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import AutocompleteInput, { Suggestion } from '@/components/AutocompleteInput';
+import AutocompleteInput, { Suggestion } from '@/components/FlightComponents/AutocompleteInput';
 import FlightSelectionModal from "@/components/FlightComponents/FlightSelectionModal";
 
 const airlineLookup: { [code: string]: string } = {
@@ -64,9 +64,9 @@ const FlightResultsContent: React.FC = () => {
   const [page, setPage] = React.useState(1);          // current page
   const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
   const [loading, setLoading] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")  
+  const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")
   const [airlineFilter, setAirlineFilter] = React.useState("");
-  
+
   //Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
@@ -99,10 +99,10 @@ const FlightResultsContent: React.FC = () => {
       try {
         const res = await fetch(`/api/airportAutocomplete?keyword=${keyword}`);
         const data = await res.json();
-        
+
         const setSuggestions = inputType === "departing" ? setDepartingSuggestions : setArrivingSuggestions;
         setSuggestions(data.suggestions || []);
-        
+
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
@@ -113,7 +113,7 @@ const FlightResultsContent: React.FC = () => {
   // Handle change for the input fields (calls fetchSuggestions)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, inputType: "departing" | "arriving") => {
     const value = e.target.value;
-    
+
     if (inputType === "departing") {
       setDepartingState(value);
       setArrivingSuggestions([]); // Clear other list when typing in this one
@@ -121,7 +121,7 @@ const FlightResultsContent: React.FC = () => {
       setArrivingState(value);
       setDepartingSuggestions([]); // Clear other list
     }
-    
+
     // Fetch suggestions with debounce
     fetchSuggestions(value, inputType);
   };
@@ -129,8 +129,8 @@ const FlightResultsContent: React.FC = () => {
   // Handle selecting a suggestion (sets the IATA code)
   const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
     // Set the state to the IATA code (e.g., "JFK")
-    const code = suggestion.code; 
-    
+    const code = suggestion.code;
+
     if (inputType === "departing") {
       setDepartingState(code);
       setDepartingSuggestions([]);
@@ -176,7 +176,7 @@ const FlightResultsContent: React.FC = () => {
     if (minutes > 0) {
       formatted += formatted.length > 0 ? ` ${minutes} min` : `${minutes} min`;
     }
-    
+
     return formatted || 'Unknown duration';
   }
 
@@ -193,7 +193,7 @@ const FlightResultsContent: React.FC = () => {
         body: JSON.stringify({
           cartId: 1, // Hardcoded to 1 for testing (matches the LiveCart default)
           category: "flight",
-          externalId: uniqueId, 
+          externalId: uniqueId,
           data: flight, // Sending the full flight object
         }),
       });
@@ -304,12 +304,12 @@ const FlightResultsContent: React.FC = () => {
           <span className="text-lg">{departingState}</span>
         </div>
 
-        
-          <div className="flex flex-col items-center">
-            <span className="font-semibold text-gray-600">To:</span>
-            <span className="text-lg">{arrivingState}</span>
-          </div>
-        
+
+        <div className="flex flex-col items-center">
+          <span className="font-semibold text-gray-600">To:</span>
+          <span className="text-lg">{arrivingState}</span>
+        </div>
+
 
         <div className="flex flex-col items-center">
           <span className="font-semibold text-gray-600">Depart:</span>
@@ -323,11 +323,11 @@ const FlightResultsContent: React.FC = () => {
           </div>
         )}
       </div>
-  
-  {/* Editable Departure / Arrival Inputs */}
+
+      {/* Editable Departure / Arrival Inputs */}
       <div className="flex justify-center space-x-4 mb-6">
-       
-       {/* DEPARTING INPUT */}
+
+        {/* DEPARTING INPUT */}
         <AutocompleteInput
           value={departingState}
           placeholder="Departing Airport/City"
@@ -354,7 +354,7 @@ const FlightResultsContent: React.FC = () => {
           onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
           className="border rounded px-3 py-1"
         />
-        
+
         <input
           type="date"
           value={departureDateState}
@@ -363,15 +363,15 @@ const FlightResultsContent: React.FC = () => {
           min={today}
         />
         {tripTypeState === "roundtrip" && (
-        <input
-          type="date"
-          value={returnDateState}
-          onChange={e => setReturnDateState(e.target.value)}
-          className="border rounded px-3 py-1"
-          min={departureDateState || today} 
-        />
-  )}
-        
+          <input
+            type="date"
+            value={returnDateState}
+            onChange={e => setReturnDateState(e.target.value)}
+            className="border rounded px-3 py-1"
+            min={departureDateState || today}
+          />
+        )}
+
         <button
           onClick={() => setPage(1)} // triggers useEffect to refetch
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -379,62 +379,62 @@ const FlightResultsContent: React.FC = () => {
           Search
         </button>
       </div>
-  {/* Editable Trip type selection */}
-    <div className="flex gap-6 mb-4 justify-center">
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="tripType"
-        value="oneway"
-        checked={tripTypeState === "oneway"}
-        onChange={() => setTripTypeState("oneway")}
-      />
-      One-way
-    </label>
+      {/* Editable Trip type selection */}
+      <div className="flex gap-6 mb-4 justify-center">
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="tripType"
+            value="oneway"
+            checked={tripTypeState === "oneway"}
+            onChange={() => setTripTypeState("oneway")}
+          />
+          One-way
+        </label>
 
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="tripType"
-        value="roundtrip"
-        checked={tripTypeState === "roundtrip"}
-        onChange={() => setTripTypeState("roundtrip")}
-      />
-      Round-trip
-    </label>
-  </div>
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="tripType"
+            value="roundtrip"
+            checked={tripTypeState === "roundtrip"}
+            onChange={() => setTripTypeState("roundtrip")}
+          />
+          Round-trip
+        </label>
+      </div>
 
       {/* Main Content */}
       <div className="flex flex-1">
 
-    {/* Sort & Filter Bar */}
-    <div className="flex flex-col items-center mb-6">
-        <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
-          <span className="font-semibold text-gray-700">Sort by:</span>
-          <select
-            className="border rounded px-2 py-1"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-          >
-            <option value="">None</option>
-            <option value="departure">Departure</option>
-            <option value="price">Price</option>
-            <option value="duration">Duration</option>
-            <option value="airline">Airline</option>
-          </select>
+        {/* Sort & Filter Bar */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <span className="font-semibold text-gray-700">Sort by:</span>
+            <select
+              className="border rounded px-2 py-1"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+            >
+              <option value="">None</option>
+              <option value="departure">Departure</option>
+              <option value="price">Price</option>
+              <option value="duration">Duration</option>
+              <option value="airline">Airline</option>
+            </select>
 
-        <span className="font-semibold text-gray-700">Airline:</span>
-          <select
-            className="border rounded px-2 py-1"
-            value={airlineFilter}
-            onChange={(e) => setAirlineFilter(e.target.value)}
-          >
-            <option value="">All</option>
-            {uniqueAirlines.map((airline) => (
-              <option key={airline} value={airline}>{airline}</option>
-            ))}
-          </select>
-        </div>
+            <span className="font-semibold text-gray-700">Airline:</span>
+            <select
+              className="border rounded px-2 py-1"
+              value={airlineFilter}
+              onChange={(e) => setAirlineFilter(e.target.value)}
+            >
+              <option value="">All</option>
+              {uniqueAirlines.map((airline) => (
+                <option key={airline} value={airline}>{airline}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Flight Cards Section */}
@@ -461,11 +461,11 @@ const FlightResultsContent: React.FC = () => {
                   <span className="font-medium">{flight.arriveAirport}</span>
                 </p>
 
-                
+
                 <p className="text-sm font-semibold text-gray-700">
                   {formatDuration(flight.duration)}
                 </p>
-                
+
                 <p className="text-gray-500 text-sm">
                   {formatShortDate(flight.departureTime)} •{" "}
                   {formatTime(flight.departureTime)}
@@ -475,13 +475,13 @@ const FlightResultsContent: React.FC = () => {
               {/* RIGHT: Price + Button */}
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-600">${flight.price}</p>
-                <button 
+                <button
                   onClick={() => handleSelectTicket(flight)}
                   className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
                 >
                   Select
                 </button>
-                
+
               </div>
             </div>
           ))}
@@ -503,11 +503,12 @@ const FlightResultsContent: React.FC = () => {
       </div>
 
       {isModalOpen && selectedFlight && (
-    <FlightSelectionModal 
-      flight={selectedFlight}
-      onClose={handleCloseModal}
-    />
-    )}
+        <FlightSelectionModal
+          flight={selectedFlight}
+          onClose={handleCloseModal}
+          onAddToCart={addToCart}
+        />
+      )}
     </div>
   );
 };

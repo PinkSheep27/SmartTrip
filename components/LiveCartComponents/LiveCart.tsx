@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ShoppingCart, Plane, Hotel, X, Trash2 } from "lucide-react";
 
-
 type CartItem = {
   id: number;
   category: string;
@@ -109,11 +108,13 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
 
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 text-sm truncate">
-                  {item.data.airline 
-                    ? `${item.data.airline} to ${item.data.arrival}` 
-                    : item.data.name}
+                  {item.category === 'flight' ? item.data.airline : item.data.name}
                 </p>
-                <p className="text-xs text-gray-500 capitalize">{item.category}</p>
+                <p className="text-xs text-gray-500 capitalize">
+                  {item.category === 'flight' 
+                    ? `${item.data.departAirport} → ${item.data.arriveAirport}`
+                    : item.category}
+                </p>
               </div>
 
               <div className="font-bold text-gray-900 text-sm">
@@ -136,7 +137,7 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-500 font-medium">Total</span>
             <span className="text-xl font-bold text-gray-900">
-              ${items.reduce((acc, item) => acc + (Number(item.data.price) || 0), 0)}
+              ${items.reduce((acc, item) => acc + (Number(item.data.price) || 0), 0).toFixed(2)}
             </span>
           </div>
           <button className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95">

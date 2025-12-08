@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import AutocompleteInput, { Suggestion } from '@/components/AutocompleteInput';
+import AutocompleteInput, { Suggestion } from '@/components/FlightComponents/AutocompleteInput';
 
 const debounce = (func: Function, delay: number) => {
   let timeoutId: NodeJS.Timeout;
