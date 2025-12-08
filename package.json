@@ -14,7 +14,8 @@
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.86.0",
+    "@supabase/supabase-js": "^2.86.2",
+    "auth0": "^5.1.0",
     "drizzle-orm": "^0.44.7",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.552.0",

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-
+import AutocompleteInput, { Suggestion } from '@/components/AutocompleteInput';
+import FlightSelectionModal from "@/components/FlightComponents/FlightSelectionModal";
 
 const airlineLookup: { [code: string]: string } = {
   "AA": "American Airlines",
@@ -33,6 +34,15 @@ type Flight = {
   price: number | string;
 };
 
+//Debounce 
+const debounce = (func: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
 const FlightResultsContent: React.FC = () => {
   const params = useSearchParams();
 
@@ -57,10 +67,80 @@ const FlightResultsContent: React.FC = () => {
   const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")  
   const [airlineFilter, setAirlineFilter] = React.useState("");
   
+  //Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+
+  const handleSelectTicket = (flight: Flight) => {
+    setSelectedFlight(flight);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedFlight(null); // Clear the selected flight data
+  };
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = new Date().toISOString().split("T")[0];
 
-  
+  type Suggestion = { code: string; name: string; type: string };
+  const [departingSuggestions, setDepartingSuggestions] = React.useState<Suggestion[]>([]);
+  const [arrivingSuggestions, setArrivingSuggestions] = React.useState<Suggestion[]>([]);
+  const [focusedInput, setFocusedInput] = React.useState<"departing" | "arriving" | null>(null);
+
+  // Function to fetch suggestions (Debounced)
+  const fetchSuggestions = React.useCallback(
+    debounce(async (keyword: string, inputType: "departing" | "arriving") => {
+      if (keyword.length < 2) {
+        inputType === "departing" ? setDepartingSuggestions([]) : setArrivingSuggestions([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/airportAutocomplete?keyword=${keyword}`);
+        const data = await res.json();
+        
+        const setSuggestions = inputType === "departing" ? setDepartingSuggestions : setArrivingSuggestions;
+        setSuggestions(data.suggestions || []);
+        
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    }, 300), // 300ms debounce delay
+    []
+  );
+
+  // Handle change for the input fields (calls fetchSuggestions)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, inputType: "departing" | "arriving") => {
+    const value = e.target.value;
+    
+    if (inputType === "departing") {
+      setDepartingState(value);
+      setArrivingSuggestions([]); // Clear other list when typing in this one
+    } else {
+      setArrivingState(value);
+      setDepartingSuggestions([]); // Clear other list
+    }
+    
+    // Fetch suggestions with debounce
+    fetchSuggestions(value, inputType);
+  };
+
+  // Handle selecting a suggestion (sets the IATA code)
+  const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
+    // Set the state to the IATA code (e.g., "JFK")
+    const code = suggestion.code; 
+    
+    if (inputType === "departing") {
+      setDepartingState(code);
+      setDepartingSuggestions([]);
+    } else {
+      setArrivingState(code);
+      setArrivingSuggestions([]);
+    }
+    setFocusedInput(null); // Clear focus
+  };
+
   const filteredFlights = Flights.filter(f => airlineFilter === "" || f.airline === airlineFilter);
   const sortedFlights = sortFlights(Flights, sortBy);
 
@@ -79,6 +159,25 @@ const FlightResultsContent: React.FC = () => {
       minute: "2-digit",
     });
     // Example → "6:29 AM"
+  }
+
+  function formatDuration(durationString: string): string {
+    // Matches '1H', '30M', etc.
+    const hoursMatch = durationString.match(/(\d+)H/);
+    const minutesMatch = durationString.match(/(\d+)M/);
+
+    const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+
+    let formatted = '';
+    if (hours > 0) {
+      formatted += `${hours} hr`;
+    }
+    if (minutes > 0) {
+      formatted += formatted.length > 0 ? ` ${minutes} min` : `${minutes} min`;
+    }
+    
+    return formatted || 'Unknown duration';
   }
 
   //Add to Cart stuff
@@ -117,80 +216,81 @@ const FlightResultsContent: React.FC = () => {
       setLoading(true);
 
       const query: { [key: string]: string } = {
-      tripType: tripTypeState,
-      departing: departingState,
-      departureDate: departureDateState,
-      page: page.toString(),
-      limit: "10",
-    };
+        tripType: tripTypeState,
+        departing: departingState,
+        arriving: arrivingState,
+        departureDate: departureDateState,
+        page: page.toString(),
+        limit: "10",
+      };
 
-    // Only include arriving and returnDate for roundtrip
-    if (tripTypeState === "roundtrip") {
-      query.arriving = arrivingState;
-      query.returnDate = returnDateState;
+      // Only include arriving and returnDate for roundtrip
+      if (tripTypeState === "roundtrip") {
+        query.arriving = arrivingState;
+        query.returnDate = returnDateState;
+      }
+
+      const searchParams = new URLSearchParams(query);
+
+      try {
+        const res = await fetch(`/api/searchFlights?${searchParams.toString()}`);
+        const data = await res.json();
+
+        const newFlights: Flight[] = (data.flights || []).map((flight: any) => ({
+          ...flight,
+          airline: airlineLookup[flight.airline] || flight.airline,
+        }));
+
+        setFlights(prev => reset ? newFlights : [...prev, ...newFlights]);
+        setHasMore(newFlights.length > 0);
+      } catch (err) {
+        console.error("Error fetching flights:", err);
+        setFlights([]);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
     }
-
-    const searchParams = new URLSearchParams(query);
-
-    try {
-      const res = await fetch(`/api/searchFlights?${searchParams.toString()}`);
-      const data = await res.json();
-
-      const newFlights: Flight[] = (data.flights || []).map((flight: any) => ({
-        ...flight,
-        airline: airlineLookup[flight.airline] || flight.airline,
-      }));
-
-      setFlights(prev => reset ? newFlights : [...prev, ...newFlights]);
-      setHasMore(newFlights.length > 0);
-    } catch (err) {
-      console.error("Error fetching flights:", err);
-      setFlights([]);
-      setHasMore(false);
-    } finally {
-      setLoading(false);
-    }
-  }
 
     fetchFlights(page === 1); //reset if on first page
   }, [tripTypeState, departingState, arrivingState, departureDateState, returnDateState, page]);
 
   function sortFlights(flights: Flight[], sortBy: string) {
-  if (sortBy === "") return flights;
+    if (sortBy === "") return flights;
 
-  const sorted = [...flights];
+    const sorted = [...flights];
 
-  switch (sortBy) {
-    case "price":
-      sorted.sort((a, b) => Number(a.price) - Number(b.price));
-      break;
+    switch (sortBy) {
+      case "price":
+        sorted.sort((a, b) => Number(a.price) - Number(b.price));
+        break;
 
-    case "departure":
-      sorted.sort(
-        (a, b) =>
-          new Date(a.departureTime).getTime() -
-          new Date(b.departureTime).getTime()
-      );
-      break;
+      case "departure":
+        sorted.sort(
+          (a, b) =>
+            new Date(a.departureTime).getTime() -
+            new Date(b.departureTime).getTime()
+        );
+        break;
 
-    case "duration":
-      sorted.sort((a, b) => {
-        const toMinutes = (d: string) => {
-          const hours = d.match(/(\d+)H/)?.[1] ?? 0;
-          const minutes = d.match(/(\d+)M/)?.[1] ?? 0;
-          return Number(hours) * 60 + Number(minutes);
-        };
-        return toMinutes(a.duration) - toMinutes(b.duration);
-      });
-      break;
+      case "duration":
+        sorted.sort((a, b) => {
+          const toMinutes = (d: string) => {
+            const hours = d.match(/(\d+)H/)?.[1] ?? 0;
+            const minutes = d.match(/(\d+)M/)?.[1] ?? 0;
+            return Number(hours) * 60 + Number(minutes);
+          };
+          return toMinutes(a.duration) - toMinutes(b.duration);
+        });
+        break;
 
-    case "airline":
-      sorted.sort((a, b) => a.airline.localeCompare(b.airline));
-      break;
+      case "airline":
+        sorted.sort((a, b) => a.airline.localeCompare(b.airline));
+        break;
+    }
+
+    return sorted;
   }
-
-  return sorted;
-}
 
   const uniqueAirlines = Array.from(new Set(Flights.map(f => f.airline)));
 
@@ -226,22 +326,35 @@ const FlightResultsContent: React.FC = () => {
   
   {/* Editable Departure / Arrival Inputs */}
       <div className="flex justify-center space-x-4 mb-6">
-        <input
-          type="text"
+       
+       {/* DEPARTING INPUT */}
+        <AutocompleteInput
           value={departingState}
-          onChange={e => setDepartingState(e.target.value)}
-          placeholder="Departing Airport"
-          className="border rounded px-3 py-1"
-        />
-        
-        <input
-          type="text"
-          value={arrivingState}
-          onChange={e => setArrivingState(e.target.value)}
-          placeholder="Arrival Airport"
+          placeholder="Departing Airport/City"
+          inputType="departing"
+          onChange={handleInputChange}
+          onSelect={handleSelectSuggestion}
+          suggestions={departingSuggestions}
+          isFocused={focusedInput === "departing"}
+          onFocus={() => setFocusedInput("departing")}
+          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
           className="border rounded px-3 py-1"
         />
 
+        {/* ARRIVING INPUT */}
+        <AutocompleteInput
+          value={arrivingState}
+          placeholder="Arrival Airport/City"
+          inputType="arriving"
+          onChange={handleInputChange}
+          onSelect={handleSelectSuggestion}
+          suggestions={arrivingSuggestions}
+          isFocused={focusedInput === "arriving"}
+          onFocus={() => setFocusedInput("arriving")}
+          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
+          className="border rounded px-3 py-1"
+        />
+        
         <input
           type="date"
           value={departureDateState}
@@ -348,6 +461,11 @@ const FlightResultsContent: React.FC = () => {
                   <span className="font-medium">{flight.arriveAirport}</span>
                 </p>
 
+                
+                <p className="text-sm font-semibold text-gray-700">
+                  {formatDuration(flight.duration)}
+                </p>
+                
                 <p className="text-gray-500 text-sm">
                   {formatShortDate(flight.departureTime)} •{" "}
                   {formatTime(flight.departureTime)}
@@ -358,8 +476,8 @@ const FlightResultsContent: React.FC = () => {
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-600">${flight.price}</p>
                 <button 
-                onClick={() => addToCart(flight)}
-                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
+                  onClick={() => handleSelectTicket(flight)}
+                  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
                 >
                   Select
                 </button>
@@ -383,6 +501,13 @@ const FlightResultsContent: React.FC = () => {
 
         </div>
       </div>
+
+      {isModalOpen && selectedFlight && (
+    <FlightSelectionModal 
+      flight={selectedFlight}
+      onClose={handleCloseModal}
+    />
+    )}
     </div>
   );
 };

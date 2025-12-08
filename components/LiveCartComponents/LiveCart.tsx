@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ShoppingCart, Plane, Hotel, X } from "lucide-react";
+import { ShoppingCart, Plane, Hotel, X, Trash2 } from "lucide-react";
+
 
 type CartItem = {
   id: number;
@@ -46,6 +47,21 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
       supabase.removeChannel(channel);
     };
   }, [cartId]);
+
+  async function deleteItem(itemId: number) {
+    try {
+      setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+      
+      const res = await fetch(`/api/cart?id=${itemId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete item");
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Failed to remove item.");
+    }
+  }
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 w-full max-h-[80vh] overflow-y-auto flex flex-col">
@@ -103,6 +119,13 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
               <div className="font-bold text-gray-900 text-sm">
                 ${item.data.price}
               </div>
+              <button 
+                onClick={() => deleteItem(item.id)}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Remove item"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           ))
         )}
