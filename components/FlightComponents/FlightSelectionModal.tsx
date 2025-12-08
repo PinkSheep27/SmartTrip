@@ -42,11 +42,11 @@ const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onC
   const basePrice = parseFloat(flight.price);
   const totalTicketPrice = basePrice * selectedClass.priceFactor * quantity;
 
-  // Placeholder for "seat map" functionality (a complex feature)
+  // Placeholder for "seat map" functionality
   const renderSeatAvailability = () => (
     <div className="bg-gray-100 p-3 rounded-lg text-sm text-gray-700">
       <h4 className="font-semibold mb-2">Seat Availability (Placeholder)</h4>
-      <p> To show live seat maps, a dedicated **Amadeus Seatmap API** call is required.</p>
+      <p> Seatmap Under construction </p>
       <div className="flex gap-2 mt-2">
         <span className="bg-green-200 px-2 rounded">12 Available (Standard)</span>
         <span className="bg-yellow-200 px-2 rounded">4 Available (Exit Row)</span>
