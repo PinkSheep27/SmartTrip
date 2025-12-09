@@ -141,8 +141,12 @@ export default function LiveCart({
                 {item.category === "Attraction"
                   ? "~$25"
                   : item.category === "Restaurant"
-                  ? "~$50–$100"
-                  : `$${item.data.price}`}
+                  ? item.data.price === "$"
+                    ? "~$10–$25"
+                    : item.data.price === "$$"
+                    ? "~$25–$50"
+                    : "~$50–$100"
+                  : ""}
               </div>
               <button
                 onClick={() => deleteItem(item.id)}
