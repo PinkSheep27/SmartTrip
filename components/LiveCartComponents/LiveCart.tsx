@@ -127,11 +127,13 @@ export default function LiveCart({
                 </p>
                 <p className="text-xs text-gray-500 capitalize">
                   {/* Updated display logic for hotels */}
-                  {item.category === 'flight' 
+                  {item.category === "flight"
                     ? `${item.data.departAirport} → ${item.data.arriveAirport}`
-                    : (item.category === 'hotel' && item.data.nights)
-                      ? `${item.data.nights} night${item.data.nights > 1 ? 's' : ''}`
-                      : item.category}
+                    : item.category === "hotel" && item.data.nights
+                    ? `${item.data.nights} night${
+                        item.data.nights > 1 ? "s" : ""
+                      }`
+                    : item.category}
                 </p>
               </div>
 
@@ -139,8 +141,12 @@ export default function LiveCart({
                 {item.category === "Attraction"
                   ? "~$25"
                   : item.category === "Restaurant"
-                  ? "~$50–$100"
-                  : `$${item.data.price}`}
+                  ? item.data.price === "$"
+                    ? "~$10–$25"
+                    : item.data.price === "$$"
+                    ? "~$25–$50"
+                    : "~$50–$100"
+                  : ""}
               </div>
               <button
                 onClick={() => deleteItem(item.id)}
