@@ -10,26 +10,35 @@ async function main() {
   console.log("Seeding database...");
 
   // 1. Create Two Users (The Owner and The Friend)
-  const [owner] = await db.insert(users).values({
-    email: "ivan@smarttrip.com",
-    name: "Ivan (Owner)",
-  }).returning();
+  const [owner] = await db
+    .insert(users)
+    .values({
+      email: "ivan@smarttrip.com",
+      name: "Ivan (Owner)",
+    })
+    .returning();
 
-  const [friend] = await db.insert(users).values({
-    email: "aaron@smarttrip.com",
-    name: "Aaron (Friend)",
-  }).returning();
+  const [friend] = await db
+    .insert(users)
+    .values({
+      email: "aaron@smarttrip.com",
+      name: "Aaron (Friend)",
+    })
+    .returning();
 
   console.log(`Created users: ${owner.name} & ${friend.name}`);
 
   // 2. Create a Trip (Owned by Ivan)
-  const [trip] = await db.insert(trips).values({
-    name: "Tech Summit in NYC",
-    destination: "New York, NY",
-    startDate: "2024-11-10",
-    endDate: "2024-11-15",
-    userId: owner.id,
-  }).returning();
+  const [trip] = await db
+    .insert(trips)
+    .values({
+      name: "Tech Summit in NYC",
+      destination: "New York, NY",
+      startDate: "2024-11-10",
+      endDate: "2024-11-15",
+      userId: owner.id,
+    })
+    .returning();
 
   console.log(`Created trip: ${trip.name}`);
 
@@ -50,14 +59,17 @@ async function main() {
   console.log(`Linked users to trip`);
 
   // 4. Create a Cart for the trip
-  const [cart] = await db.insert(carts).values({
-    tripId: trip.id,
-  }).returning();
+  const [cart] = await db
+    .insert(carts)
+    .values({
+      tripId: trip.id,
+    })
+    .returning();
 
   // 5. Add items to the cart
   await db.insert(cartItems).values([
     {
-      cartId: cart.id,
+      cartId: cart.id.toString(),
       category: "flight",
       externalId: "FL-123",
       data: {
@@ -66,11 +78,11 @@ async function main() {
         departure: "SFO",
         arrival: "JFK",
         price: 450,
-        departureTime: "2024-11-10T08:00:00Z"
-      }
+        departureTime: "2024-11-10T08:00:00Z",
+      },
     },
     {
-      cartId: cart.id,
+      cartId: cart.id.toString(),
       category: "hotel",
       externalId: "HT-999",
       data: {
@@ -78,9 +90,9 @@ async function main() {
         checkIn: "2024-11-10",
         checkOut: "2024-11-15",
         price: 1200,
-        rating: 5
-      }
-    }
+        rating: 5,
+      },
+    },
   ]);
 
   console.log("Database seeded successfully!");

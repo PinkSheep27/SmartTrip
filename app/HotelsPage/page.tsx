@@ -250,34 +250,14 @@ function HotelsPage() {
   // ---------------------------------------------------------
   async function addToCart(hotel: Hotels) {
     try {
-      // Calculate total nights
-      const start = new Date(checkIn);
-      const end = new Date(checkOut);
-      const nights = differenceInCalendarDays(end, start);
-      
-      // Safety check: ensure at least 1 night is counted
-      const validNights = nights > 0 ? nights : 1;
-      
-      // Calculate Total Price
-      const totalPrice = hotel.price * validNights;
-
-      // Send to API
       const response = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartId: 1, // Hardcoded for now
-          category: "hotel",
-          externalId: hotel.id,
-          data: {
-            ...hotel,
-            price: totalPrice,       // Store the TOTAL price for the cart to display
-            pricePerNight: hotel.price, // Keep original nightly rate for reference
-            nights: validNights,
-            checkInDate: checkIn,
-            checkOutDate: checkOut,
-            guests: guests
-          },
+          cartId: 1,
+          category: "Hotel",
+          externalId: event.id,
+          data: event,
         }),
       });
 
@@ -286,11 +266,10 @@ function HotelsPage() {
         throw new Error(errorData.error || "Failed to add to cart");
       }
 
-      alert(`✅ Added ${hotel.name} to your itinerary for $${totalPrice} (${validNights} nights)!`);
-      
+      alert("✅ Hotel added to cart!");
     } catch (error) {
-      console.error("Error adding hotel:", error);
-      alert("❌ Error adding hotel. Check console.");
+      console.log(error);
+      alert("❌ Error adding Hotel. Check console.");
     }
   }
 

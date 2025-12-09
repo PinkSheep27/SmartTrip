@@ -20,12 +20,14 @@ export async function POST(request: NextRequest) {
     // Insert into Supabase via Drizzle
     const [newItem] = await db
       .insert(cartItems)
-      .values({
-        cartId,
-        category,
-        externalId,
-        data,
-      })
+      .values([
+        {
+          cartId,
+          category,
+          externalId,
+          data,
+        },
+      ])
       .returning();
 
     return NextResponse.json({ success: true, item: newItem });
@@ -45,10 +47,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Missing item ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing item ID" }, { status: 400 });
     }
 
     // Delete from Supabase via Drizzle

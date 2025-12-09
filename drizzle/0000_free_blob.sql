@@ -1,6 +1,6 @@
 CREATE TABLE "cart_items" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"cart_id" integer NOT NULL,
+	"cart_id" text NOT NULL,
 	"category" text NOT NULL,
 	"external_id" text,
 	"data" jsonb NOT NULL,
