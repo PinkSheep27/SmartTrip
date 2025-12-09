@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Star, Wifi, Users, Calendar, Search } from "lucide-react";
+import { differenceInCalendarDays } from "date-fns";
 
 interface Hotels {
   id: string;
@@ -244,7 +245,10 @@ function HotelsPage() {
     guests,
   ]);
 
-  async function addToCart(event: Hotels) {
+  // ---------------------------------------------------------
+  // NEW: Add to Cart Functionality (Updated for Total Price)
+  // ---------------------------------------------------------
+  async function addToCart(hotel: Hotels) {
     try {
       const response = await fetch("/api/cart", {
         method: "POST",

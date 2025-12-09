@@ -126,9 +126,12 @@ export default function LiveCart({
                     : item.data.name}
                 </p>
                 <p className="text-xs text-gray-500 capitalize">
-                  {item.category === "flight"
+                  {/* Updated display logic for hotels */}
+                  {item.category === 'flight' 
                     ? `${item.data.departAirport} → ${item.data.arriveAirport}`
-                    : item.category}
+                    : (item.category === 'hotel' && item.data.nights)
+                      ? `${item.data.nights} night${item.data.nights > 1 ? 's' : ''}`
+                      : item.category}
                 </p>
               </div>
 
