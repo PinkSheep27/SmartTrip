@@ -40,7 +40,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
+      if (window.scrollY > 200) {
         setScrolled(true);
       } else {
         setScrolled(false);

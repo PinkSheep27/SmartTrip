@@ -45,10 +45,22 @@ export const participants = pgTable("participants", {
   pk: primaryKey(t.userId, t.tripId),
 }));
 
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  tripId: integer("trip_id").notNull().references(() => trips.id, { onDelete: 'cascade' }),
+  title: text("title").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  description: text("description"),
+  location: text("location"),
+  category: text("category").default('activity'), // e.g. flight, hotel, food
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 
 export const usersRelations = relations(users, ({ many }) => ({
-  ownedTrips: many(trips), // Trips they created
-  sharedTrips: many(participants), // Trips they were invited to
+  ownedTrips: many(trips),
+  sharedTrips: many(participants),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
@@ -57,7 +69,15 @@ export const tripsRelations = relations(trips, ({ one, many }) => ({
     references: [users.id],
   }),
   carts: many(carts),
-  participants: many(participants), // List of everyone on the trip
+  participants: many(participants),
+  events: many(events),
+}));
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  trip: one(trips, {
+    fields: [events.tripId],
+    references: [trips.id],
+  }),
 }));
 
 export const participantsRelations = relations(participants, ({ one }) => ({
