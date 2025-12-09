@@ -82,26 +82,24 @@ const Navbar: React.FC = () => {
     },
   ];
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-
   return (
     <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-6xl mt-6 px-6">
-      <div className="bg-white shadow-lg rounded-full px-6 py-4 w-full">
+      <div className="bg-white shadow-lg rounded-full px-6 py-3 w-full border border-gray-100">
         <div className="flex items-center justify-between">
+          
+          {/* Logo Section */}
           <div className="flex items-center space-x-3">
             <Link href="/">
               <Image
                 src={smartTripLogo}
                 alt="SmartTrip Logo"
-                className="h-10 w-auto cursor-pointer"
+                className="h-10 w-auto cursor-pointer hover:opacity-90 transition-opacity"
               />
             </Link>
           </div>
 
-          <ul className="hidden md:flex items-center space-x-8 text-gray-700 font-medium">
+          {/* Navigation Links */}
+          <ul className="hidden lg:flex items-center space-x-8 text-gray-600 font-medium">
             {navLinks.map((link) => (
               <li
                 key={link.label}
@@ -110,7 +108,7 @@ const Navbar: React.FC = () => {
               >
                 <Link
                   href={link.href}
-                  className="flex items-center space-x-1 hover:text-teal-500 transition-colors"
+                  className="flex items-center space-x-1.5 hover:text-[#94C3D2] transition-colors"
                 >
                   <Image
                     src={
@@ -129,54 +127,47 @@ const Navbar: React.FC = () => {
             ))}
           </ul>
 
-          <div className="flex items-center space-x-4">
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2">
+            
+            {/* Cart Icon - Always visible if user is logged in */}
             {user && (
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
-                className={`relative p-2 rounded-full transition-all cursor-pointer ${
-                  isCartOpen ? "bg-gray-100 rotate-90" : "hover:bg-gray-50"
+                className={`relative p-2.5 rounded-full transition-all cursor-pointer ${
+                  isCartOpen ? "bg-gray-100 text-black" : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
                 }`}
               >
                 {isCartOpen ? (
-                  <X className="w-6 h-6 text-gray-600" />
+                  <X className="w-5 h-5" />
                 ) : (
-                  <ShoppingCart className="w-6 h-6 text-gray-600" />
+                  <ShoppingCart className="w-5 h-5" />
                 )}
               </button>
             )}
 
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="h-6 w-px bg-gray-200 mx-2 hidden md:block"></div>
+
+            {/* Auth Section */}
+            <div className="flex items-center">
               {loading ? (
-                <div className="px-5 py-2 text-gray-500">...</div>
+                <div className="px-4 py-2 text-gray-400 text-sm">Loading...</div>
               ) : !user ? (
-                <>
+                <div className="flex items-center gap-2">
                   <LoginButton />
                   <SignUpButton />
-                </>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <Link
-                    href="/Profile"
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                  >
-                    <Profile user={user} />
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 text-sm text-red-500 border border-red-200 rounded-full hover:bg-red-50 cursor-pointer"
-                  >
-                    Log Out
-                  </button>
                 </div>
+              ) : (
+                /* Profile Component now handles the dropdown logic */
+                <Profile user={user} />
               )}
             </div>
           </div>
         </div>
 
+        {/* Live Cart Overlay */}
         {user && isCartOpen && (
-          <div className="absolute top-24 right-0 w-96 z-50 animate-in fade-in slide-in-from-top-5 duration-200">
-            {/* Hardcoded for now - update for real items */}
+          <div className="absolute top-20 right-0 w-96 z-50 animate-in fade-in slide-in-from-top-5 duration-200">
             <LiveCart cartId={1} onClose={() => setIsCartOpen(false)} />
           </div>
         )}
