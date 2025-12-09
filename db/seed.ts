@@ -67,33 +67,33 @@ async function main() {
     .returning();
 
   // 5. Add items to the cart
-  // await db.insert(cartItems).values([
-  //   {
-  //     cartId: cart.id,
-  //     category: "flight",
-  //     externalId: "FL-123",
-  //     data: {
-  //       airline: "Delta",
-  //       flightNumber: "DL404",
-  //       departure: "SFO",
-  //       arrival: "JFK",
-  //       price: 450,
-  //       departureTime: "2024-11-10T08:00:00Z"
-  //     }
-  //   },
-  //   {
-  //     cartId: cart.id,
-  //     category: "hotel",
-  //     externalId: "HT-999",
-  //     data: {
-  //       name: "The Plaza",
-  //       checkIn: "2024-11-10",
-  //       checkOut: "2024-11-15",
-  //       price: 1200,
-  //       rating: 5
-  //     }
-  //   }
-  // ]);
+  await db.insert(cartItems).values([
+    {
+      cartId: cart.id.toString(),
+      category: "flight",
+      externalId: "FL-123",
+      data: {
+        airline: "Delta",
+        flightNumber: "DL404",
+        departure: "SFO",
+        arrival: "JFK",
+        price: 450,
+        departureTime: "2024-11-10T08:00:00Z",
+      },
+    },
+    {
+      cartId: cart.id.toString(),
+      category: "hotel",
+      externalId: "HT-999",
+      data: {
+        name: "The Plaza",
+        checkIn: "2024-11-10",
+        checkOut: "2024-11-15",
+        price: 1200,
+        rating: 5,
+      },
+    },
+  ]);
 
   console.log("Database seeded successfully!");
   process.exit(0);
