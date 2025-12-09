@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Star, Wifi, Users, Calendar, Search } from "lucide-react";
+import { differenceInCalendarDays } from "date-fns";
 
 interface Hotels {
   id: string;
@@ -244,11 +245,52 @@ function HotelsPage() {
     guests,
   ]);
 
-  async function addToCart(event: Hotels) {
+  // ---------------------------------------------------------
+  // NEW: Add to Cart Functionality (Updated for Total Price)
+  // ---------------------------------------------------------
+  async function addToCart(hotel: Hotels) {
     try {
-      //Call API to add to db, live cart update
+      // Calculate total nights
+      const start = new Date(checkIn);
+      const end = new Date(checkOut);
+      const nights = differenceInCalendarDays(end, start);
+      
+      // Safety check: ensure at least 1 night is counted
+      const validNights = nights > 0 ? nights : 1;
+      
+      // Calculate Total Price
+      const totalPrice = hotel.price * validNights;
+
+      // Send to API
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: 1, // Hardcoded for now
+          category: "hotel",
+          externalId: hotel.id,
+          data: {
+            ...hotel,
+            price: totalPrice,       // Store the TOTAL price for the cart to display
+            pricePerNight: hotel.price, // Keep original nightly rate for reference
+            nights: validNights,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
+            guests: guests
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add to cart");
+      }
+
+      alert(`✅ Added ${hotel.name} to your itinerary for $${totalPrice} (${validNights} nights)!`);
+      
     } catch (error) {
-      console.log(error);
+      console.error("Error adding hotel:", error);
+      alert("❌ Error adding hotel. Check console.");
     }
   }
 
