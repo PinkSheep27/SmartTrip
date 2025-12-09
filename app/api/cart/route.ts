@@ -45,10 +45,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Missing item ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing item ID" }, { status: 400 });
     }
 
     // Delete from Supabase via Drizzle

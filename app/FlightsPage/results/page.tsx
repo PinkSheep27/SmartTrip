@@ -2,26 +2,28 @@
 
 import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import AutocompleteInput, { Suggestion } from '@/components/FlightComponents/AutocompleteInput';
+import AutocompleteInput, {
+  Suggestion,
+} from "@/components/FlightComponents/AutocompleteInput";
 import FlightSelectionModal from "@/components/FlightComponents/FlightSelectionModal";
 
 const airlineLookup: { [code: string]: string } = {
-  "AA": "American Airlines",
-  "AS": "Alaska Airlines",
-  "B6": "JetBlue Airways",
-  "DL": "Delta Air Lines",
-  "F9": "Frontier Airlines",
-  "HA": "Hawaiian Airlines",
-  "NK": "Spirit Airlines",
-  "OO": "SkyWest Airlines",
-  "UA": "United Airlines",
-  "WN": "Southwest Airlines",
-  "YX": "Republic Airline",
-  "EV": "ExpressJet Airlines",
-  "MQ": "Envoy Air",
+  AA: "American Airlines",
+  AS: "Alaska Airlines",
+  B6: "JetBlue Airways",
+  DL: "Delta Air Lines",
+  F9: "Frontier Airlines",
+  HA: "Hawaiian Airlines",
+  NK: "Spirit Airlines",
+  OO: "SkyWest Airlines",
+  UA: "United Airlines",
+  WN: "Southwest Airlines",
+  YX: "Republic Airline",
+  EV: "ExpressJet Airlines",
+  MQ: "Envoy Air",
   "9E": "Endeavor Air",
-  "G7": "GoJet Airlines",
-  "OH": "PSA Airlines",
+  G7: "GoJet Airlines",
+  OH: "PSA Airlines",
   // add more codes as needed
 };
 
@@ -34,7 +36,7 @@ type Flight = {
   price: number | string;
 };
 
-//Debounce 
+//Debounce
 const debounce = (func: Function, delay: number) => {
   let timeoutId: NodeJS.Timeout;
   return (...args: any) => {
@@ -57,14 +59,17 @@ const FlightResultsContent: React.FC = () => {
   const [tripTypeState, setTripTypeState] = React.useState(tripType);
   const [departingState, setDepartingState] = React.useState(departing);
   const [arrivingState, setArrivingState] = React.useState(arriving);
-  const [departureDateState, setDepartureDateState] = React.useState(departureDate);
+  const [departureDateState, setDepartureDateState] =
+    React.useState(departureDate);
   const [returnDateState, setReturnDateState] = React.useState(returnDate);
 
   const [Flights, setFlights] = React.useState<Flight[]>([]);
-  const [page, setPage] = React.useState(1);          // current page
+  const [page, setPage] = React.useState(1); // current page
   const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
   const [loading, setLoading] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("")
+  const [sortBy, setSortBy] = React.useState<
+    "" | "price" | "departure" | "duration" | "airline"
+  >("");
   const [airlineFilter, setAirlineFilter] = React.useState("");
 
   //Modal States
@@ -84,15 +89,23 @@ const FlightResultsContent: React.FC = () => {
   const today = new Date().toISOString().split("T")[0];
 
   type Suggestion = { code: string; name: string; type: string };
-  const [departingSuggestions, setDepartingSuggestions] = React.useState<Suggestion[]>([]);
-  const [arrivingSuggestions, setArrivingSuggestions] = React.useState<Suggestion[]>([]);
-  const [focusedInput, setFocusedInput] = React.useState<"departing" | "arriving" | null>(null);
+  const [departingSuggestions, setDepartingSuggestions] = React.useState<
+    Suggestion[]
+  >([]);
+  const [arrivingSuggestions, setArrivingSuggestions] = React.useState<
+    Suggestion[]
+  >([]);
+  const [focusedInput, setFocusedInput] = React.useState<
+    "departing" | "arriving" | null
+  >(null);
 
   // Function to fetch suggestions (Debounced)
   const fetchSuggestions = React.useCallback(
     debounce(async (keyword: string, inputType: "departing" | "arriving") => {
       if (keyword.length < 2) {
-        inputType === "departing" ? setDepartingSuggestions([]) : setArrivingSuggestions([]);
+        inputType === "departing"
+          ? setDepartingSuggestions([])
+          : setArrivingSuggestions([]);
         return;
       }
 
@@ -100,9 +113,11 @@ const FlightResultsContent: React.FC = () => {
         const res = await fetch(`/api/airportAutocomplete?keyword=${keyword}`);
         const data = await res.json();
 
-        const setSuggestions = inputType === "departing" ? setDepartingSuggestions : setArrivingSuggestions;
+        const setSuggestions =
+          inputType === "departing"
+            ? setDepartingSuggestions
+            : setArrivingSuggestions;
         setSuggestions(data.suggestions || []);
-
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
@@ -111,7 +126,10 @@ const FlightResultsContent: React.FC = () => {
   );
 
   // Handle change for the input fields (calls fetchSuggestions)
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, inputType: "departing" | "arriving") => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    inputType: "departing" | "arriving"
+  ) => {
     const value = e.target.value;
 
     if (inputType === "departing") {
@@ -127,7 +145,10 @@ const FlightResultsContent: React.FC = () => {
   };
 
   // Handle selecting a suggestion (sets the IATA code)
-  const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
+  const handleSelectSuggestion = (
+    suggestion: Suggestion,
+    inputType: "departing" | "arriving"
+  ) => {
     // Set the state to the IATA code (e.g., "JFK")
     const code = suggestion.code;
 
@@ -141,7 +162,9 @@ const FlightResultsContent: React.FC = () => {
     setFocusedInput(null); // Clear focus
   };
 
-  const filteredFlights = Flights.filter(f => airlineFilter === "" || f.airline === airlineFilter);
+  const filteredFlights = Flights.filter(
+    (f) => airlineFilter === "" || f.airline === airlineFilter
+  );
   const sortedFlights = sortFlights(Flights, sortBy);
 
   function formatShortDate(dateString: string) {
@@ -169,7 +192,7 @@ const FlightResultsContent: React.FC = () => {
     const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
     const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
 
-    let formatted = '';
+    let formatted = "";
     if (hours > 0) {
       formatted += `${hours} hr`;
     }
@@ -177,7 +200,7 @@ const FlightResultsContent: React.FC = () => {
       formatted += formatted.length > 0 ? ` ${minutes} min` : `${minutes} min`;
     }
 
-    return formatted || 'Unknown duration';
+    return formatted || "Unknown duration";
   }
 
   //Add to Cart stuff
@@ -192,7 +215,7 @@ const FlightResultsContent: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartId: 1, // Hardcoded to 1 for testing (matches the LiveCart default)
-          category: "flight",
+          category: "Flight",
           externalId: uniqueId,
           data: flight, // Sending the full flight object
         }),
@@ -233,15 +256,19 @@ const FlightResultsContent: React.FC = () => {
       const searchParams = new URLSearchParams(query);
 
       try {
-        const res = await fetch(`/api/searchFlights?${searchParams.toString()}`);
+        const res = await fetch(
+          `/api/searchFlights?${searchParams.toString()}`
+        );
         const data = await res.json();
 
-        const newFlights: Flight[] = (data.flights || []).map((flight: any) => ({
-          ...flight,
-          airline: airlineLookup[flight.airline] || flight.airline,
-        }));
+        const newFlights: Flight[] = (data.flights || []).map(
+          (flight: any) => ({
+            ...flight,
+            airline: airlineLookup[flight.airline] || flight.airline,
+          })
+        );
 
-        setFlights(prev => reset ? newFlights : [...prev, ...newFlights]);
+        setFlights((prev) => (reset ? newFlights : [...prev, ...newFlights]));
         setHasMore(newFlights.length > 0);
       } catch (err) {
         console.error("Error fetching flights:", err);
@@ -253,7 +280,14 @@ const FlightResultsContent: React.FC = () => {
     }
 
     fetchFlights(page === 1); //reset if on first page
-  }, [tripTypeState, departingState, arrivingState, departureDateState, returnDateState, page]);
+  }, [
+    tripTypeState,
+    departingState,
+    arrivingState,
+    departureDateState,
+    returnDateState,
+    page,
+  ]);
 
   function sortFlights(flights: Flight[], sortBy: string) {
     if (sortBy === "") return flights;
@@ -292,11 +326,10 @@ const FlightResultsContent: React.FC = () => {
     return sorted;
   }
 
-  const uniqueAirlines = Array.from(new Set(Flights.map(f => f.airline)));
+  const uniqueAirlines = Array.from(new Set(Flights.map((f) => f.airline)));
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pt-40">
-
       {/* Top Filter / Info Bar */}
       <div className="bg-white shadow-md rounded-xl p-4 flex justify-around items-center m-6">
         <div className="flex flex-col items-center">
@@ -304,12 +337,10 @@ const FlightResultsContent: React.FC = () => {
           <span className="text-lg">{departingState}</span>
         </div>
 
-
         <div className="flex flex-col items-center">
           <span className="font-semibold text-gray-600">To:</span>
           <span className="text-lg">{arrivingState}</span>
         </div>
-
 
         <div className="flex flex-col items-center">
           <span className="font-semibold text-gray-600">Depart:</span>
@@ -326,7 +357,6 @@ const FlightResultsContent: React.FC = () => {
 
       {/* Editable Departure / Arrival Inputs */}
       <div className="flex justify-center space-x-4 mb-6">
-
         {/* DEPARTING INPUT */}
         <AutocompleteInput
           value={departingState}
@@ -358,7 +388,7 @@ const FlightResultsContent: React.FC = () => {
         <input
           type="date"
           value={departureDateState}
-          onChange={e => setDepartureDateState(e.target.value)}
+          onChange={(e) => setDepartureDateState(e.target.value)}
           className="border rounded px-3 py-1"
           min={today}
         />
@@ -366,7 +396,7 @@ const FlightResultsContent: React.FC = () => {
           <input
             type="date"
             value={returnDateState}
-            onChange={e => setReturnDateState(e.target.value)}
+            onChange={(e) => setReturnDateState(e.target.value)}
             className="border rounded px-3 py-1"
             min={departureDateState || today}
           />
@@ -406,7 +436,6 @@ const FlightResultsContent: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-1">
-
         {/* Sort & Filter Bar */}
         <div className="flex flex-col items-center mb-6">
           <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
@@ -431,7 +460,9 @@ const FlightResultsContent: React.FC = () => {
             >
               <option value="">All</option>
               {uniqueAirlines.map((airline) => (
-                <option key={airline} value={airline}>{airline}</option>
+                <option key={airline} value={airline}>
+                  {airline}
+                </option>
               ))}
             </select>
           </div>
@@ -439,7 +470,6 @@ const FlightResultsContent: React.FC = () => {
 
         {/* Flight Cards Section */}
         <div className="flex-1 m-6 space-y-6">
-
           {Flights.length === 0 && !loading && (
             <p className="text-gray-600 text-lg">No flights found.</p>
           )}
@@ -461,7 +491,6 @@ const FlightResultsContent: React.FC = () => {
                   <span className="font-medium">{flight.arriveAirport}</span>
                 </p>
 
-
                 <p className="text-sm font-semibold text-gray-700">
                   {formatDuration(flight.duration)}
                 </p>
@@ -474,14 +503,15 @@ const FlightResultsContent: React.FC = () => {
 
               {/* RIGHT: Price + Button */}
               <div className="text-right">
-                <p className="text-2xl font-bold text-blue-600">${flight.price}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  ${flight.price}
+                </p>
                 <button
                   onClick={() => handleSelectTicket(flight)}
                   className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
                 >
                   Select
                 </button>
-
               </div>
             </div>
           ))}
@@ -490,7 +520,7 @@ const FlightResultsContent: React.FC = () => {
           {hasMore && (
             <div className="flex justify-center mt-4">
               <button
-                onClick={() => setPage(prev => prev + 1)}
+                onClick={() => setPage((prev) => prev + 1)}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
                 disabled={loading}
               >
@@ -498,7 +528,6 @@ const FlightResultsContent: React.FC = () => {
               </button>
             </div>
           )}
-
         </div>
       </div>
 
@@ -515,7 +544,11 @@ const FlightResultsContent: React.FC = () => {
 
 const FlightResultsPage: React.FC = () => {
   return (
-    <Suspense fallback={<div className="p-10 text-center">Loading search results...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-10 text-center">Loading search results...</div>
+      }
+    >
       <FlightResultsContent />
     </Suspense>
   );

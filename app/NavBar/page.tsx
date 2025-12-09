@@ -63,12 +63,6 @@ const Navbar: React.FC = () => {
       iconFilled: hotelsIconFilledImg,
     },
     {
-      href: "#",
-      label: "Cars",
-      iconOutlined: carsIconOutlinedImg,
-      iconFilled: carsIconFilledImg,
-    },
-    {
       href: "/ExperiencePage",
       label: "Experiences",
       iconOutlined: experiencesIconOutlinedImg,
@@ -86,7 +80,6 @@ const Navbar: React.FC = () => {
     <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-6xl mt-6 px-6">
       <div className="bg-white shadow-lg rounded-full px-6 py-3 w-full border border-gray-100">
         <div className="flex items-center justify-between">
-          
           {/* Logo Section */}
           <div className="flex items-center space-x-3">
             <Link href="/">
@@ -129,13 +122,14 @@ const Navbar: React.FC = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2">
-            
             {/* Cart Icon - Always visible if user is logged in */}
             {user && (
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
                 className={`relative p-2.5 rounded-full transition-all cursor-pointer ${
-                  isCartOpen ? "bg-gray-100 text-black" : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
+                  isCartOpen
+                    ? "bg-gray-100 text-black"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
                 }`}
               >
                 {isCartOpen ? (
@@ -151,7 +145,9 @@ const Navbar: React.FC = () => {
             {/* Auth Section */}
             <div className="flex items-center">
               {loading ? (
-                <div className="px-4 py-2 text-gray-400 text-sm">Loading...</div>
+                <div className="px-4 py-2 text-gray-400 text-sm">
+                  Loading...
+                </div>
               ) : !user ? (
                 <div className="flex items-center gap-2">
                   <LoginButton />

@@ -244,11 +244,36 @@ function HotelsPage() {
     guests,
   ]);
 
+  function smallCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash * 31 + str.charCodeAt(i)) % 10000;
+    }
+    return hash;
+  }
+
   async function addToCart(event: Hotels) {
     try {
-      //Call API to add to db, live cart update
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: 1,
+          category: "Hotel",
+          externalId: event.id,
+          data: event,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add to cart");
+      }
+
+      alert("✅ Hotel added to cart!");
     } catch (error) {
       console.log(error);
+      alert("❌ Error adding Hotel. Check console.");
     }
   }
 

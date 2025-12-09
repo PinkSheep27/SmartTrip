@@ -81,9 +81,26 @@ export default function ExperiencePage() {
 
   async function addToCart(event: Attractions) {
     try {
-      //Call API to add to db, live cart update
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: 1, // Hardcoded to 1 for testing (matches the LiveCart default)
+          category: "Attraction",
+          externalId: event.id,
+          data: event, // Sending the full flight object
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add to cart");
+      }
+
+      alert("✅ Event added to cart!");
     } catch (error) {
       console.log(error);
+      alert("❌ Error adding Experience. Check console.");
     }
   }
 

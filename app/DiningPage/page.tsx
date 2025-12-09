@@ -87,11 +87,28 @@ export default function DiningSelection() {
     }
   };
 
-  async function addToCart(rest: Restaurant) {
+  async function addToCart(event: Restaurant) {
     try {
-      //Call API to add to db, live cart update
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartId: 1,
+          category: "Restaurant",
+          externalId: event.id,
+          data: event,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add to cart");
+      }
+
+      alert("✅ Restuaurant added to cart!");
     } catch (error) {
       console.log(error);
+      alert("❌ Error adding Restaurant. Check console.");
     }
   }
 

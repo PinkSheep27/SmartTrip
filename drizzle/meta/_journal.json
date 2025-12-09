@@ -8,6 +8,27 @@
       "when": 1765260367405,
       "tag": "0000_free_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765307024124,
+      "tag": "0001_modern_strong_guy",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765307191134,
+      "tag": "0002_perpetual_mister_sinister",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765307355534,
+      "tag": "0003_wakeful_cargill",
+      "breakpoints": true
     }
   ]
 }
