@@ -248,7 +248,7 @@ function HotelsPage() {
   // ---------------------------------------------------------
   // NEW: Add to Cart Functionality (Updated for Total Price)
   // ---------------------------------------------------------
-  async function addToCart(hotel: Hotels) {
+  async function addToCart(event: Hotels) {
     try {
       const response = await fetch("/api/cart", {
         method: "POST",
