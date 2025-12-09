@@ -127,11 +127,13 @@ export default function LiveCart({
                 </p>
                 <p className="text-xs text-gray-500 capitalize">
                   {/* Updated display logic for hotels */}
-                  {item.category === 'flight' 
+                  {item.category === "flight"
                     ? `${item.data.departAirport} → ${item.data.arriveAirport}`
-                    : (item.category === 'hotel' && item.data.nights)
-                      ? `${item.data.nights} night${item.data.nights > 1 ? 's' : ''}`
-                      : item.category}
+                    : item.category === "hotel" && item.data.nights
+                    ? `${item.data.nights} night${
+                        item.data.nights > 1 ? "s" : ""
+                      }`
+                    : item.category}
                 </p>
               </div>
 
@@ -161,7 +163,7 @@ export default function LiveCart({
               Total
               <span className="text-gray-600 text-xs">
                 {" "}
-                (Excluding Dining and Experience)
+                (Excluding Dining and Experiences)
               </span>
             </span>
             <span className="text-xl font-bold text-gray-900">
