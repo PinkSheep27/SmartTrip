@@ -244,14 +244,6 @@ function HotelsPage() {
     guests,
   ]);
 
-  function smallCode(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash * 31 + str.charCodeAt(i)) % 10000;
-    }
-    return hash;
-  }
-
   async function addToCart(event: Hotels) {
     try {
       const response = await fetch("/api/cart", {

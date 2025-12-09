@@ -20,12 +20,14 @@ export async function POST(request: NextRequest) {
     // Insert into Supabase via Drizzle
     const [newItem] = await db
       .insert(cartItems)
-      .values({
-        cartId,
-        category,
-        externalId,
-        data,
-      })
+      .values([
+        {
+          cartId,
+          category,
+          externalId,
+          data,
+        },
+      ])
       .returning();
 
     return NextResponse.json({ success: true, item: newItem });
