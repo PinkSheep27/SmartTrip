@@ -8,9 +8,25 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+    
+    // Exchange the code for a session
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (!error && data?.session) {
+      const response = NextResponse.redirect(`${origin}${next}`)
+      
+      // ✅ THIS BLOCK IS CRITICAL - IT SAVES THE COOKIE
+      if (data.session.provider_token) {
+        response.cookies.set('google_provider_token', data.session.provider_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 3600, // 1 hour
+          path: '/',
+        })
+      }
+      
+      return response
     }
   }
 

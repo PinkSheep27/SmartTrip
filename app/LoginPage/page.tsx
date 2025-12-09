@@ -32,13 +32,18 @@ function LoginForm() {
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${location.origin}/auth/callback`,
+      scopes: 'https://www.googleapis.com/auth/calendar.events.readonly',
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
       },
-    });
-  };
+    },
+  });
+};
 
   return (
     <div className="absolute inset-0 flex items-start justify-center pt-44">

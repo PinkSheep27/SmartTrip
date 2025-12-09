@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1764212293822,
-      "tag": "0000_gorgeous_celestials",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1764215615133,
-      "tag": "0001_oval_vision",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1764219050339,
-      "tag": "0002_third_chimera",
+      "when": 1765260367405,
+      "tag": "0000_free_blob",
       "breakpoints": true
     }
   ]

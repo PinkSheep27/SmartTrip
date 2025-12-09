@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ShoppingCart, Plane, Hotel, X } from "lucide-react";
+import { ShoppingCart, Plane, Hotel, X, Trash2 } from "lucide-react";
 
 type CartItem = {
   id: number;
@@ -46,6 +46,21 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
       supabase.removeChannel(channel);
     };
   }, [cartId]);
+
+  async function deleteItem(itemId: number) {
+    try {
+      setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+      
+      const res = await fetch(`/api/cart?id=${itemId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete item");
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Failed to remove item.");
+    }
+  }
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 w-full max-h-[80vh] overflow-y-auto flex flex-col">
@@ -93,16 +108,25 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
 
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 text-sm truncate">
-                  {item.data.airline 
-                    ? `${item.data.airline} to ${item.data.arrival}` 
-                    : item.data.name}
+                  {item.category === 'flight' ? item.data.airline : item.data.name}
                 </p>
-                <p className="text-xs text-gray-500 capitalize">{item.category}</p>
+                <p className="text-xs text-gray-500 capitalize">
+                  {item.category === 'flight' 
+                    ? `${item.data.departAirport} → ${item.data.arriveAirport}`
+                    : item.category}
+                </p>
               </div>
 
               <div className="font-bold text-gray-900 text-sm">
                 ${item.data.price}
               </div>
+              <button 
+                onClick={() => deleteItem(item.id)}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Remove item"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           ))
         )}
@@ -113,7 +137,7 @@ export default function LiveCart({ cartId, onClose }: { cartId: number; onClose?
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-500 font-medium">Total</span>
             <span className="text-xl font-bold text-gray-900">
-              ${items.reduce((acc, item) => acc + (Number(item.data.price) || 0), 0)}
+              ${items.reduce((acc, item) => acc + (Number(item.data.price) || 0), 0).toFixed(2)}
             </span>
           </div>
           <button className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95">

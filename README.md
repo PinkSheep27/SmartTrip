@@ -1,20 +1,19 @@
 # SmartTrip
 
 ## Overview
-A travel booking system that consolidates multiple travel services into a single platform using TypeScript, React, Tailwind, and AWS services.
+A travel booking system that consolidates multiple travel services into a single platform using TypeScript, React, Tailwind, Supabase and it's accompanying services.
 
 ## Problem Statement
  It’s annoying having to look through a bunch of different websites to find the best deals for flights, car rentals, hotels, and key places to visit.
 
 ## Technical Architecture
 - **Frontend**: React 18 with TypeScript
-- **Styling**: Tailwind CSS for responsive design
+- **Styling**: Tailwind CSS & Framer Motion
 - **Backend**: Next.js API routes with AWS Lambda
-- **Database**: PostgreSQL with Drizzle ORM
-- **Cloud**: AWS (S3, Lambda, Aurora DSQL)
-- **Testing**: Vitest with 70% coverage target
-- **Deployment**: GitHub Actions CI/CD
-- **Live Colaboration**: WebSocket
+- **Database**: Supabase with Drizzle ORM
+- **Authentication**: Supabase
+- **Deployment**: Vercel
+- **Live Colaboration**: Supabase
 
 ## Prerequisites
 - Node.js 18.17.0 or higher

@@ -40,7 +40,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
+      if (window.scrollY > 200) {
         setScrolled(true);
       } else {
         setScrolled(false);
@@ -80,13 +80,13 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <div className="absolute inset-0 flex items-start justify-center pt-44 z-20">
+      <div className="absolute inset-0 flex items-start justify-center pt-32 md:pt-44 z-20">
         <Image
           src={smartTripLogo}
           alt="SmartTrip Logo"
           width={500}
           height={100}
-          className="w-2/3 max-w-[50rem]"
+          className="w-4/5 md:w-2/3 max-w-[50rem]"
         />
       </div>
 
@@ -151,15 +151,18 @@ const HomePage: React.FC = () => {
         `}
       >
         <main className="
-          relative top-50 max-w-3/5 mx-auto 
-          text-white flex justify-between gap-8 mt-[50vh]
+          relative mx-auto 
+          w-11/12 md:max-w-4/5 lg:max-w-3/5
+          text-white flex flex-col md:flex-row justify-between gap-8 
+          mt-[60vh] md:mt-[60vh]
           ">
           <div className="
               relative 
               bg-[#94C3D2]/80 rounded-lg shadow-xl 
-              pt-10 pl-20 pr-20 pb-10 max-w-7/15
+              p-8 md:pt-10 md:pl-20 md:pr-20 md:pb-10
+              w-full md:flex-1
               overflow-auto text-left
-              min-h-75 
+              min-h-[300px] 
             ">
             <AnimatePresence mode="wait">
               <motion.div
@@ -172,10 +175,10 @@ const HomePage: React.FC = () => {
 
                 className="pb-10"
               >
-                <h1 className="text-blue-500 text-4xl font-bold mb-6">
+                <h1 className="text-blue-500 text-3xl md:text-4xl font-bold mb-6">
                   {currentHeader}
                 </h1>
-                <p className="text-gray-100 text-lg">
+                <p className="text-gray-100 text-base md:text-lg">
                   {currentText}
                 </p>
               </motion.div>
@@ -185,13 +188,13 @@ const HomePage: React.FC = () => {
               type="button"
               onClick={goBack}
               className="
-                    absolute top-1/2 -translate-y-1/2 left-4 
-                    w-12 h-12 bg-white rounded-full 
+                    absolute top-1/2 -translate-y-1/2 left-2 md:left-4 
+                    w-10 h-10 md:w-12 md:h-12 bg-white rounded-full 
                     flex items-center justify-center 
                     shadow-xl cursor-pointer"
               aria-label="Previous slide"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -200,20 +203,20 @@ const HomePage: React.FC = () => {
               type="button"
               onClick={goNext}
               className="
-                    absolute top-1/2 -translate-y-1/2 right-4 
-                    w-12 h-12 bg-white/90 rounded-full 
+                    absolute top-1/2 -translate-y-1/2 right-2 md:right-4 
+                    w-10 h-10 md:w-12 md:h-12 bg-white/90 rounded-full 
                     flex items-center justify-center 
                     shadow-xl cursor-pointer"
               aria-label="Next Slide"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
             <div className="
                 absolute flex justify-center
-                bottom-10 left-0 right-0
+                bottom-6 md:bottom-10 left-0 right-0
                 space-x-2
                 pointer-events-none "
             >
@@ -231,14 +234,15 @@ const HomePage: React.FC = () => {
 
           <div className="
               bg-[#94C3D2]/80 rounded-lg shadow-xl 
-              p-10 max-w-7/15
+              p-8 md:p-10 
+              w-full md:flex-1
               overflow-auto text-left
-              min-h-75
+              min-h-[300px]
             ">
-            <h1 className="text-blue-500 text-4xl font-bold mb-6">
+            <h1 className="text-blue-500 text-3xl md:text-4xl font-bold mb-6">
               Collaborative Planning
             </h1>
-            <p className="text-gray-100 text-lg">
+            <p className="text-gray-100 text-base md:text-lg">
               Planning for trips is, most of the time, a hassle; especially when you’re
               planning with multiple people who have different ideas of a fun trip.
               That’s where SmartTrip comes in. We get rid of the hassle having to message
@@ -247,21 +251,25 @@ const HomePage: React.FC = () => {
             </p>
           </div>
         </main>
+        
         <div className="
-        relative mx-auto max-w-3/5
-        text-white flex justify-between gap-8 mt-[20vh]
+          relative mx-auto 
+          w-11/12 md:max-w-4/5 lg:max-w-3/5
+          text-white flex justify-center gap-8 
+          mt-8 md:mt-16 mb-10
         ">
           <div className="
               relative 
               bg-[#94C3D2]/80 rounded-lg shadow-xl 
-              pt-10 pl-20 pr-20 pb-10
+              p-8 md:pt-10 md:pl-20 md:pr-20 md:pb-10
+              w-full
               overflow-auto text-left
-              min-h-75
+              min-h-[300px]
             ">
-            <h1 className="text-center text-blue-500 text-4xl font-bold mb-6">
+            <h1 className="text-center text-blue-500 text-3xl md:text-4xl font-bold mb-6">
               Mission Statement
             </h1>
-            <p className="text-center text-gray-100 text-lg">
+            <p className="text-center text-gray-100 text-base md:text-lg">
               At SmartTrip, our mission is to revolutionize the way the world travels together.
               We believe that while the journey is better shared, the planning process shouldn't drive
               you apart. For too long, group trips have been stifled by the chaos of scattered spreadsheets

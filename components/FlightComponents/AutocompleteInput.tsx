@@ -1,4 +1,3 @@
-// components/AutocompleteInput.tsx
 "use client";
 
 import React from 'react';
