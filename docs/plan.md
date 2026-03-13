@@ -35,7 +35,6 @@ Each user should have a profile page that others can visit.
 - Here the users should be able to see all the reviews the person made on places visited, 
 achievements, (TBD).
 
-
 ## Plane Tickets, Hotels, Car Rentals, Public Transportation*, Experiences*, Dining
 
 ### Details

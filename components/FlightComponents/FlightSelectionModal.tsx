@@ -69,14 +69,14 @@ const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onC
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 pt-16">
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer"
         onClick={onClose}
       />
 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 relative z-10">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-2xl"
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-2xl cursor-pointer"
         >&times;</button>
 
         <h2 className="text-3xl font-bold text-blue-600 mb-4 border-b pb-2">
@@ -98,7 +98,7 @@ const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onC
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value)))}
-              className="p-2 border rounded-lg w-20 text-center"
+              className="p-2 border rounded-lg w-20 text-center cursor-pointer"
             />
           </div>
 
@@ -109,7 +109,7 @@ const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onC
                 <button
                   key={option.type}
                   onClick={() => setSelectedClass(option)}
-                  className={`p-3 rounded-lg border transition-colors text-sm ${selectedClass.type === option.type
+                  className={`p-3 rounded-lg border transition-colors text-sm cursor-pointer ${selectedClass.type === option.type
                       ? "bg-blue-600 text-white border-blue-600"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                     }`}
@@ -128,7 +128,7 @@ const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onC
           {/* 4. Attach the handler to the button */}
           <button
             onClick={handleCheckout}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+            className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition cursor-pointer"
           >
             Proceed to Checkout
           </button>

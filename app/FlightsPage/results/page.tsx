@@ -2,41 +2,23 @@
 
 import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import AutocompleteInput, {
-  Suggestion,
-} from "@/components/FlightComponents/AutocompleteInput";
+import AutocompleteInput, { Suggestion } from "@/components/FlightComponents/AutocompleteInput";
 import FlightSelectionModal from "@/components/FlightComponents/FlightSelectionModal";
+import { Plane, Clock, PlaneTakeoff, PlaneLanding, Search } from "lucide-react";
 
 const airlineLookup: { [code: string]: string } = {
-  AA: "American Airlines",
-  AS: "Alaska Airlines",
-  B6: "JetBlue Airways",
-  DL: "Delta Air Lines",
-  F9: "Frontier Airlines",
-  HA: "Hawaiian Airlines",
-  NK: "Spirit Airlines",
-  OO: "SkyWest Airlines",
-  UA: "United Airlines",
-  WN: "Southwest Airlines",
-  YX: "Republic Airline",
-  EV: "ExpressJet Airlines",
-  MQ: "Envoy Air",
-  "9E": "Endeavor Air",
-  G7: "GoJet Airlines",
-  OH: "PSA Airlines",
-  // add more codes as needed
+  AA: "American Airlines", AS: "Alaska Airlines", B6: "JetBlue Airways",
+  DL: "Delta Air Lines", F9: "Frontier Airlines", HA: "Hawaiian Airlines",
+  NK: "Spirit Airlines", OO: "SkyWest Airlines", UA: "United Airlines",
+  WN: "Southwest Airlines", YX: "Republic Airline", EV: "ExpressJet Airlines",
+  MQ: "Envoy Air", "9E": "Endeavor Air", G7: "GoJet Airlines", OH: "PSA Airlines",
 };
 
 type Flight = {
-  airline: string;
-  departAirport: string;
-  arriveAirport: string;
-  departureTime: string;
-  duration: string;
-  price: number | string;
+  airline: string; departAirport: string; arriveAirport: string;
+  departureTime: string; duration: string; price: number | string;
 };
 
-//Debounce
 const debounce = (func: Function, delay: number) => {
   let timeoutId: NodeJS.Timeout;
   return (...args: any) => {
@@ -48,31 +30,25 @@ const debounce = (func: Function, delay: number) => {
 const FlightResultsContent: React.FC = () => {
   const params = useSearchParams();
 
-  //Initial Read Params from URL
   const tripType = params.get("tripType") || "";
   const departing = params.get("departing") || "";
   const arriving = params.get("arriving") || "";
   const departureDate = params.get("departureDate") || "";
   const returnDate = params.get("returnDate") || "";
 
-  // Editable state for user input
   const [tripTypeState, setTripTypeState] = React.useState(tripType);
   const [departingState, setDepartingState] = React.useState(departing);
   const [arrivingState, setArrivingState] = React.useState(arriving);
-  const [departureDateState, setDepartureDateState] =
-    React.useState(departureDate);
+  const [departureDateState, setDepartureDateState] = React.useState(departureDate);
   const [returnDateState, setReturnDateState] = React.useState(returnDate);
 
   const [Flights, setFlights] = React.useState<Flight[]>([]);
-  const [page, setPage] = React.useState(1); // current page
-  const [hasMore, setHasMore] = React.useState(true); // flag if more results exist
+  const [page, setPage] = React.useState(1);
+  const [hasMore, setHasMore] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState<
-    "" | "price" | "departure" | "duration" | "airline"
-  >("");
+  const [sortBy, setSortBy] = React.useState<"" | "price" | "departure" | "duration" | "airline">("");
   const [airlineFilter, setAirlineFilter] = React.useState("");
 
-  //Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
 
@@ -83,75 +59,46 @@ const FlightResultsContent: React.FC = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedFlight(null); // Clear the selected flight data
+    setSelectedFlight(null);
   };
-  // Get today's date in YYYY-MM-DD format for min attribute
+
   const today = new Date().toISOString().split("T")[0];
 
-  type Suggestion = { code: string; name: string; type: string };
-  const [departingSuggestions, setDepartingSuggestions] = React.useState<
-    Suggestion[]
-  >([]);
-  const [arrivingSuggestions, setArrivingSuggestions] = React.useState<
-    Suggestion[]
-  >([]);
-  const [focusedInput, setFocusedInput] = React.useState<
-    "departing" | "arriving" | null
-  >(null);
+  const [departingSuggestions, setDepartingSuggestions] = React.useState<Suggestion[]>([]);
+  const [arrivingSuggestions, setArrivingSuggestions] = React.useState<Suggestion[]>([]);
+  const [focusedInput, setFocusedInput] = React.useState<"departing" | "arriving" | null>(null);
 
-  // Function to fetch suggestions (Debounced)
   const fetchSuggestions = React.useCallback(
     debounce(async (keyword: string, inputType: "departing" | "arriving") => {
       if (keyword.length < 2) {
-        inputType === "departing"
-          ? setDepartingSuggestions([])
-          : setArrivingSuggestions([]);
+        inputType === "departing" ? setDepartingSuggestions([]) : setArrivingSuggestions([]);
         return;
       }
-
       try {
         const res = await fetch(`/api/airportAutocomplete?keyword=${keyword}`);
         const data = await res.json();
-
-        const setSuggestions =
-          inputType === "departing"
-            ? setDepartingSuggestions
-            : setArrivingSuggestions;
+        const setSuggestions = inputType === "departing" ? setDepartingSuggestions : setArrivingSuggestions;
         setSuggestions(data.suggestions || []);
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
-    }, 300), // 300ms debounce delay
-    []
+    }, 300), []
   );
 
-  // Handle change for the input fields (calls fetchSuggestions)
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    inputType: "departing" | "arriving"
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, inputType: "departing" | "arriving") => {
     const value = e.target.value;
-
     if (inputType === "departing") {
       setDepartingState(value);
-      setArrivingSuggestions([]); // Clear other list when typing in this one
+      setArrivingSuggestions([]);
     } else {
       setArrivingState(value);
-      setDepartingSuggestions([]); // Clear other list
+      setDepartingSuggestions([]);
     }
-
-    // Fetch suggestions with debounce
     fetchSuggestions(value, inputType);
   };
 
-  // Handle selecting a suggestion (sets the IATA code)
-  const handleSelectSuggestion = (
-    suggestion: Suggestion,
-    inputType: "departing" | "arriving"
-  ) => {
-    // Set the state to the IATA code (e.g., "JFK")
+  const handleSelectSuggestion = (suggestion: Suggestion, inputType: "departing" | "arriving") => {
     const code = suggestion.code;
-
     if (inputType === "departing") {
       setDepartingState(code);
       setDepartingSuggestions([]);
@@ -159,65 +106,41 @@ const FlightResultsContent: React.FC = () => {
       setArrivingState(code);
       setArrivingSuggestions([]);
     }
-    setFocusedInput(null); // Clear focus
+    setFocusedInput(null);
   };
 
-  const filteredFlights = Flights.filter(
-    (f) => airlineFilter === "" || f.airline === airlineFilter
-  );
-  const sortedFlights = sortFlights(Flights, sortBy);
+  const filteredFlights = Flights.filter((f) => airlineFilter === "" || f.airline === airlineFilter);
+  const sortedFlights = sortFlights(filteredFlights, sortBy);
 
   function formatShortDate(dateString: string) {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
   function formatTime(dateString: string) {
     const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-    });
-    // Example → "6:29 AM"
+    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   }
 
   function formatDuration(durationString: string): string {
-    // Matches '1H', '30M', etc.
     const hoursMatch = durationString.match(/(\d+)H/);
     const minutesMatch = durationString.match(/(\d+)M/);
-
     const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
     const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
-
     let formatted = "";
-    if (hours > 0) {
-      formatted += `${hours} hr`;
-    }
-    if (minutes > 0) {
-      formatted += formatted.length > 0 ? ` ${minutes} min` : `${minutes} min`;
-    }
-
+    if (hours > 0) formatted += `${hours} hr`;
+    if (minutes > 0) formatted += formatted.length > 0 ? ` ${minutes} min` : `${minutes} min`;
     return formatted || "Unknown duration";
   }
 
-  //Add to Cart stuff
-  //---------------BEGIN------------------------
   async function addToCart(flight: Flight) {
     try {
-      // Create a unique ID since one isn't provided by the simplified API response
       const uniqueId = `${flight.airline}-${flight.departAirport}-${flight.departureTime}`;
-
       const response = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartId: 1, // Hardcoded to 1 for testing (matches the LiveCart default)
-          category: "Flight",
-          externalId: uniqueId,
-          data: flight, // Sending the full flight object
+          cartId: 1, category: "Flight", externalId: uniqueId, data: flight,
         }),
       });
 
@@ -225,49 +148,35 @@ const FlightResultsContent: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to add to cart");
       }
-
       alert("✅ Flight added to cart!");
     } catch (error) {
       console.error("Error adding flight:", error);
       alert("❌ Error adding flight. Check console.");
     }
   }
-  //--------------------END--------------------------
+
   React.useEffect(() => {
     async function fetchFlights(reset = false) {
       if (loading) return;
       setLoading(true);
 
       const query: { [key: string]: string } = {
-        tripType: tripTypeState,
-        departing: departingState,
-        arriving: arrivingState,
-        departureDate: departureDateState,
-        page: page.toString(),
-        limit: "10",
+        tripType: tripTypeState, departing: departingState, arriving: arrivingState,
+        departureDate: departureDateState, page: page.toString(), limit: "10",
       };
 
-      // Only include arriving and returnDate for roundtrip
       if (tripTypeState === "roundtrip") {
         query.arriving = arrivingState;
         query.returnDate = returnDateState;
       }
 
       const searchParams = new URLSearchParams(query);
-
       try {
-        const res = await fetch(
-          `/api/searchFlights?${searchParams.toString()}`
-        );
+        const res = await fetch(`/api/searchFlights?${searchParams.toString()}`);
         const data = await res.json();
-
-        const newFlights: Flight[] = (data.flights || []).map(
-          (flight: any) => ({
-            ...flight,
-            airline: airlineLookup[flight.airline] || flight.airline,
-          })
-        );
-
+        const newFlights: Flight[] = (data.flights || []).map((flight: any) => ({
+          ...flight, airline: airlineLookup[flight.airline] || flight.airline,
+        }));
         setFlights((prev) => (reset ? newFlights : [...prev, ...newFlights]));
         setHasMore(newFlights.length > 0);
       } catch (err) {
@@ -278,35 +187,16 @@ const FlightResultsContent: React.FC = () => {
         setLoading(false);
       }
     }
-
-    fetchFlights(page === 1); //reset if on first page
-  }, [
-    tripTypeState,
-    departingState,
-    arrivingState,
-    departureDateState,
-    returnDateState,
-    page,
-  ]);
+    fetchFlights(page === 1);
+  }, [tripTypeState, departingState, arrivingState, departureDateState, returnDateState, page]);
 
   function sortFlights(flights: Flight[], sortBy: string) {
     if (sortBy === "") return flights;
-
     const sorted = [...flights];
-
     switch (sortBy) {
-      case "price":
-        sorted.sort((a, b) => Number(a.price) - Number(b.price));
-        break;
-
+      case "price": sorted.sort((a, b) => Number(a.price) - Number(b.price)); break;
       case "departure":
-        sorted.sort(
-          (a, b) =>
-            new Date(a.departureTime).getTime() -
-            new Date(b.departureTime).getTime()
-        );
-        break;
-
+        sorted.sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime()); break;
       case "duration":
         sorted.sort((a, b) => {
           const toMinutes = (d: string) => {
@@ -317,214 +207,201 @@ const FlightResultsContent: React.FC = () => {
           return toMinutes(a.duration) - toMinutes(b.duration);
         });
         break;
-
-      case "airline":
-        sorted.sort((a, b) => a.airline.localeCompare(b.airline));
-        break;
+      case "airline": sorted.sort((a, b) => a.airline.localeCompare(b.airline)); break;
     }
-
     return sorted;
   }
 
   const uniqueAirlines = Array.from(new Set(Flights.map((f) => f.airline)));
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pt-40">
-      {/* Top Filter / Info Bar */}
-      <div className="bg-white shadow-md rounded-xl p-4 flex justify-around items-center m-6">
-        <div className="flex flex-col items-center">
-          <span className="font-semibold text-gray-600">From:</span>
-          <span className="text-lg">{departingState}</span>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <span className="font-semibold text-gray-600">To:</span>
-          <span className="text-lg">{arrivingState}</span>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <span className="font-semibold text-gray-600">Depart:</span>
-          <span className="text-lg">{departureDateState}</span>
-        </div>
-
-        {tripTypeState === "roundtrip" && (
-          <div className="flex flex-col items-center">
-            <span className="font-semibold text-gray-600">Return:</span>
-            <span className="text-lg">{returnDateState}</span>
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-24 pb-16">
+      
+      {/* Top Filter Bar */}
+      <div className="max-w-7xl mx-auto px-6 w-full">
+        <div className="bg-white rounded-3xl shadow-md p-6 mb-8 border border-gray-100">
+          
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="flex-1 relative">
+               <PlaneTakeoff className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+               <AutocompleteInput
+                  value={departingState}
+                  placeholder="Departing"
+                  inputType="departing"
+                  onChange={handleInputChange}
+                  onSelect={handleSelectSuggestion}
+                  suggestions={departingSuggestions}
+                  isFocused={focusedInput === "departing"}
+                  onFocus={() => setFocusedInput("departing")}
+                  onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
+                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all"
+                />
+            </div>
+            <div className="flex-1 relative">
+               <PlaneLanding className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+               <AutocompleteInput
+                  value={arrivingState}
+                  placeholder="Arrival"
+                  inputType="arriving"
+                  onChange={handleInputChange}
+                  onSelect={handleSelectSuggestion}
+                  suggestions={arrivingSuggestions}
+                  isFocused={focusedInput === "arriving"}
+                  onFocus={() => setFocusedInput("arriving")}
+                  onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
+                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all"
+                />
+            </div>
+            <div className="flex-1">
+              <input
+                type="date"
+                value={departureDateState}
+                onChange={(e) => setDepartureDateState(e.target.value)}
+                className="w-full px-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer"
+                min={today}
+              />
+            </div>
+            {tripTypeState === "roundtrip" && (
+              <div className="flex-1">
+                <input
+                  type="date"
+                  value={returnDateState}
+                  onChange={(e) => setReturnDateState(e.target.value)}
+                  className="w-full px-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer"
+                  min={departureDateState || today}
+                />
+              </div>
+            )}
+            <button
+              onClick={() => setPage(1)}
+              className="bg-gradient-to-r from-[#94C3D2] to-[#7FB3C4] text-white px-8 py-3 rounded-xl hover:shadow-lg transition-all font-bold flex items-center justify-center cursor-pointer min-w-[140px]"
+            >
+              <Search className="w-5 h-5 mr-2" /> Search
+            </button>
           </div>
-        )}
-      </div>
 
-      {/* Editable Departure / Arrival Inputs */}
-      <div className="flex justify-center space-x-4 mb-6">
-        {/* DEPARTING INPUT */}
-        <AutocompleteInput
-          value={departingState}
-          placeholder="Departing Airport/City"
-          inputType="departing"
-          onChange={handleInputChange}
-          onSelect={handleSelectSuggestion}
-          suggestions={departingSuggestions}
-          isFocused={focusedInput === "departing"}
-          onFocus={() => setFocusedInput("departing")}
-          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
-          className="border rounded px-3 py-1"
-        />
+          <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+             <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-[#94C3D2] transition-colors">
+                  <input
+                    type="radio" name="tripType" value="oneway"
+                    checked={tripTypeState === "oneway"}
+                    onChange={() => setTripTypeState("oneway")}
+                    className="w-4 h-4 text-[#94C3D2] focus:ring-[#94C3D2] cursor-pointer"
+                  /> One-way
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-gray-700 hover:text-[#94C3D2] transition-colors">
+                  <input
+                    type="radio" name="tripType" value="roundtrip"
+                    checked={tripTypeState === "roundtrip"}
+                    onChange={() => setTripTypeState("roundtrip")}
+                    className="w-4 h-4 text-[#94C3D2] focus:ring-[#94C3D2] cursor-pointer"
+                  /> Round-trip
+                </label>
+              </div>
 
-        {/* ARRIVING INPUT */}
-        <AutocompleteInput
-          value={arrivingState}
-          placeholder="Arrival Airport/City"
-          inputType="arriving"
-          onChange={handleInputChange}
-          onSelect={handleSelectSuggestion}
-          suggestions={arrivingSuggestions}
-          isFocused={focusedInput === "arriving"}
-          onFocus={() => setFocusedInput("arriving")}
-          onBlur={() => setTimeout(() => setFocusedInput(null), 200)}
-          className="border rounded px-3 py-1"
-        />
-
-        <input
-          type="date"
-          value={departureDateState}
-          onChange={(e) => setDepartureDateState(e.target.value)}
-          className="border rounded px-3 py-1"
-          min={today}
-        />
-        {tripTypeState === "roundtrip" && (
-          <input
-            type="date"
-            value={returnDateState}
-            onChange={(e) => setReturnDateState(e.target.value)}
-            className="border rounded px-3 py-1"
-            min={departureDateState || today}
-          />
-        )}
-
-        <button
-          onClick={() => setPage(1)} // triggers useEffect to refetch
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          Search
-        </button>
-      </div>
-      {/* Editable Trip type selection */}
-      <div className="flex gap-6 mb-4 justify-center">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="tripType"
-            value="oneway"
-            checked={tripTypeState === "oneway"}
-            onChange={() => setTripTypeState("oneway")}
-          />
-          One-way
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="tripType"
-            value="roundtrip"
-            checked={tripTypeState === "roundtrip"}
-            onChange={() => setTripTypeState("roundtrip")}
-          />
-          Round-trip
-        </label>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1">
-        {/* Sort & Filter Bar */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
-            <span className="font-semibold text-gray-700">Sort by:</span>
-            <select
-              className="border rounded px-2 py-1"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-            >
-              <option value="">None</option>
-              <option value="departure">Departure</option>
-              <option value="price">Price</option>
-              <option value="duration">Duration</option>
-              <option value="airline">Airline</option>
-            </select>
-
-            <span className="font-semibold text-gray-700">Airline:</span>
-            <select
-              className="border rounded px-2 py-1"
-              value={airlineFilter}
-              onChange={(e) => setAirlineFilter(e.target.value)}
-            >
-              <option value="">All</option>
-              {uniqueAirlines.map((airline) => (
-                <option key={airline} value={airline}>
-                  {airline}
-                </option>
-              ))}
-            </select>
+              <div className="flex items-center space-x-4">
+                <select
+                  className="border-2 border-gray-200 rounded-xl px-4 py-2 font-medium focus:outline-none focus:border-[#94C3D2] cursor-pointer hover:border-gray-300 transition-colors"
+                  value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}
+                >
+                  <option value="">Sort by: None</option>
+                  <option value="price">Price: Low to High</option>
+                  <option value="departure">Earliest Departure</option>
+                  <option value="duration">Shortest Duration</option>
+                  <option value="airline">Airline</option>
+                </select>
+                <select
+                  className="border-2 border-gray-200 rounded-xl px-4 py-2 font-medium focus:outline-none focus:border-[#94C3D2] cursor-pointer hover:border-gray-300 transition-colors"
+                  value={airlineFilter} onChange={(e) => setAirlineFilter(e.target.value)}
+                >
+                  <option value="">All Airlines</option>
+                  {uniqueAirlines.map((airline) => (
+                    <option key={airline} value={airline}>{airline}</option>
+                  ))}
+                </select>
+              </div>
           </div>
         </div>
 
-        {/* Flight Cards Section */}
-        <div className="flex-1 m-6 space-y-6">
+        {/* Flight Results */}
+        <div className="space-y-6">
           {Flights.length === 0 && !loading && (
-            <p className="text-gray-600 text-lg">No flights found.</p>
+             <div className="text-center py-12 bg-white rounded-3xl shadow-sm border border-gray-100">
+                <p className="text-gray-500 text-lg font-medium">No flights found for this route.</p>
+             </div>
           )}
           {Flights.length === 0 && loading && (
-            <p className="text-gray-600 text-lg">Loading flights...</p>
+             <div className="flex justify-center py-12">
+               <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+             </div>
           )}
 
           {sortedFlights.map((flight: any, i: number) => (
             <div
               key={i}
-              className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center hover:shadow-lg transition-shadow"
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group flex flex-col md:flex-row"
             >
-              {/* LEFT: Airline + Route + Times */}
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold">{flight.airline}</h3>
+              <div className="flex-1 p-6 flex flex-col justify-between">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#94C3D2] transition-colors flex items-center">
+                       <Plane className="w-5 h-5 mr-2 text-[#94C3D2]" /> {flight.airline}
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                     <span className="bg-blue-50 text-[#94C3D2] px-3 py-1 rounded-lg text-sm font-bold flex items-center">
+                        <Clock className="w-4 h-4 mr-1"/> {formatDuration(flight.duration)}
+                     </span>
+                  </div>
+                </div>
 
-                <p className="text-gray-600">
-                  <span className="font-medium">{flight.departAirport}</span> →{" "}
-                  <span className="font-medium">{flight.arriveAirport}</span>
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-800">{formatTime(flight.departureTime)}</p>
+                    <p className="text-sm font-medium text-gray-500">{flight.departAirport}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatShortDate(flight.departureTime)}</p>
+                  </div>
+                  
+                  <div className="flex-1 flex flex-col items-center px-6">
+                     <div className="w-full h-px bg-gray-300 relative">
+                        <Plane className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                     </div>
+                     <p className="text-xs text-gray-500 mt-2 font-medium">Direct</p> {/* Assumed direct, update based on API if needed */}
+                  </div>
 
-                <p className="text-sm font-semibold text-gray-700">
-                  {formatDuration(flight.duration)}
-                </p>
-
-                <p className="text-gray-500 text-sm">
-                  {formatShortDate(flight.departureTime)} •{" "}
-                  {formatTime(flight.departureTime)}
-                </p>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-800">--:--</p> {/* If you have arrival time, map it here */}
+                    <p className="text-sm font-medium text-gray-500">{flight.arriveAirport}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatShortDate(flight.departureTime)}</p>
+                  </div>
+                </div>
               </div>
 
-              {/* RIGHT: Price + Button */}
-              <div className="text-right">
-                <p className="text-2xl font-bold text-blue-600">
-                  ${flight.price}
-                </p>
+              {/* Price & Action Section */}
+              <div className="bg-gray-50 p-6 flex flex-col justify-center items-center md:items-end border-t md:border-t-0 md:border-l border-gray-100 min-w-[200px]">
+                <p className="text-sm text-gray-500 mb-1">Price per traveler</p>
+                <div className="flex items-baseline mb-4">
+                   <span className="text-4xl font-bold text-gray-900">${flight.price}</span>
+                </div>
                 <button
                   onClick={() => handleSelectTicket(flight)}
-                  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all"
+                  className="w-full px-8 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center justify-center cursor-pointer"
                 >
-                  Select
+                  Select &gt;
                 </button>
               </div>
             </div>
           ))}
 
-          {/* Load More Button */}
           {hasMore && (
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-8 pb-8">
               <button
                 onClick={() => setPage((prev) => prev + 1)}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-white border-2 border-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl hover:border-[#94C3D2] hover:text-[#94C3D2] transition-all cursor-pointer"
                 disabled={loading}
               >
-                {loading ? "Loading..." : "Load More"}
+                {loading ? "Loading..." : "Load More Flights"}
               </button>
             </div>
           )}
@@ -544,11 +421,7 @@ const FlightResultsContent: React.FC = () => {
 
 const FlightResultsPage: React.FC = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="p-10 text-center">Loading search results...</div>
-      }
-    >
+    <Suspense fallback={<div className="p-10 text-center text-gray-500 font-medium">Loading search results...</div>}>
       <FlightResultsContent />
     </Suspense>
   );
