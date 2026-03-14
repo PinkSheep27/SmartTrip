@@ -19,6 +19,9 @@ function HotelsPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
 
+  // Animation State
+  const [hasSearched, setHasSearched] = useState(false);
+
   const [start, setStart] = useState(0);
   const [hotelsLoaded, setHotelsLoaded] = useState(50);
   const [moreHotels, setMoreHotels] = useState(true);
@@ -47,6 +50,7 @@ function HotelsPage() {
       return;
     }
 
+    setHasSearched(true);
     setLoading(true);
     setError("");
     setHotels([]);
@@ -88,8 +92,6 @@ function HotelsPage() {
         return;
       }
 
-      console.log(`Found ${hotelsData.allHotels.length} total hotels`);
-
       setHotelsInfo(hotelsData.allHotels);
 
       const ids = hotelsData.allHotels.map((hotel: Hotels) => hotel.id);
@@ -115,8 +117,6 @@ function HotelsPage() {
       const chunk = ids.slice(0, 50);
       const idsParam = chunk.join(",");
 
-      console.log("Loading first batch of hotels with prices...");
-
       const res = await fetch(
         `/api/hotels/hotelsPrice?hotelIds=${encodeURIComponent(
           idsParam
@@ -128,10 +128,6 @@ function HotelsPage() {
       }
 
       const data = await res.json();
-
-      console.log(
-        `First batch: ${data.hotels?.length || 0} hotels with prices`
-      );
 
       if (data.hotels && data.hotels.length > 0) {
         const merged = mergeHotelData(baseHotels, data.hotels);
@@ -245,9 +241,6 @@ function HotelsPage() {
     guests,
   ]);
 
-  // ---------------------------------------------------------
-  // NEW: Add to Cart Functionality (Updated for Total Price)
-  // ---------------------------------------------------------
   async function addToCart(event: Hotels) {
     try {
       const response = await fetch("/api/cart", {
@@ -274,7 +267,6 @@ function HotelsPage() {
   }
 
   useEffect(() => {
-    // Skip running the effect on the first render
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
@@ -282,7 +274,6 @@ function HotelsPage() {
 
     if (!loadMoreRef.current || hotels.length === 0) return;
 
-    //Observer for constant hotel searching/Rendering
     const obs = new IntersectionObserver(
       (entries) => {
         if (
@@ -291,7 +282,6 @@ function HotelsPage() {
           moreHotels &&
           hotelIds.length > 0
         ) {
-          console.log("Loading more hotels...");
           loadMoreHotels();
         }
       },
@@ -313,283 +303,288 @@ function HotelsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#94C3D2] py-16">
-      {/* Modern Hero Section */}
-      <div className="relative text-white overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-6 py-16">
-          <div className="text-center mb-10">
-            <h1 className="text-6xl md:text-7xl font-bold mb-4 tracking-tight">
-              Find Your Perfect Stay
-            </h1>
-            <p className="text-xl md:text-2xl text-white">
-              Search, compare, and book hotels worldwide
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-24 overflow-hidden">
+      
+      <div className="max-w-7xl mx-auto px-6 w-full">
+        
+        {/* Hero Text */}
+        <div 
+          className={`text-center transition-all duration-500 ease-in-out overflow-hidden flex flex-col justify-end ${
+            hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-10'
+          }`}
+        >
+          <h1 className="text-6xl md:text-7xl font-bold mb-4 tracking-tight text-gray-900">
+            Find Your Perfect Stay
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600">
+            Search, compare, and book hotels worldwide
+          </p>
+        </div>
 
-          {/* Modern Search Card */}
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-white rounded-3xl shadow-2xl p-8">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                {/* Location */}
-                <div className="md:col-span-4">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Where
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#94C3D2] w-5 h-5" />
-                    <input
-                      onKeyDown={handleKeyDown}
-                      type="text"
-                      placeholder="City, hotel, or destination"
-                      value={searchLocation}
-                      onChange={(e) => setSearchLocation(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] text-gray-800 font-medium transition-all hover:border-gray-300"
-                    />
-                  </div>
-                </div>
+        {/* Horizontal Search Bar */}
+        <div className={`bg-white rounded-3xl p-6 border border-gray-100 transition-all duration-700 ${
+          hasSearched ? 'shadow-lg' : 'shadow-md'
+        }`}>
+          
+          <div className="flex flex-col md:flex-row gap-4">
+            
+            {/* Location */}
+            <div className="flex-[1.5] relative">
+               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+               <input
+                  onKeyDown={handleKeyDown}
+                  type="text"
+                  placeholder="City or destination"
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white"
+                />
+            </div>
+            
+            {/* Check-in */}
+            <div className="flex-1 relative">
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer"
+              />
+            </div>
 
-                {/* Check-in */}
-                <div className="md:col-span-3">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Check-in
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#94C3D2] w-5 h-5" />
-                    <input
-                      type="date"
-                      value={checkIn}
-                      onChange={(e) => setCheckIn(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] text-gray-800 font-medium transition-all hover:border-gray-300"
-                    />
-                  </div>
-                </div>
-
-                {/* Check-out */}
-                <div className="md:col-span-3">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Check-out
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#94C3D2] w-5 h-5" />
-                    <input
-                      type="date"
-                      value={checkOut}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      min={checkIn || new Date().toISOString().split("T")[0]}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] text-gray-800 font-medium transition-all hover:border-gray-300"
-                    />
-                  </div>
-                </div>
-
-                {/* Guests */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Guests
-                  </label>
-                  <div className="relative">
-                    <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#94C3D2] w-5 h-5" />
-                    <select
-                      value={guests}
-                      onChange={(e) => setGuests(Number(e.target.value))}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] text-gray-800 font-medium transition-all appearance-none bg-white cursor-pointer hover:border-gray-300"
-                    >
-                      <option value={1}>1</option>
-                      <option value={2}>2</option>
-                      <option value={3}>3</option>
-                      <option value={4}>4</option>
-                      <option value={5}>5+</option>
-                    </select>
-                  </div>
-                </div>
+            {/* Check-out */}
+            <div className="flex-1 relative">
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                min={checkIn || new Date().toISOString().split("T")[0]}
+                className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer"
+              />
+            </div>
+            
+            {/* Guests */}
+            <div className="flex-1 relative">
+              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
+              <select
+                value={guests}
+                onChange={(e) => setGuests(Number(e.target.value))}
+                className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer appearance-none"
+              >
+                <option value={1}>1 Guest</option>
+                <option value={2}>2 Guests</option>
+                <option value={3}>3 Guests</option>
+                <option value={4}>4 Guests</option>
+                <option value={5}>5+ Guests</option>
+              </select>
+            </div>
+            
+            {/* Search Button */}
+            <button
+              onClick={getHotels}
+              className="relative bg-gradient-to-r from-[#94C3D2] to-[#7FB3C4] text-white rounded-xl hover:shadow-lg transition-all font-bold min-w-[140px] cursor-pointer"
+            >
+              {/* Invisible placeholder forcing dimensions */}
+              <div className="flex items-center justify-center px-8 py-3 opacity-0 pointer-events-none">
+                <Search className="w-5 h-5 mr-2" /> Search
               </div>
 
-              <button
-                onClick={getHotels}
-                disabled={loading}
-                className={`w-full mt-6 bg-gradient-to-r from-orange-400 to-orange-500 text-white py-5 rounded-2xl font-bold text-lg hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-[1.01] shadow-lg flex items-center justify-center space-x-2 ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                <Search className="w-6 h-6" />
-                <span>{loading ? "Searching Hotels..." : "Search Hotels"}</span>
-              </button>
-
-              {error && (
-                <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg text-sm font-medium">
-                  {error}
-                </div>
-              )}
-            </div>
+              {/* Absolutely positioned active content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {loading && !hotels.length ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <div className="flex items-center">
+                    <Search className="w-5 h-5 mr-2" /> Search
+                  </div>
+                )}
+              </div>
+            </button>
           </div>
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium animate-fade-in">
+              {error}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Results Section */}
-      {hotels.length > 0 && (
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Sticky Filter Bar */}
-          <div className="bg-white rounded-2xl shadow-md p-6 mb-6 z-10 border border-gray-100">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {sortedHotels.length} hotels available
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  {searchLocation || "Your destination"} • {checkIn} to{" "}
-                  {checkOut}
-                </p>
+      {hasSearched && (
+        <div className="max-w-7xl mx-auto px-6 py-8 w-full transition-all duration-700 animate-fade-in">
+          
+          {hotels.length > 0 ? (
+            <>
+              {/* Sticky Filter Bar */}
+              <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {sortedHotels.length} hotels available
+                  </h2>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Sort by:
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 font-medium cursor-pointer hover:border-gray-300 transition-all"
+                  >
+                    <option value="recommended">Recommended</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Highest Rating</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <span className="text-sm font-semibold text-gray-700">
-                  Sort by:
-                </span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 font-medium cursor-pointer hover:border-gray-300 transition-all"
-                >
-                  <option value="recommended">Recommended</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Highest Rating</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Hotel Cards*/}
-          <div className="space-y-6">
-            {sortedHotels.map((hotel) => (
-              <div
-                key={hotel.id}
-                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
-              >
-                <div className="flex flex-col md:flex-row">
-                  {/* Hotel Image */}
-                  <div className="relative md:w-80 h-64 md:h-auto flex-shrink-0 bg-gradient-to-br from-[#94C3D2] to-[#7FB3C4]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-white text-lg font-semibold text-center px-4">
-                        {hotel.name}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Hotel Info */}
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#94C3D2] transition-colors">
+              {/* Hotel Cards */}
+              <div className="space-y-6">
+                {sortedHotels.map((hotel) => (
+                  <div
+                    key={hotel.id}
+                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
+                  >
+                    <div className="flex flex-col md:flex-row">
+                      {/* Hotel Image */}
+                      <div className="relative md:w-80 h-64 md:h-auto flex-shrink-0 bg-gradient-to-br from-[#94C3D2] to-[#7FB3C4]">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-white text-lg font-semibold text-center px-4">
                             {hotel.name}
-                          </h3>
-                          <div className="flex items-center text-gray-600 mb-3">
-                            <MapPin className="w-4 h-4 mr-1.5 text-[#94C3D2]" />
-                            <span className="text-sm font-medium">
-                              {hotel.location}
-                            </span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Hotel Info */}
+                      <div className="flex-1 p-6 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#94C3D2] transition-colors">
+                                {hotel.name}
+                              </h3>
+                              <div className="flex items-center text-gray-600 mb-3">
+                                <MapPin className="w-4 h-4 mr-1.5 text-[#94C3D2]" />
+                                <span className="text-sm font-medium">
+                                  {hotel.location}
+                                </span>
+                              </div>
+                              {hotel.distance && (
+                                <p className="text-sm text-gray-500 mb-3">
+                                  {hotel.distance}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Rating Badge */}
+                            {hotel.rating > 0 && (
+                              <div className="flex flex-col items-end ml-4">
+                                <div className="flex items-center bg-[#94C3D2] text-white px-3 py-2 rounded-xl shadow-md mb-1">
+                                  <Star className="w-4 h-4 mr-1 fill-current" />
+                                  <span className="font-bold text-lg">
+                                    {hotel.rating}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-gray-600 font-medium">
+                                  Excellent
+                                </span>
+                              </div>
+                            )}
                           </div>
-                          {hotel.distance && (
-                            <p className="text-sm text-gray-500 mb-3">
-                              {hotel.distance}
-                            </p>
+
+                          {/* Amenities */}
+                          {hotel.amenities && hotel.amenities.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {hotel.amenities.slice(0, 5).map((amenity, idx) => (
+                                <div
+                                  key={idx}
+                                  className="flex items-center space-x-1.5 bg-cyan-50 text-[#94C3D2] px-3 py-1.5 rounded-lg text-sm font-medium"
+                                >
+                                  <Wifi className="w-3.5 h-3.5" />
+                                  <span>{amenity}</span>
+                                </div>
+                              ))}
+                            </div>
                           )}
                         </div>
 
-                        {/* Rating Badge */}
-                        {hotel.rating > 0 && (
-                          <div className="flex flex-col items-end ml-4">
-                            <div className="flex items-center bg-[#94C3D2] text-white px-3 py-2 rounded-xl shadow-md mb-1">
-                              <Star className="w-4 h-4 mr-1 fill-current" />
-                              <span className="font-bold text-lg">
-                                {hotel.rating}
+                        {/* Price and CTA */}
+                        <div className="flex items-end justify-between pt-4 border-t border-gray-100 mt-4">
+                          <div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              Starting from
+                            </p>
+                            <div className="flex items-baseline">
+                              <span className="text-4xl font-bold text-gray-900">
+                                ${hotel.price}
+                              </span>
+                              <span className="text-gray-600 ml-2 font-medium">
+                                /night
                               </span>
                             </div>
-                            <span className="text-xs text-gray-600 font-medium">
-                              Excellent
-                            </span>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Includes taxes & fees
+                            </p>
                           </div>
-                        )}
-                      </div>
 
-                      {/* Amenities */}
-                      {hotel.amenities && hotel.amenities.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {hotel.amenities.slice(0, 5).map((amenity, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center space-x-1.5 bg-cyan-50 text-[#94C3D2] px-3 py-1.5 rounded-lg text-sm font-medium"
-                            >
-                              <Wifi className="w-3.5 h-3.5" />
-                              <span>{amenity}</span>
-                            </div>
-                          ))}
+                          <button
+                            onClick={() => addToCart(hotel)}
+                            className="px-8 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center space-x-2 cursor-pointer"
+                          >
+                            <span>Add to Cart &gt;</span>
+                          </button>
                         </div>
-                      )}
-                    </div>
-
-                    {/* Price and CTA */}
-                    <div className="flex items-end justify-between pt-4 border-t border-gray-100 mt-4">
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          Starting from
-                        </p>
-                        <div className="flex items-baseline">
-                          <span className="text-4xl font-bold text-gray-900">
-                            ${hotel.price}
-                          </span>
-                          <span className="text-gray-600 ml-2 font-medium">
-                            /night
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Includes taxes & fees
-                        </p>
                       </div>
-
-                      <button
-                        onClick={() => addToCart(hotel)}
-                        className="px-8 py-4 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2 group"
-                      >
-                        <span>Add to Cart &gt;</span>
-                      </button>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))}
 
-            {/* Loading Indicator */}
-            {loadingMore && (
-              <div className="flex justify-center py-12">
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
-                  <p className="text-gray-600 font-medium">
-                    Loading more hotels...
-                  </p>
-                </div>
-              </div>
-            )}
+                {/* Loading Indicator */}
+                {loadingMore && (
+                  <div className="flex justify-center py-12">
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="animate-spin rounded-full h-10 w-10 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+                    </div>
+                  </div>
+                )}
 
-            {/* Intersection Observer Trigger */}
-            {moreHotels && !loadingMore && (
-              <div ref={loadMoreRef} className="h-px"></div>
-            )}
+                {/* Intersection Observer Trigger */}
+                {moreHotels && !loadingMore && (
+                  <div ref={loadMoreRef} className="h-px"></div>
+                )}
 
-            {/* No More Hotels Message */}
-            {!moreHotels && hotels.length > 0 && (
-              <div className="text-center py-12">
-                <div className="inline-flex items-center space-x-2 bg-gray-100 px-6 py-3 rounded-full">
-                  <span className="text-gray-600 font-medium">
-                    All hotels loaded
-                  </span>
-                </div>
+                {/* No More Hotels Message */}
+                {!moreHotels && hotels.length > 0 && (
+                  <div className="text-center py-12">
+                    <span className="text-gray-500 font-medium">
+                      All hotels loaded
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          ) : loading ? (
+             <div className="flex justify-center py-20">
+               <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+             </div>
+          ) : null}
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
