@@ -7,13 +7,14 @@ export interface Attractions {
   id: string;
   name: string;
   description: string;
-  categories?: string[]; // multiple possible categories
+  categories?: string[]; 
   image?: string;
   formattedAddress?: string;
-  location: [Number?, Number?]; //long, lati
+  location: [Number?, Number?];
 }
 
 export default function ExperiencePage() {
+  const [hasSearched, setHasSearched] = useState(false);
   const [searchLocation, setSearchLocation] = useState("");
   const [selectedType, setSelectedType] = useState("tourism.attraction");
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,6 +33,7 @@ export default function ExperiencePage() {
       return;
     }
 
+    setHasSearched(true);
     setLoading(true);
     setError("");
     setAttractions([]);
@@ -85,10 +87,10 @@ export default function ExperiencePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartId: 1, // Hardcoded to 1 for testing (matches the LiveCart default)
+          cartId: 1, 
           category: "Attraction",
           externalId: event.id,
-          data: event, // Sending the full flight object
+          data: event, 
         }),
       });
 
@@ -105,179 +107,156 @@ export default function ExperiencePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#94C3D2] py-32">
-      {/* Header Section */}
-      <div className="relative pb-24">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-5xl text-white font-bold mb-3 drop-shadow-lg">
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-24 overflow-hidden">
+      
+      <div className="max-w-7xl mx-auto px-6 w-full">
+        
+        {/* Hero Text */}
+        <div 
+          className={`text-center transition-all duration-500 ease-in-out overflow-hidden flex flex-col justify-end ${
+            hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-10'
+          }`}
+        >
+          <h1 className="text-6xl md:text-7xl font-bold mb-4 tracking-tight text-gray-900">
             Explore Local Attractions
           </h1>
-          <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto opacity-95">
-            Find the best tours, activities, and experiences in your destination
+          <p className="text-xl md:text-2xl text-gray-600">
+            Find the best tours, activities, and experiences
           </p>
         </div>
 
-        {/* Search Section */}
-        <div className="relative max-w-4xl mx-auto px-6 pb-12 pt-4">
-          <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 transform hover:scale-[1.01] transition-all">
-            <div className="space-y-6">
-              {/* Location Input and Type Dropdown */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-3">
-                    Where do you want to explore?
-                  </label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#94C3D2] w-6 h-6 group-focus-within:scale-110 transition-transform" />
-                    <input
-                      onKeyDown={handleKeyDown}
-                      type="text"
-                      placeholder="Enter a city (e.g., New York, Paris, Tokyo)"
-                      value={searchLocation}
-                      onChange={(e) => setSearchLocation(e.target.value)}
-                      className="w-full pl-14 pr-4 py-5 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] focus:ring-4 focus:ring-cyan-100 text-gray-800 font-medium transition-all hover:border-gray-300 text-lg"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3">
-                    Kind
-                  </label>
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full px-4 py-5 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#94C3D2] focus:ring-4 focus:ring-cyan-100 text-gray-800 font-medium cursor-pointer hover:border-gray-300 transition-all bg-white"
-                  >
-                    <option value="tourism.attraction">
-                      Interesting Places
-                    </option>
-                    <option value="entertainment">Entertainment</option>
-                    <option value="leisure.park">Parks</option>
-                    <option value="memorial">Memorials</option>
-                    <option value="adult">Adult(21+)</option>
-                    <option value="beach">Beaches</option>
-                    <option value="natural">Nature</option>
-                  </select>
-                </div>
+        {/* Horizontal Search Bar */}
+        <div className={`bg-white rounded-3xl p-6 border border-gray-100 transition-all duration-700 ${
+          hasSearched ? 'shadow-lg' : 'shadow-md'
+        }`}>
+          
+          <div className="flex flex-col md:flex-row gap-4">
+            
+            {/* Location */}
+            <div className="flex-[2] relative">
+               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+               <input
+                  onKeyDown={handleKeyDown}
+                  type="text"
+                  placeholder="Enter a city (e.g., New York, Paris)"
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white"
+                />
+            </div>
+            
+            {/* Kind */}
+            <div className="flex-1 relative">
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer"
+              >
+                <option value="tourism.attraction">Interesting Places</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="leisure.park">Parks</option>
+                <option value="memorial">Memorials</option>
+                <option value="adult">Adult (21+)</option>
+                <option value="beach">Beaches</option>
+                <option value="natural">Nature</option>
+              </select>
+            </div>
+            
+            {/* Search Button */}
+            <button
+              onClick={getAttractions}
+              className="relative bg-gradient-to-r from-[#94C3D2] to-[#7FB3C4] text-white rounded-xl hover:shadow-lg transition-all font-bold min-w-[140px] cursor-pointer"
+            >
+              <div className="flex items-center justify-center px-8 py-3 opacity-0 pointer-events-none">
+                <Search className="w-5 h-5 mr-2" /> Search
               </div>
 
-              {/* Search Button */}
-              <button
-                onClick={getAttractions}
-                disabled={loading}
-                className={`w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white py-5 px-6 rounded-2xl font-bold text-lg hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                <Search className="w-6 h-6" />
-                <span>
-                  {loading ? "Searching Activities..." : "Search Activities"}
-                </span>
-              </button>
-
-              {/* Error Message */}
-              {error && (
-                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl text-sm font-medium animate-fade-in">
-                  <p className="font-bold mb-1">Error</p>
-                  <p>{error}</p>
-                </div>
-              )}
-            </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                {loading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <div className="flex items-center">
+                    <Search className="w-5 h-5 mr-2" /> Search
+                  </div>
+                )}
+              </div>
+            </button>
           </div>
-        </div>
 
-        {/* Results Section */}
-        {attractions.length > 0 && (
-          <div className="relative max-w-7xl mx-auto px-6 pb-16">
-            {/* Total Experiences Rendered */}
-            <p className="mt-4 inline-block bg-gray-400 backdrop-blur-sm px-4 py-2 rounded-xl text-white text-lg font-medium border border-white/20 mb-4">
-              Total Experiences Rendered:
-              <span className="ml-2 font-semibold text-yellow-300">
-                {attractions.length}
-              </span>
-            </p>
-            {/*Attractions List*/}
-            <div className="flex flex-col gap-6">
-              {attractions.map((attraction) => (
-                <div
-                  key={attraction.id}
-                  className="w-full bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 group transform hover:-translate-y-1"
-                >
-                  <div className="flex flex-col md:flex-row">
-                    {/* Content Section */}
-                    <div className="flex-1 p-6 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#94C3D2] transition-colors line-clamp-1">
-                              {attraction.name}
-                            </h3>
-                            <div className="flex items-center text-gray-600 mb-2">
-                              <MapPin className="w-4 h-4 mr-1.5 text-[#94C3D2]" />
-                              <span className="text-sm font-medium">
-                                {attraction.formattedAddress}
-                              </span>
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium animate-fade-in">
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Results Section */}
+      {hasSearched && (
+        <div className="max-w-7xl mx-auto px-6 py-8 w-full transition-all duration-700 animate-fade-in">
+          
+          {attractions.length > 0 ? (
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {attractions.length} experiences found
+                </h2>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {attractions.map((attraction) => (
+                  <div
+                    key={attraction.id}
+                    className="w-full bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
+                  >
+                    <div className="flex flex-col md:flex-row">
+                      <div className="flex-1 p-6 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#94C3D2] transition-colors">
+                                {attraction.name}
+                              </h3>
+                              <div className="flex items-center text-gray-600 mb-2">
+                                <MapPin className="w-4 h-4 mr-1.5 text-[#94C3D2]" />
+                                <span className="text-sm font-medium">
+                                  {attraction.formattedAddress}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
-
-                        {/* Description */}
-                        {/* <p className="text-sm text-gray-600 mb-4 line-clamp-1">
-                    {attraction.description}
-                  </p> */}
+                      </div>
+                      <div className="p-6 border-t md:border-t-0 md:border-l border-gray-100 flex items-center justify-center md:justify-end min-w-[200px]">
+                        <button
+                          onClick={() => addToCart(attraction)}
+                          className="w-full px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center justify-center cursor-pointer"
+                        >
+                          <span>Add to Cart &gt;</span>
+                        </button>
                       </div>
                     </div>
-                    {/* View Details Button */}
-                    <div className="h-16 mt-4 pt-4 border-t border-gray-200 flex justify-end pr-4">
-                      <button
-                        onClick={() => addToCart(attraction)}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-bold hover:from-orange-500 hover:to-orange-600 transition-all transform hover:scale-105 shadow-md flex items-center justify-center space-x-2 group"
-                      >
-                        <span>Add to Cart &gt;</span>
-                      </button>
-                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                ))}
+              </div>
+            </>
+          ) : loading ? (
+             <div className="flex justify-center py-20">
+               <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+             </div>
+          ) : null}
+        </div>
+      )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="relative max-w-7xl mx-auto px-6 pb-16">
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white mb-4"></div>
-              <p className="text-white font-semibold text-lg">
-                Finding amazing experiences...
-              </p>
-            </div>
-          </div>
-        )}
-
-        <style jsx>{`
-          @keyframes fade-in {
-            from {
-              opacity: 0;
-              transform: translateY(-10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .animate-fade-in {
-            animation: fade-in 0.5s ease-out;
-          }
-          .delay-700 {
-            animation-delay: 700ms;
-          }
-          .delay-1000 {
-            animation-delay: 1000ms;
-          }
-        `}</style>
-      </div>
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
