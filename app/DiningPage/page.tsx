@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Heading from "@/components/DiningComponents/Heading";
-
+import { MapPin, Search } from "lucide-react";
 import type { prices } from "@/components/DiningComponents/RestaurantCard";
 import RestaurantCard from "@/components/DiningComponents/RestaurantCard";
 
@@ -21,6 +20,7 @@ interface Restaurant {
 }
 
 export default function DiningSelection() {
+  const [hasSearched, setHasSearched] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -33,11 +33,11 @@ export default function DiningSelection() {
       return;
     }
 
+    setHasSearched(true);
     setLoading(true);
     setError("");
 
     try {
-      // First, geocode the location to get coordinates
       const geocodeResponse = await fetch(
         `/api/geocode?address=${encodeURIComponent(searchLocation)}`
       );
@@ -54,7 +54,6 @@ export default function DiningSelection() {
 
       const { lat, lng } = geocodeData.location;
 
-      // Now search for restaurants near this location
       const query = searchTerm.trim() || "restaurant";
       const response = await fetch(
         `/api/DiningRoute?query=${encodeURIComponent(
@@ -80,7 +79,6 @@ export default function DiningSelection() {
     }
   }
 
-  // Allow search on Enter key
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       searchRestaurants();
@@ -105,7 +103,7 @@ export default function DiningSelection() {
         throw new Error(errorData.error || "Failed to add to cart");
       }
 
-      alert("✅ Restuaurant added to cart!");
+      alert("✅ Restaurant added to cart!");
     } catch (error) {
       console.log(error);
       alert("❌ Error adding Restaurant. Check console.");
@@ -113,138 +111,134 @@ export default function DiningSelection() {
   }
 
   return (
-    <div>
-      <div className="min-h-screen bg-gradient-to-br bg-[#94C3D2] p-5">
-        <div className="max-w-7xl mx-auto pt-28">
-          <Heading></Heading>
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-24 overflow-hidden">
+      
+      <div className="max-w-7xl mx-auto px-6 w-full">
+        
+        {/* Hero Text */}
+        <div 
+          className={`text-center transition-all duration-500 ease-in-out overflow-hidden flex flex-col justify-end ${
+            hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-10'
+          }`}
+        >
+          <h1 className="text-6xl md:text-7xl font-bold mb-4 tracking-tight text-gray-900">
+            Find Your Next Meal
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600">
+            Search, discover, and book the best restaurants
+          </p>
+        </div>
 
-          {/* Search and Filter Controls */}
-          <div className="mb-8 animate-fade-in">
-            {/* Location Search */}
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center gap-4 w-full max-w-3xl">
-                <input
+        {/* Horizontal Search Bar */}
+        <div className={`bg-white rounded-3xl p-6 border border-gray-100 transition-all duration-700 ${
+          hasSearched ? 'shadow-lg' : 'shadow-md'
+        }`}>
+          
+          <div className="flex flex-col md:flex-row gap-4">
+            
+            {/* Location Input */}
+            <div className="flex-1 relative">
+               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+               <input
                   type="text"
                   placeholder="Enter city or zip code"
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 px-6 py-4 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
+                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white"
                 />
-                <button
-                  type="button"
-                  onClick={searchRestaurants}
-                  disabled={loading}
-                  className={`px-6 py-4 rounded-2xl bg-amber-500 text-white font-semibold shadow-lg hover:bg-amber-600 transition-all ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {loading ? "Searching..." : "Search"}
-                </button>
-              </div>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                {error}
+            {/* Craving / Search Term Input */}
+            <div className="flex-1 relative">
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+               <input
+                  type="text"
+                  placeholder="Craving anything specific? (Optional)"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white"
+                />
+            </div>
+            
+            {/* Search Button */}
+            <button
+              onClick={searchRestaurants}
+              className="relative bg-gradient-to-r from-[#94C3D2] to-[#7FB3C4] text-white rounded-xl hover:shadow-lg transition-all font-bold min-w-[140px] cursor-pointer"
+            >
+              <div className="flex items-center justify-center px-8 py-3 opacity-0 pointer-events-none">
+                <Search className="w-5 h-5 mr-2" /> Search
               </div>
-            )}
 
-            {/* Search Bar */}
-            {restaurants.length !== 0 && (
-              <div className="mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder="Search restaurants, cuisines, or dishes..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="w-full px-6 py-4 pl-12 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 text-gray-800 placeholder-gray-500 text-lg transition-all"
-                    />
-
-                    {/* Search Icon */}
-                    <svg
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-
-                    {/* Clear Button */}
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm("")}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    )}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {loading && !restaurants.length ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <div className="flex items-center">
+                    <Search className="w-5 h-5 mr-2" /> Search
                   </div>
-                </div>
+                )}
               </div>
-            )}
-
-            {/* Loading Indicator */}
-            {loading && (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-              </div>
-            )}
+            </button>
           </div>
 
-          {!loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {restaurants.map((restaurant) => (
-                <RestaurantCard
-                  key={restaurant.id}
-                  name={restaurant.name}
-                  id={restaurant.id}
-                  cuisine={restaurant.cuisine}
-                  rating={restaurant.rating}
-                  price={restaurant.price}
-                  waitTime={restaurant.waitTime}
-                  address={restaurant.address}
-                  tags={restaurant.tags}
-                  isOpen={restaurant.isOpen}
-                  photo={restaurant.photo}
-                  addToCart={async () => addToCart(restaurant)}
-                />
-              ))}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium animate-fade-in">
+              {error}
             </div>
           )}
         </div>
-        <style>{`
+      </div>
+
+      {/* Results Section */}
+      {hasSearched && (
+        <div className="max-w-7xl mx-auto px-6 py-8 w-full transition-all duration-700 animate-fade-in">
+          
+          {restaurants.length > 0 ? (
+            <>
+              <div className="mb-6 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {restaurants.length} restaurants found
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {restaurants.map((restaurant) => (
+                  <RestaurantCard
+                    key={restaurant.id}
+                    name={restaurant.name}
+                    id={restaurant.id}
+                    cuisine={restaurant.cuisine}
+                    rating={restaurant.rating}
+                    price={restaurant.price}
+                    waitTime={restaurant.waitTime}
+                    address={restaurant.address}
+                    tags={restaurant.tags}
+                    isOpen={restaurant.isOpen}
+                    photo={restaurant.photo}
+                    addToCart={async () => addToCart(restaurant)}
+                  />
+                ))}
+              </div>
+            </>
+          ) : loading ? (
+             <div className="flex justify-center py-20">
+               <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+             </div>
+          ) : null}
+        </div>
+      )}
+
+      <style jsx>{`
         @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-20px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in {
-          animation: fade-in 0.6s ease;
+          animation: fade-in 0.5s ease-out forwards;
         }
       `}</style>
-      </div>
     </div>
   );
 }
