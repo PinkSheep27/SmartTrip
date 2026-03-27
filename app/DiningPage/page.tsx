@@ -111,33 +111,33 @@ export default function DiningSelection() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pt-24 overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex flex-col pt-[clamp(6rem,10vh,8rem)] overflow-hidden">
       
-      <div className="max-w-7xl mx-auto px-6 w-full">
+      <div className="max-w-7xl mx-auto px-[clamp(1rem,4vw,2rem)] w-full">
         
         {/* Hero Text */}
         <div 
           className={`text-center transition-all duration-500 ease-in-out overflow-hidden flex flex-col justify-end ${
-            hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-10'
+            hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-[clamp(1.5rem,4vh,2.5rem)]'
           }`}
         >
-          <h1 className="text-6xl md:text-7xl font-bold mb-4 tracking-tight text-gray-900">
+          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-bold mb-[clamp(0.5rem,2vh,1rem)] tracking-tight text-gray-900">
             Find Your Next Meal
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600">
+          <p className="text-[clamp(1.125rem,2vw,1.5rem)] text-gray-600">
             Search, discover, and book the best restaurants
           </p>
         </div>
 
         {/* Horizontal Search Bar */}
-        <div className={`bg-white rounded-3xl p-6 border border-gray-100 transition-all duration-700 ${
+        <div className={`bg-white rounded-[clamp(1rem,2vw,1.5rem)] p-[clamp(1rem,3vw,1.5rem)] border border-gray-100 transition-all duration-700 ${
           hasSearched ? 'shadow-lg' : 'shadow-md'
         }`}>
           
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-[clamp(0.5rem,1.5vw,1rem)]">
             
             {/* Location Input */}
-            <div className="flex-1 relative">
+            <div className="flex-1 min-w-[200px] relative">
                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
                <input
                   type="text"
@@ -145,12 +145,12 @@ export default function DiningSelection() {
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white"
+                  className="w-full pl-10 pr-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.75rem,1.5vh,1rem)] border-2 border-gray-200 rounded-[clamp(0.5rem,1vw,0.75rem)] focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white text-[16px] md:text-[clamp(13px,1.5vw,16px)] text-ellipsis"
                 />
             </div>
 
             {/* Craving / Search Term Input */}
-            <div className="flex-1 relative">
+            <div className="flex-1 min-w-[200px] relative">
                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
                <input
                   type="text"
@@ -158,16 +158,16 @@ export default function DiningSelection() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white"
+                  className="w-full pl-10 pr-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.75rem,1.5vh,1rem)] border-2 border-gray-200 rounded-[clamp(0.5rem,1vw,0.75rem)] focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white text-[16px] md:text-[clamp(13px,1.5vw,16px)] text-ellipsis"
                 />
             </div>
             
             {/* Search Button */}
             <button
               onClick={searchRestaurants}
-              className="relative bg-gradient-to-r from-[#94C3D2] to-[#7FB3C4] text-white rounded-xl hover:shadow-lg transition-all font-bold min-w-[140px] cursor-pointer"
+              className="relative bg-gradient-to-r from-[#94C3D2] to-[#7FB3C4] text-white rounded-[clamp(0.5rem,1vw,0.75rem)] hover:shadow-lg transition-all font-bold min-w-[140px] cursor-pointer"
             >
-              <div className="flex items-center justify-center px-8 py-3 opacity-0 pointer-events-none">
+              <div className="flex items-center justify-center px-[clamp(1.5rem,3vw,2rem)] py-[clamp(0.75rem,1.5vh,1rem)] opacity-0 pointer-events-none">
                 <Search className="w-5 h-5 mr-2" /> Search
               </div>
 
@@ -184,7 +184,7 @@ export default function DiningSelection() {
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium animate-fade-in">
+            <div className="mt-[clamp(1rem,2vh,1.5rem)] p-[clamp(0.75rem,1.5vh,1rem)] bg-red-50 border border-red-200 text-red-600 rounded-[clamp(0.5rem,1vw,0.75rem)] text-[clamp(14px,1.5vw,16px)] font-medium animate-fade-in">
               {error}
             </div>
           )}
@@ -193,17 +193,17 @@ export default function DiningSelection() {
 
       {/* Results Section */}
       {hasSearched && (
-        <div className="max-w-7xl mx-auto px-6 py-8 w-full transition-all duration-700 animate-fade-in">
+        <div className="max-w-7xl mx-auto px-[clamp(1rem,4vw,2rem)] py-[clamp(1.5rem,4vh,2.5rem)] w-full transition-all duration-700 animate-fade-in">
           
           {restaurants.length > 0 ? (
             <>
-              <div className="mb-6 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-900">
+              <div className="mb-[clamp(1rem,2vh,1.5rem)] flex justify-between items-center">
+                <h2 className="text-[clamp(1.125rem,2vw,1.25rem)] font-bold text-gray-900">
                   {restaurants.length} restaurants found
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[clamp(1rem,2.5vw,1.5rem)]">
                 {restaurants.map((restaurant) => (
                   <RestaurantCard
                     key={restaurant.id}
@@ -223,8 +223,8 @@ export default function DiningSelection() {
               </div>
             </>
           ) : loading ? (
-             <div className="flex justify-center py-20">
-               <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+             <div className="flex justify-center py-[clamp(3rem,8vh,5rem)]">
+               <div className="animate-spin rounded-full h-[clamp(2.5rem,4vw,3rem)] w-[clamp(2.5rem,4vw,3rem)] border-4 border-cyan-200 border-t-[#94C3D2]"></div>
              </div>
           ) : null}
         </div>
