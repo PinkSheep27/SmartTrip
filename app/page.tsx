@@ -80,23 +80,19 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <div className="absolute inset-0 flex items-start justify-center pt-32 md:pt-44 z-20">
+      {/* Hero Logo - Now uses vw so it physically shrinks on narrow screens */}
+      <div className="absolute inset-0 flex items-start justify-center pt-[clamp(6rem,15vh,12rem)] z-20 pointer-events-none">
         <Image
           src={smartTripLogo}
           alt="SmartTrip Logo"
           width={500}
           height={100}
-          className="w-4/5 md:w-2/3 max-w-[50rem]"
+          className="w-[clamp(20rem,75vw,55rem)] h-auto"
         />
       </div>
 
-      <div
-        className={`
-          fixed inset-0 z-10 
-          ${scrolled ? 'pointer-events-none' : ''} 
-        `}
-      >
-
+      {/* Background Image */}
+      <div className={`fixed inset-0 z-10 ${scrolled ? 'pointer-events-none' : ''}`}>
         <Image
           src={mainBackground}
           alt="Travel background"
@@ -104,97 +100,58 @@ const HomePage: React.FC = () => {
           objectFit="contain"
           objectPosition="bottom"
           priority
-          className={`
-            transition-transform duration-1000 ease-in-out
-            ${scrolled ? 'scale-106' : 'scale-101'} 
-          `}
+          className={`transition-transform duration-1000 ease-in-out ${scrolled ? 'scale-106' : 'scale-101'}`}
         />
       </div>
 
-
-      <div
-        className={`
-          fixed inset-0 z-50
-          transition-opacity duration-1000 ease-in-out 
-          ${scrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
-        `}
-      >
-        <div
-          className={`
-            absolute bottom-16 left-1/2 -translate-x-1/2 
-            transition-opacity duration-500
-            ${showScrollButton ? 'opacity-100' : 'opacity-0'} 
-          `}
-        >
-          <div
-            className="flex flex-col items-center gap-3 cursor-pointer group pointer-events-auto"
-            onClick={handleScrollClick}
-          >
-
-            <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-xl group-hover:animate-none animate-bounce">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      {/* Scroll Down Button Section */}
+      <div className={`fixed inset-0 z-50 transition-opacity duration-1000 ease-in-out ${scrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div className={`absolute bottom-[clamp(2rem,8vh,4rem)] left-1/2 -translate-x-1/2 transition-opacity duration-500 ${showScrollButton ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="flex flex-col items-center gap-[clamp(0.5rem,1vh,0.75rem)] cursor-pointer group pointer-events-auto" onClick={handleScrollClick}>
+            <div className="w-[clamp(2.5rem,4vw,3rem)] h-[clamp(2.5rem,4vw,3rem)] bg-white/90 rounded-full flex items-center justify-center shadow-xl group-hover:animate-none animate-bounce">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </div>
-
-            <span className="bg-white/90 px-5 py-2 rounded-full shadow-xl font-medium text-gray-700">
+            <span className="bg-white/90 px-[clamp(0.75rem,2vw,1.25rem)] py-[clamp(0.25rem,1vh,0.5rem)] rounded-full shadow-xl font-medium text-gray-700 text-[clamp(11px,1.2vw,14px)]">
               Scroll Down
             </span>
           </div>
         </div>
       </div>
 
-      <div className={`
-          min-h-screen relative z-30
-          transition-opacity duration-1000 ease-in-out 
-          ${scrolled ? 'opacity-100' : 'opacity-0'} 
-        `}
-      >
-        <main className="
-          relative mx-auto 
-          w-11/12 md:max-w-4/5 lg:max-w-3/5
-          text-white flex flex-col md:flex-row justify-between gap-8 
-          mt-[60vh] md:mt-[60vh]
-          ">
-          <div className="
-              relative 
-              bg-[#94C3D2]/80 rounded-lg shadow-xl 
-              p-8 md:pt-10 md:pl-20 md:pr-20 md:pb-10
-              w-full md:flex-1
-              overflow-auto text-left
-              min-h-[300px] 
-            ">
+      {/* Main Content Area */}
+      <div className={`min-h-screen relative z-30 transition-opacity duration-1000 ease-in-out ${scrolled ? 'opacity-100' : 'opacity-0'}`}>
+        <main className="relative mx-auto w-[clamp(40%,80vw,1000px)] text-white flex flex-col md:flex-row justify-between gap-[clamp(1rem,3vw,2rem)] mt-[clamp(50vh,60vh,70vh)]">
+          
+          {/* Carousel Card - Increased internal horizontal padding to protect text from buttons */}
+          <div className="relative bg-[#94C3D2]/90 rounded-[clamp(1rem,2vw,1.5rem)] shadow-xl w-full md:flex-1 min-h-[clamp(18rem,35vh,24rem)] flex flex-col justify-center px-[clamp(3rem,5vw,4.5rem)] py-[clamp(2rem,4vh,3rem)] backdrop-blur-sm border border-white/20 overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4 }}
-
-                className="pb-10"
+                className="pb-[clamp(1rem,3vh,2rem)]"
               >
-                <h1 className="text-blue-500 text-3xl md:text-4xl font-bold mb-6">
+                <h1 className="text-white text-[clamp(1.5rem,3vw,2.25rem)] font-bold mb-[clamp(0.75rem,2vh,1.5rem)] drop-shadow-md leading-tight">
                   {currentHeader}
                 </h1>
-                <p className="text-gray-100 text-base md:text-lg">
+                <p className="text-gray-50 text-[clamp(0.95rem,1.5vw,1.125rem)] leading-relaxed font-medium">
                   {currentText}
                 </p>
               </motion.div>
             </AnimatePresence>
 
+            {/* Navigation Buttons - Scaled down for mobile */}
             <button
               type="button"
               onClick={goBack}
-              className="
-                    absolute top-1/2 -translate-y-1/2 left-2 md:left-4 
-                    w-10 h-10 md:w-12 md:h-12 bg-white rounded-full 
-                    flex items-center justify-center 
-                    shadow-xl cursor-pointer"
+              className="absolute top-1/2 -translate-y-1/2 left-[clamp(0.5rem,1.5vw,1rem)] w-[clamp(2rem,4vw,3rem)] h-[clamp(2rem,4vw,3rem)] bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105 cursor-pointer z-10"
               aria-label="Previous slide"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-[50%] w-[50%] text-cyan-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -202,47 +159,31 @@ const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={goNext}
-              className="
-                    absolute top-1/2 -translate-y-1/2 right-2 md:right-4 
-                    w-10 h-10 md:w-12 md:h-12 bg-white/90 rounded-full 
-                    flex items-center justify-center 
-                    shadow-xl cursor-pointer"
+              className="absolute top-1/2 -translate-y-1/2 right-[clamp(0.5rem,1.5vw,1rem)] w-[clamp(2rem,4vw,3rem)] h-[clamp(2rem,4vw,3rem)] bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105 cursor-pointer z-10"
               aria-label="Next Slide"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-[50%] w-[50%] text-cyan-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
-            <div className="
-                absolute flex justify-center
-                bottom-6 md:bottom-10 left-0 right-0
-                space-x-2
-                pointer-events-none "
-            >
+            {/* Carousel Indicators */}
+            <div className="absolute flex justify-center bottom-[clamp(1rem,2vh,1.5rem)] left-0 right-0 space-x-2 pointer-events-none z-10">
               {headers.map((header, index) => (
                 <div
                   key={header}
-                  className={`
-                      w-3 h-3 rounded-full transition-colors duration-500
-                      ${currentIndex === index ? 'bg-gray-400' : 'bg-white'}
-                    `}
+                  className={`w-[clamp(6px,1vw,10px)] h-[clamp(6px,1vw,10px)] rounded-full transition-all duration-500 ${currentIndex === index ? 'bg-white scale-125' : 'bg-white/40'}`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="
-              bg-[#94C3D2]/80 rounded-lg shadow-xl 
-              p-8 md:p-10 
-              w-full md:flex-1
-              overflow-auto text-left
-              min-h-[300px]
-            ">
-            <h1 className="text-blue-500 text-3xl md:text-4xl font-bold mb-6">
+          {/* Collaborative Planning Card */}
+          <div className="bg-[#94C3D2]/90 rounded-[clamp(1rem,2vw,1.5rem)] shadow-xl w-full md:flex-1 min-h-[clamp(18rem,35vh,24rem)] flex flex-col justify-center px-[clamp(2rem,4vw,3.5rem)] py-[clamp(2rem,4vh,3rem)] backdrop-blur-sm border border-white/20">
+            <h1 className="text-white text-[clamp(1.5rem,3vw,2.25rem)] font-bold mb-[clamp(0.75rem,2vh,1.5rem)] drop-shadow-md leading-tight">
               Collaborative Planning
             </h1>
-            <p className="text-gray-100 text-base md:text-lg">
+            <p className="text-gray-50 text-[clamp(0.95rem,1.5vw,1.125rem)] leading-relaxed font-medium">
               Planning for trips is, most of the time, a hassle; especially when you’re
               planning with multiple people who have different ideas of a fun trip.
               That’s where SmartTrip comes in. We get rid of the hassle having to message
@@ -252,24 +193,13 @@ const HomePage: React.FC = () => {
           </div>
         </main>
         
-        <div className="
-          relative mx-auto 
-          w-11/12 md:max-w-4/5 lg:max-w-3/5
-          text-white flex justify-center gap-8 
-          mt-8 md:mt-16 mb-10
-        ">
-          <div className="
-              relative 
-              bg-[#94C3D2]/80 rounded-lg shadow-xl 
-              p-8 md:pt-10 md:pl-20 md:pr-20 md:pb-10
-              w-full
-              overflow-auto text-left
-              min-h-[300px]
-            ">
-            <h1 className="text-center text-blue-500 text-3xl md:text-4xl font-bold mb-6">
+        {/* Mission Statement Section */}
+        <div className="relative mx-auto w-[clamp(40%,80vw,1000px)] text-white flex justify-center mt-[clamp(1.5rem,4vh,3rem)] mb-[clamp(2rem,8vh,6rem)]">
+          <div className="bg-[#94C3D2]/90 rounded-[clamp(1rem,2vw,1.5rem)] shadow-xl p-[clamp(2rem,5vw,4rem)] w-full text-center min-h-[clamp(15rem,25vh,20rem)] flex flex-col justify-center backdrop-blur-sm border border-white/20">
+            <h1 className="text-white text-[clamp(1.75rem,4vw,2.5rem)] font-bold mb-[clamp(1rem,2vh,1.5rem)] drop-shadow-md leading-tight">
               Mission Statement
             </h1>
-            <p className="text-center text-gray-100 text-base md:text-lg">
+            <p className="text-gray-50 text-[clamp(1rem,1.5vw,1.125rem)] leading-relaxed font-medium max-w-4xl mx-auto">
               At SmartTrip, our mission is to revolutionize the way the world travels together.
               We believe that while the journey is better shared, the planning process shouldn't drive
               you apart. For too long, group trips have been stifled by the chaos of scattered spreadsheets

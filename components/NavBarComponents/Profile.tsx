@@ -51,20 +51,20 @@ export default function Profile({ user }: ProfileProps) {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-full transition-all"
+        className="flex items-center gap-[clamp(0.5rem,1vw,0.75rem)] hover:bg-gray-100 p-[clamp(0.25rem,0.5vw,0.4rem)] rounded-full transition-all shrink-0 cursor-pointer"
       >
         {avatarUrl ? (
           <img
             src={avatarUrl}
             alt="Profile"
-            className="h-9 w-9 rounded-full object-cover border border-gray-200"
+            className="h-[clamp(2rem,4vh,2.25rem)] w-[clamp(2rem,4vh,2.25rem)] rounded-full object-cover border border-gray-200"
           />
         ) : (
-          <div className="h-9 w-9 rounded-full bg-[#94C3D2] text-white flex items-center justify-center font-bold text-sm">
+          <div className="h-[clamp(2rem,4vh,2.25rem)] w-[clamp(2rem,4vh,2.25rem)] rounded-full bg-[#94C3D2] text-white flex items-center justify-center font-bold text-[clamp(12px,1.2vw,14px)]">
             {displayName?.charAt(0).toUpperCase()}
           </div>
         )}
-        <span className="text-gray-700 font-medium hidden md:block">
+        <span className="text-gray-700 font-medium hidden md:block text-[clamp(13px,1.2vw,14px)]">
           {displayName}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -72,59 +72,59 @@ export default function Profile({ user }: ProfileProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50 animate-in fade-in zoom-in-95 duration-100">
-          <div className="space-y-1">
+        <div className="absolute right-0 mt-[clamp(0.4rem,1vh,0.5rem)] w-[clamp(14rem,20vw,16rem)] bg-white rounded-[clamp(0.75rem,1.5vw,1rem)] shadow-xl border border-gray-100 p-[clamp(0.5rem,1.5vw,0.75rem)] z-50 animate-in fade-in zoom-in-95 duration-100">
+          <div className="space-y-[clamp(0.2rem,0.4vh,0.25rem)]">
             
             {/* Profile Link */}
             <Link
               href="/Profile"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+              className="flex items-center gap-[clamp(0.5rem,1vw,0.75rem)] px-[clamp(0.5rem,1vw,0.75rem)] py-[clamp(0.5rem,0.8vh,0.6rem)] text-gray-700 hover:bg-gray-50 rounded-[clamp(0.5rem,1vw,0.75rem)] transition-colors"
             >
-              <UserIcon className="w-5 h-5 text-gray-500" />
-              <span className="font-medium">Profile</span>
+              <UserIcon className="w-5 h-5 shrink-0 text-gray-500" />
+              <span className="font-medium text-[clamp(13px,1.2vw,14px)]">Profile</span>
             </Link>
 
             {/* Itinerary Link */}
             <Link
-              href="/ItineraryPage" // Assuming you will create this page
+              href="/ItineraryPage"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+              className="flex items-center gap-[clamp(0.5rem,1vw,0.75rem)] px-[clamp(0.5rem,1vw,0.75rem)] py-[clamp(0.5rem,0.8vh,0.6rem)] text-gray-700 hover:bg-gray-50 rounded-[clamp(0.5rem,1vw,0.75rem)] transition-colors"
             >
-              <Map className="w-5 h-5 text-gray-500" />
-              <span className="font-medium">Itinerary</span>
+              <Map className="w-5 h-5 shrink-0 text-gray-500" />
+              <span className="font-medium text-[clamp(13px,1.2vw,14px)]">Itinerary</span>
             </Link>
 
             {/* Night Mode Toggle */}
-            <div className="flex items-center justify-between px-3 py-2.5 text-gray-700">
-              <div className="flex items-center gap-3">
-                <Moon className="w-5 h-5 text-gray-500" />
-                <span className="font-medium">Night Mode</span>
+            <div className="flex items-center justify-between px-[clamp(0.5rem,1vw,0.75rem)] py-[clamp(0.5rem,0.8vh,0.6rem)] text-gray-700">
+              <div className="flex items-center gap-[clamp(0.5rem,1vw,0.75rem)]">
+                <Moon className="w-5 h-5 shrink-0 text-gray-500" />
+                <span className="font-medium text-[clamp(13px,1.2vw,14px)]">Night Mode</span>
               </div>
               
-              {/* Custom Toggle Switch */}
+              {/* Custom Toggle Switch (Subtly fluid sizing) */}
               <button
                 onClick={toggleNightMode}
-                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                className={`w-[clamp(2.5rem,4vw,2.75rem)] h-[clamp(1.25rem,2vh,1.5rem)] flex items-center rounded-full p-1 transition-colors duration-300 cursor-pointer ${
                   isNightMode ? 'bg-black' : 'bg-gray-200'
                 }`}
               >
                 <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
-                    isNightMode ? 'translate-x-5' : 'translate-x-0'
+                  className={`bg-white w-[clamp(0.9rem,1.5vw,1.1rem)] h-[clamp(0.9rem,1.5vw,1.1rem)] rounded-full shadow-md transform transition-transform duration-300 ${
+                    isNightMode ? 'translate-x-[clamp(1.1rem,1.8vw,1.25rem)]' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
-            <hr className="my-2 border-gray-100" />
+            <hr className="my-[clamp(0.4rem,1vh,0.5rem)] border-gray-100" />
 
-            {/* Log Out Button */}
+            {/* Log Out Button - Synchronized with your main NavBar buttons */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-500 border border-red-100 rounded-xl hover:bg-red-50 transition-colors mt-2"
+              className="w-full flex items-center justify-center gap-2 px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.4rem,0.8vh,0.5rem)] text-red-500 border border-red-100 rounded-[clamp(0.5rem,1vw,0.75rem)] hover:bg-red-50 transition-colors mt-[clamp(0.25rem,0.5vh,0.4rem)] cursor-pointer"
             >
-              <span className="text-sm font-bold">Log Out</span>
+              <span className="text-[clamp(12px,1.2vw,13px)] font-bold">Log Out</span>
             </button>
           </div>
         </div>
