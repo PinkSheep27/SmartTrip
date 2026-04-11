@@ -34,16 +34,16 @@ export const carts = pgTable("carts", {
   id: serial("id").primaryKey(),
   tripId: integer("trip_id")
     .notNull()
-    .references(() => trips.id), // Cart belongs to a Trip
+    .references(() => trips.id, {onDelete: "cascade"}), // Cart belongs to a Trip
   isActive: boolean("is_active").default(true), // To handle history later
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
-  cartId: text("cart_id")
+  cartId: integer("cart_id")
     .notNull()
-    .references(() => carts.id),
+    .references(() => carts.id, { onDelete: "cascade"}),
   category: text("category").notNull(), // 'flight', 'hotel', 'dining', 'experience'
   externalId: text("external_id"), //ID from API
   data: jsonb("data").notNull(), //snapshot of data: price, times, images, etc.
@@ -58,7 +58,7 @@ export const participants = pgTable(
       .references(() => users.id),
     tripId: integer("trip_id")
       .notNull()
-      .references(() => trips.id),
+      .references(() => trips.id, {onDelete: "cascade"}),
     role: text("role").default("member"), // 'owner', 'editor', 'viewer'
     joinedAt: timestamp("joined_at").defaultNow().notNull(),
   },

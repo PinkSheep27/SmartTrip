@@ -27,6 +27,8 @@ const Navbar: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [activeCartId, setActiveCartId] = useState<number | null>(null);
+  const [trips, setTrips] = useState<any[]>([]);
   const supabase = createClient();
 
   useEffect(() => {
@@ -48,6 +50,43 @@ const Navbar: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const fetchUserTrips = async () => {
+      if (!user) return;
+
+      try {
+        // 1. Call your actual database endpoint
+        const res = await fetch('/api/trips');
+
+        if (!res.ok) throw new Error("Failed to fetch trips");
+
+        const dbTrips = await res.json();
+
+        // 2. Map the database data to match the format the CartSwitcherModal expects
+        const formattedTrips = dbTrips.map((trip: any) => ({
+          cartId: trip.id, // Using trip.id as the identifier to switch between
+          tripName: trip.name,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          approxPrice: 0, // Set to 0 for now until you add price calculation!
+          participants: trip.contributors.map((c: any) => ({ name: c.userName })),
+        }));
+
+        // 3. Save the real trips to state
+        setTrips(formattedTrips);
+
+        // 4. Default to the first trip if they have one
+        if (formattedTrips.length > 0) {
+          setActiveCartId(formattedTrips[0].cartId);
+        }
+      } catch (error) {
+        console.error("Failed to fetch trips", error);
+      }
+    };
+
+    fetchUserTrips();
+  }, [user]);
 
   const navLinks = [
     {
@@ -165,7 +204,69 @@ const Navbar: React.FC = () => {
         {/* Live Cart Overlay */}
         {user && isCartOpen && (
           <div className="absolute top-[calc(100%+0.5rem)] right-0 w-[clamp(20rem,30vw,24rem)] z-50 animate-in fade-in slide-in-from-top-5 duration-200">
-            <LiveCart cartId={1} onClose={() => setIsCartOpen(false)} />
+            {activeCartId ? (
+              <LiveCart
+                cartId={activeCartId}
+                onClose={() => setIsCartOpen(false)}
+                onSwitchCart={(newCartId) => setActiveCartId(newCartId)}
+                trips={trips}
+              />
+            ) : (
+              /* Empty State - Shows when the user has 0 trips */
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 w-full flex flex-col items-center justify-center text-center relative">
+                {/* Close Button for Empty State */}
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+
+                <div className="bg-blue-50 p-4 rounded-full mb-4 mt-2">
+                  <ShoppingCart className="w-8 h-8 text-blue-500" />
+                </div>
+
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No Trips Yet</h3>
+                <p className="text-sm text-gray-500 mb-8 px-2">
+                  You need a trip to start adding flights and hotels to your itinerary.
+                </p>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      // 1. Create the default placeholder trip
+                      const res = await fetch("/api/trips", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: "Trip Itinerary", destination: "TBD" }),
+                      });
+
+                      if (res.ok) {
+                        const newTripData = await res.json();
+
+                        // 2. Add it to our local state so the Modal works
+                        setTrips([{
+                          cartId: newTripData.cart.id,
+                          tripName: newTripData.trip.name,
+                          startDate: null,
+                          endDate: null,
+                          approxPrice: 0,
+                          participants: [{ name: "Me" }]
+                        }]);
+
+                        // 3. Set the active cart ID to instantly swap the view!
+                        setActiveCartId(newTripData.cart.id);
+                      }
+                    } catch (error) {
+                      console.error("Failed to create default cart:", error);
+                    }
+                  }}
+                  className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" /> Create "Trip Itinerary"
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
