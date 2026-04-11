@@ -36,7 +36,6 @@ function LoginForm() {
     provider: "google",
     options: {
       redirectTo: `${location.origin}/auth/callback`,
-      scopes: 'https://www.googleapis.com/auth/calendar.events.readonly',
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
