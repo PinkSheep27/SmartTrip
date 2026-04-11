@@ -8,12 +8,13 @@ import {
   jsonb,
   boolean,
   primaryKey,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey(),
   email: text("email").notNull().unique(),
-  name: text("name").notNull(),
+  name: text("name"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -24,7 +25,7 @@ export const trips = pgTable("trips", {
   destination: text("destination").notNull(),
   startDate: text("start_date"),
   endDate: text("end_date"),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => users.id), //Trip Owner
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -53,7 +54,7 @@ export const cartItems = pgTable("cart_items", {
 export const participants = pgTable(
   "participants",
   {
-    userId: integer("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => users.id),
     tripId: integer("trip_id")
