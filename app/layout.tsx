@@ -1,24 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import NavBar from "@/app/NavBar/page";
+import { TripProvider } from "@/context/TripContext";
 
-type layoutProps = {
-  children: React.ReactNode;
-};
-
-export const metadata: Metadata = {
-  title: "SmartTrip",
-  description: `SmartTrip is your central command for travel, 
-    bringing every step of the planning 
-    process into one seamless platform.`,
-};
-
-export default function RootLayout({ children }: layoutProps) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="bg-white">
-        <NavBar />
-        {children}
+        <TripProvider>
+          <NavBar />
+          {children}
+        </TripProvider>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrip } from "@/context/TripContext";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,7 +28,7 @@ const Navbar: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeCartId, setActiveCartId] = useState<number | null>(null);
+  const { activeCartId, setActiveCartId } = useTrip();
   const [trips, setTrips] = useState<any[]>([]);
   const supabase = createClient();
 
@@ -56,32 +57,35 @@ const Navbar: React.FC = () => {
       if (!user) return;
 
       try {
-        // 1. Call your actual database endpoint
         const res = await fetch('/api/trips');
-
         if (!res.ok) throw new Error("Failed to fetch trips");
 
         const dbTrips = await res.json();
 
-        // 2. Map the database data to match the format the CartSwitcherModal expects
-        const formattedTrips = dbTrips.map((trip: any) => ({
-          cartId: trip.id, // Using trip.id as the identifier to switch between
-          tripName: trip.name,
-          startDate: trip.startDate,
-          endDate: trip.endDate,
-          approxPrice: 0, // Set to 0 for now until you add price calculation!
-          participants: trip.contributors.map((c: any) => ({ name: c.userName })),
-        }));
+        if (dbTrips && Array.isArray(dbTrips)) {
+          const formattedTrips = dbTrips.map((trip: any) => ({
+            id: trip.id,
+            cartId: trip.cartId || trip.id,
+            tripName: trip.name,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            approxPrice: 0,
+            participants: (trip.contributors || []).map((c: any) => ({ name: c.userName })),
+          }));
 
-        // 3. Save the real trips to state
-        setTrips(formattedTrips);
+          setTrips(formattedTrips);
 
-        // 4. Default to the first trip if they have one
-        if (formattedTrips.length > 0) {
-          setActiveCartId(formattedTrips[0].cartId);
+          // AUTO-SET ACTIVE CART: 
+          // This ensures that if you have a trip, the LiveCart actually loads it!
+          if (formattedTrips.length > 0 && !activeCartId) {
+            setActiveCartId(formattedTrips[0].cartId);
+          }
+        } else {
+          setTrips([]);
         }
       } catch (error) {
         console.error("Failed to fetch trips", error);
+        setTrips([]);
       }
     };
 
@@ -168,8 +172,8 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
                 className={`relative p-[clamp(0.5rem,1vw,0.625rem)] rounded-full transition-all cursor-pointer ${isCartOpen
-                    ? "bg-gray-100 text-black"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
+                  ? "bg-gray-100 text-black"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
                   }`}
               >
                 {isCartOpen ? (

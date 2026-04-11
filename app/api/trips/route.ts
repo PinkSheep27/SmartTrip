@@ -24,19 +24,31 @@ export async function GET(request: NextRequest) {
 
     if (tripIds.length === 0) return NextResponse.json([]);
 
-    const myTrips = await db.select().from(trips).where(inArray(trips.id, tripIds));
+    const myTrips = await db
+      .select({
+        id: trips.id,
+        name: trips.name,
+        destination: trips.destination,
+        cartId: carts.id, // Now the frontend can see the Cart ID
+      })
+      .from(trips)
+      .leftJoin(carts, eq(trips.id, carts.tripId))
+      .where(inArray(trips.id, tripIds));
+
     const allParticipants = await db
       .select({ tripId: participants.tripId, userName: users.name, userEmail: users.email, role: participants.role })
       .from(participants)
       .innerJoin(users, eq(participants.userId, users.id))
       .where(inArray(participants.tripId, tripIds));
 
+      /*
     const tripsWithContributors = myTrips.map(trip => ({
-        ...trip,
-        contributors: allParticipants.filter(p => p.tripId === trip.id)
+      ...trip,
+      contributors: allParticipants.filter(p => p.tripId === trip.id)
     }));
+    */
 
-    return NextResponse.json(tripsWithContributors);
+    return NextResponse.json(myTrips);
   } catch (error) {
     console.error("Trips API GET Error:", error);
     return NextResponse.json({ error: "Failed to fetch trips" }, { status: 500 });
