@@ -116,22 +116,24 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-6xl mt-6 px-6">
-      <div className="bg-white shadow-lg rounded-full px-6 py-3 w-full border border-gray-100">
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-6xl mt-[clamp(0.75rem,2vh,1.5rem)] px-[clamp(1rem,4vw,2rem)]">
+      {/* Added 'relative' here so the Cart dropdown aligns perfectly! */}
+      <div className="bg-white shadow-lg rounded-full px-[clamp(1rem,3vw,1.5rem)] py-[clamp(0.5rem,1vh,0.75rem)] w-full border border-gray-100 relative">
         <div className="flex items-center justify-between">
+
           {/* Logo Section */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 shrink-0">
             <Link href="/">
               <Image
                 src={smartTripLogo}
                 alt="SmartTrip Logo"
-                className="h-10 w-auto cursor-pointer hover:opacity-90 transition-opacity"
+                className="h-[clamp(2rem,4vh,2.5rem)] w-auto cursor-pointer hover:opacity-90 transition-opacity"
               />
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <ul className="hidden lg:flex items-center space-x-8 text-gray-600 font-medium">
+          <ul className="flex items-center space-x-[clamp(1rem,2.5vw,2rem)] text-[clamp(14px,1.2vw,16px)] text-gray-600 font-medium">
             {navLinks.map((link) => (
               <li
                 key={link.label}
@@ -160,14 +162,14 @@ const Navbar: React.FC = () => {
           </ul>
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
-            {/* Cart Icon - Always visible if user is logged in */}
+          <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] shrink-0">
+            {/* Cart Icon */}
             {user && (
               <button
                 onClick={() => setIsCartOpen(!isCartOpen)}
-                className={`relative p-2.5 rounded-full transition-all cursor-pointer ${isCartOpen
-                  ? "bg-gray-100 text-black"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
+                className={`relative p-[clamp(0.5rem,1vw,0.625rem)] rounded-full transition-all cursor-pointer ${isCartOpen
+                    ? "bg-gray-100 text-black"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
                   }`}
               >
                 {isCartOpen ? (
@@ -178,21 +180,21 @@ const Navbar: React.FC = () => {
               </button>
             )}
 
-            <div className="h-6 w-px bg-gray-200 mx-2 hidden md:block"></div>
+            <div className="h-[clamp(1.25rem,2.5vh,1.5rem)] w-px bg-gray-200 mx-[clamp(0.25rem,1vw,0.5rem)] hidden md:block"></div>
 
             {/* Auth Section */}
             <div className="flex items-center">
               {loading ? (
-                <div className="px-4 py-2 text-gray-400 text-sm">
+                <div className="px-4 py-2 text-gray-400 text-[clamp(13px,1.2vw,14px)]">
                   Loading...
                 </div>
               ) : !user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)]">
                   <LoginButton />
                   <SignUpButton />
                 </div>
               ) : (
-                /* Profile Component now handles the dropdown logic */
+                /* Profile Component handles the dropdown logic */
                 <Profile user={user} />
               )}
             </div>
@@ -201,7 +203,7 @@ const Navbar: React.FC = () => {
 
         {/* Live Cart Overlay */}
         {user && isCartOpen && (
-          <div className="absolute top-20 right-0 w-96 z-50 animate-in fade-in slide-in-from-top-5 duration-200">
+          <div className="absolute top-[calc(100%+0.5rem)] right-0 w-[clamp(20rem,30vw,24rem)] z-50 animate-in fade-in slide-in-from-top-5 duration-200">
             {activeCartId ? (
               <LiveCart
                 cartId={activeCartId}

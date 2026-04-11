@@ -1,10 +1,10 @@
 export default function Header() {
   return (
-    <div className="text-center text-white mb-10 animate-fade-in">
-      <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">
+    <div className="text-center text-white animate-fade-in mb-[clamp(1.5rem,4vh,2.5rem)]">
+      <h1 className="font-bold drop-shadow-lg text-[clamp(2.5rem,6vw,4.5rem)] mb-[clamp(0.5rem,2vh,1rem)]">
         Discover Your Next Meal
       </h1>
-      <p className="text-lg opacity-95">
+      <p className="opacity-95 text-[clamp(1.125rem,2vw,1.5rem)]">
         Find the perfect dining experience tailored to your taste
       </p>
     </div>
