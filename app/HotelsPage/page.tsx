@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrip } from "@/context/TripContext";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Star, Wifi, Users, Calendar, Search } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
@@ -18,6 +19,8 @@ interface Hotels {
 function HotelsPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
+
+  const { activeCartId } = useTrip();
 
   // Animation State
   const [hasSearched, setHasSearched] = useState(false);
@@ -247,7 +250,7 @@ function HotelsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartId: 1,
+          cartId: activeCartId,
           category: "Hotel",
           externalId: event.id,
           data: event,
@@ -259,10 +262,10 @@ function HotelsPage() {
         throw new Error(errorData.error || "Failed to add to cart");
       }
 
-      alert("✅ Hotel added to cart!");
+      alert("Hotel added to cart!");
     } catch (error) {
       console.log(error);
-      alert("❌ Error adding Hotel. Check console.");
+      alert("Error adding Hotel. Check console.");
     }
   }
 
@@ -304,14 +307,13 @@ function HotelsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pt-[clamp(6rem,10vh,8rem)] overflow-hidden">
-      
+
       <div className="max-w-7xl mx-auto px-[clamp(1rem,4vw,2rem)] w-full">
-        
+
         {/* Hero Text */}
-        <div 
-          className={`text-center transition-all duration-500 ease-in-out overflow-hidden flex flex-col justify-end ${
-            hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-[clamp(1.5rem,4vh,2.5rem)]'
-          }`}
+        <div
+          className={`text-center transition-all duration-500 ease-in-out overflow-hidden flex flex-col justify-end ${hasSearched ? 'opacity-0 scale-95 h-0 mb-0' : 'opacity-100 scale-100 h-[180px] mb-[clamp(1.5rem,4vh,2.5rem)]'
+            }`}
         >
           <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-bold mb-[clamp(0.5rem,2vh,1rem)] tracking-tight text-gray-900">
             Find Your Perfect Stay
@@ -322,25 +324,24 @@ function HotelsPage() {
         </div>
 
         {/* Horizontal Search Bar */}
-        <div className={`bg-white rounded-[clamp(1rem,2vw,1.5rem)] p-[clamp(1rem,3vw,1.5rem)] border border-gray-100 transition-all duration-700 ${
-          hasSearched ? 'shadow-lg' : 'shadow-md'
-        }`}>
-          
+        <div className={`bg-white rounded-[clamp(1rem,2vw,1.5rem)] p-[clamp(1rem,3vw,1.5rem)] border border-gray-100 transition-all duration-700 ${hasSearched ? 'shadow-lg' : 'shadow-md'
+          }`}>
+
           <div className="flex flex-col lg:flex-row gap-[clamp(0.5rem,1.5vw,1rem)]">
-            
+
             {/* Location */}
             <div className="flex-[1.5] min-w-[200px] relative">
-               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
-               <input
-                  onKeyDown={handleKeyDown}
-                  type="text"
-                  placeholder="City or destination"
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
-                  className="w-full pl-10 pr-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.75rem,1.5vh,1rem)] border-2 border-gray-200 rounded-[clamp(0.5rem,1vw,0.75rem)] focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white text-[16px] lg:text-[clamp(13px,1.5vw,16px)] text-ellipsis"
-                />
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+              <input
+                onKeyDown={handleKeyDown}
+                type="text"
+                placeholder="City or destination"
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                className="w-full pl-10 pr-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.75rem,1.5vh,1rem)] border-2 border-gray-200 rounded-[clamp(0.5rem,1vw,0.75rem)] focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white text-[16px] lg:text-[clamp(13px,1.5vw,16px)] text-ellipsis"
+              />
             </div>
-            
+
             {/* Check-in */}
             <div className="flex-1 min-w-[140px] relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
@@ -364,7 +365,7 @@ function HotelsPage() {
                 className="w-full pl-10 pr-[clamp(0.5rem,1vw,1rem)] py-[clamp(0.75rem,1.5vh,1rem)] border-2 border-gray-200 rounded-[clamp(0.5rem,1vw,0.75rem)] focus:outline-none focus:border-[#94C3D2] text-gray-800 transition-all bg-white cursor-pointer text-[16px] lg:text-[clamp(13px,1.5vw,16px)] text-ellipsis"
               />
             </div>
-            
+
             {/* Guests */}
             <div className="flex-1 min-w-[140px] relative">
               <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
@@ -380,7 +381,7 @@ function HotelsPage() {
                 <option value={5}>5+ Guests</option>
               </select>
             </div>
-            
+
             {/* Search Button */}
             <button
               onClick={getHotels}
@@ -415,7 +416,7 @@ function HotelsPage() {
       {/* Results Section */}
       {hasSearched && (
         <div className="max-w-7xl mx-auto px-[clamp(1rem,4vw,2rem)] py-[clamp(1.5rem,4vh,2.5rem)] w-full transition-all duration-700 animate-fade-in">
-          
+
           {hotels.length > 0 ? (
             <>
               {/* Sticky Filter Bar */}
@@ -569,9 +570,9 @@ function HotelsPage() {
               </div>
             </>
           ) : loading ? (
-             <div className="flex justify-center py-[clamp(3rem,8vh,5rem)]">
-               <div className="animate-spin rounded-full h-[clamp(2.5rem,4vw,3rem)] w-[clamp(2.5rem,4vw,3rem)] border-4 border-cyan-200 border-t-[#94C3D2]"></div>
-             </div>
+            <div className="flex justify-center py-[clamp(3rem,8vh,5rem)]">
+              <div className="animate-spin rounded-full h-[clamp(2.5rem,4vw,3rem)] w-[clamp(2.5rem,4vw,3rem)] border-4 border-cyan-200 border-t-[#94C3D2]"></div>
+            </div>
           ) : null}
         </div>
       )}

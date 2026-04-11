@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrip } from "@/context/TripContext";
 import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import AutocompleteInput, { Suggestion } from "@/components/FlightComponents/AutocompleteInput";
@@ -35,6 +36,8 @@ const FlightResultsContent: React.FC = () => {
   const arriving = params.get("arriving") || "";
   const departureDate = params.get("departureDate") || "";
   const returnDate = params.get("returnDate") || "";
+
+  const { activeCartId } = useTrip();
 
   const [tripTypeState, setTripTypeState] = React.useState(tripType);
   const [departingState, setDepartingState] = React.useState(departing);
@@ -140,7 +143,7 @@ const FlightResultsContent: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartId: 1, category: "Flight", externalId: uniqueId, data: flight,
+          cartId: activeCartId, category: "Flight", externalId: uniqueId, data: flight,
         }),
       });
 
@@ -148,10 +151,10 @@ const FlightResultsContent: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to add to cart");
       }
-      alert("✅ Flight added to cart!");
+      alert("Flight added to cart!");
     } catch (error) {
       console.error("Error adding flight:", error);
-      alert("❌ Error adding flight. Check console.");
+      alert("Error adding flight. Check console.");
     }
   }
 

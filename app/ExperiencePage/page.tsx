@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrip } from "@/context/TripContext";
 import { useState } from "react";
 import { MapPin, Search } from "lucide-react";
 
@@ -14,6 +15,7 @@ export interface Attractions {
 }
 
 export default function ExperiencePage() {
+  const { activeCartId } = useTrip();
   const [hasSearched, setHasSearched] = useState(false);
   const [searchLocation, setSearchLocation] = useState("");
   const [selectedType, setSelectedType] = useState("tourism.attraction");
@@ -87,7 +89,7 @@ export default function ExperiencePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cartId: 1, 
+          cartId: activeCartId, 
           category: "Attraction",
           externalId: event.id,
           data: event, 
@@ -99,10 +101,10 @@ export default function ExperiencePage() {
         throw new Error(errorData.error || "Failed to add to cart");
       }
 
-      alert("✅ Event added to cart!");
+      alert("Event added to cart!");
     } catch (error) {
       console.log(error);
-      alert("❌ Error adding Experience. Check console.");
+      alert("Error adding Experience. Check console.");
     }
   }
 
