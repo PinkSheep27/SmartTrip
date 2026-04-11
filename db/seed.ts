@@ -69,7 +69,7 @@ async function main() {
   // 5. Add items to the cart
   await db.insert(cartItems).values([
     {
-      cartId: cart.id.toString(),
+      cartId: cart.id,
       category: "flight",
       externalId: "FL-123",
       data: {
@@ -82,7 +82,7 @@ async function main() {
       },
     },
     {
-      cartId: cart.id.toString(),
+      cartId: cart.id,
       category: "hotel",
       externalId: "HT-999",
       data: {

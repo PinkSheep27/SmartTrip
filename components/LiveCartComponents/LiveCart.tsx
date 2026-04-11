@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ShoppingCart, Plane, Hotel, X, Trash2 } from "lucide-react";
+import CartSwitcherModal from "./CartSwitcherModal";
 
 type CartItem = {
   id: number;
@@ -13,11 +14,16 @@ type CartItem = {
 export default function LiveCart({
   cartId,
   onClose,
+  onSwitchCart,
+  trips,
 }: {
   cartId: number;
   onClose?: () => void;
+  onSwitchCart: (newCartId: number) => void;
+  trips: any[];
 }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -71,10 +77,16 @@ export default function LiveCart({
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 w-full max-h-[80vh] overflow-y-auto flex flex-col">
       <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-800">
+        <button
+          onClick={() => setIsSwitcherOpen(true)}
+          className="text-xl font-bold flex items-center gap-2 text-gray-800 hover:text-blue-600 transition-colors p-2 -ml-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+        >
           <ShoppingCart className="w-5 h-5 text-blue-600" />
           Trip Itinerary
-        </h2>
+          <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-md ml-2">
+            Switch
+          </span>
+        </button>
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-green-50 px-2 py-1 rounded-full border border-green-100">
@@ -130,10 +142,9 @@ export default function LiveCart({
                   {item.category === "flight"
                     ? `${item.data.departAirport} → ${item.data.arriveAirport}`
                     : item.category === "hotel" && item.data.nights
-                    ? `${item.data.nights} night${
-                        item.data.nights > 1 ? "s" : ""
+                      ? `${item.data.nights} night${item.data.nights > 1 ? "s" : ""
                       }`
-                    : item.category}
+                      : item.category}
                 </p>
               </div>
 
@@ -141,12 +152,12 @@ export default function LiveCart({
                 {item.category === "Attraction"
                   ? "~$25"
                   : item.category === "Restaurant"
-                  ? item.data.price === "$"
-                    ? "~$10–$25"
-                    : item.data.price === "$$"
-                    ? "~$25–$50"
-                    : "~$50–$100"
-                  : ""}
+                    ? item.data.price === "$"
+                      ? "~$10–$25"
+                      : item.data.price === "$$"
+                        ? "~$25–$50"
+                        : "~$50–$100"
+                    : ""}
               </div>
               <button
                 onClick={() => deleteItem(item.id)}
@@ -182,6 +193,17 @@ export default function LiveCart({
           </button>
         </div>
       )}
+      <CartSwitcherModal
+        isOpen={isSwitcherOpen}
+        onClose={() => setIsSwitcherOpen(false)}
+        onSelectCart={(newCartId) => {
+          onSwitchCart(newCartId);
+        }}
+        onCreateCart={() => {
+          console.log("Create new cart clicked");
+        }}
+        trips={trips}
+      />
     </div>
   );
 }
