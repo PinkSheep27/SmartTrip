@@ -13,6 +13,7 @@ async function main() {
   const [owner] = await db
     .insert(users)
     .values({
+      id: "00000000-0000-0000-0000-000000000000",
       email: "ivan@smarttrip.com",
       name: "Ivan (Owner)",
     })
@@ -21,6 +22,7 @@ async function main() {
   const [friend] = await db
     .insert(users)
     .values({
+      id: "00000000-0000-0000-0000-000000000001",
       email: "aaron@smarttrip.com",
       name: "Aaron (Friend)",
     })
