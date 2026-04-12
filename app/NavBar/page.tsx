@@ -1,7 +1,7 @@
 "use client";
 
 import { useTrip } from "@/context/TripContext";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -9,7 +9,7 @@ import LoginButton from "../../components/NavBarComponents/LoginButton";
 import SignUpButton from "../../components/NavBarComponents/SignUpButton";
 import Profile from "../../components/NavBarComponents/Profile";
 import LiveCart from "../../components/LiveCartComponents/LiveCart";
-import { ShoppingCart, X } from "lucide-react";
+import { ShoppingCart } from "lucide-react"; // Removed X import here
 
 import smartTripLogo from "../../assets/logos/smarttrip-transparent-logo.png";
 import flightsIconOutlinedImg from "../../assets/favicons/flights-outlined-100px.png";
@@ -27,10 +27,33 @@ const Navbar: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  const [activeDropdown, setActiveDropdown] = useState<'cart' | 'profile' | null>(null);
+  
+  // Refs to handle clicking outside the cart
+  const cartButtonRef = useRef<HTMLButtonElement>(null);
+  const cartDropdownRef = useRef<HTMLDivElement>(null);
+
   const { activeCartId, setActiveCartId } = useTrip();
   const [trips, setTrips] = useState<any[]>([]);
   const supabase = createClient();
+
+  // Outside click listener for the Cart
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        activeDropdown === 'cart' &&
+        cartDropdownRef.current &&
+        !cartDropdownRef.current.contains(event.target as Node) &&
+        cartButtonRef.current &&
+        !cartButtonRef.current.contains(event.target as Node)
+      ) {
+        setActiveDropdown(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [activeDropdown]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -50,7 +73,7 @@ const Navbar: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth]);
 
   useEffect(() => {
     const fetchUserTrips = async () => {
@@ -75,8 +98,6 @@ const Navbar: React.FC = () => {
 
           setTrips(formattedTrips);
 
-          // AUTO-SET ACTIVE CART: 
-          // This ensures that if you have a trip, the LiveCart actually loads it!
           if (formattedTrips.length > 0 && !activeCartId) {
             setActiveCartId(formattedTrips[0].cartId);
           }
@@ -90,7 +111,7 @@ const Navbar: React.FC = () => {
     };
 
     fetchUserTrips();
-  }, [user]);
+  }, [user, activeCartId, setActiveCartId]);
 
   const navLinks = [
     {
@@ -121,7 +142,6 @@ const Navbar: React.FC = () => {
 
   return (
     <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] w-full max-w-6xl mt-[clamp(0.75rem,2vh,1.5rem)] px-[clamp(1rem,4vw,2rem)]">
-      {/* Added 'relative' here so the Cart dropdown aligns perfectly! */}
       <div className="bg-white shadow-lg rounded-full px-[clamp(1rem,3vw,1.5rem)] py-[clamp(0.5rem,1vh,0.75rem)] w-full border border-gray-100 relative">
         <div className="flex items-center justify-between">
 
@@ -170,17 +190,15 @@ const Navbar: React.FC = () => {
             {/* Cart Icon */}
             {user && (
               <button
-                onClick={() => setIsCartOpen(!isCartOpen)}
-                className={`relative p-[clamp(0.5rem,1vw,0.625rem)] rounded-full transition-all cursor-pointer ${isCartOpen
-                  ? "bg-gray-100 text-black"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
-                  }`}
+                ref={cartButtonRef}
+                onClick={() => setActiveDropdown(prev => prev === 'cart' ? null : 'cart')}
+                className={`relative p-[clamp(0.5rem,1vw,0.625rem)] rounded-full transition-all cursor-pointer ${
+                  activeDropdown === 'cart'
+                    ? "bg-gray-100 text-black"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
+                }`}
               >
-                {isCartOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <ShoppingCart className="w-5 h-5" />
-                )}
+                <ShoppingCart className="w-5 h-5" />
               </button>
             )}
 
@@ -198,33 +216,34 @@ const Navbar: React.FC = () => {
                   <SignUpButton />
                 </div>
               ) : (
-                /* Profile Component handles the dropdown logic */
-                <Profile user={user} />
+                <Profile 
+                  user={user} 
+                  isOpen={activeDropdown === 'profile'}
+                  onToggle={() => setActiveDropdown(prev => prev === 'profile' ? null : 'profile')}
+                  onClose={() => setActiveDropdown(prev => prev === 'profile' ? null : prev)}
+                />
               )}
             </div>
           </div>
         </div>
 
         {/* Live Cart Overlay */}
-        {user && isCartOpen && (
-          <div className="absolute top-[calc(100%+0.5rem)] right-0 w-[clamp(20rem,30vw,24rem)] z-50 animate-in fade-in slide-in-from-top-5 duration-200">
+        {user && activeDropdown === 'cart' && (
+          <div 
+            ref={cartDropdownRef}
+            className="absolute top-[calc(100%+0.5rem)] right-0 w-[clamp(20rem,30vw,24rem)] z-50 animate-in fade-in slide-in-from-top-5 duration-200"
+          >
             {activeCartId ? (
               <LiveCart
                 cartId={activeCartId}
-                onClose={() => setIsCartOpen(false)}
                 onSwitchCart={(newCartId) => setActiveCartId(newCartId)}
                 trips={trips}
               />
             ) : (
-              /* Empty State - Shows when the user has 0 trips */
+              /* Empty State */
               <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 w-full flex flex-col items-center justify-center text-center relative">
-                {/* Close Button for Empty State */}
-                <button
-                  onClick={() => setIsCartOpen(false)}
-                  className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
+                
+                {/* REMOVED CLOSE BUTTON FROM HERE */}
 
                 <div className="bg-blue-50 p-4 rounded-full mb-4 mt-2">
                   <ShoppingCart className="w-8 h-8 text-blue-500" />
@@ -238,7 +257,6 @@ const Navbar: React.FC = () => {
                 <button
                   onClick={async () => {
                     try {
-                      // 1. Create the default placeholder trip
                       const res = await fetch("/api/trips", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -247,8 +265,6 @@ const Navbar: React.FC = () => {
 
                       if (res.ok) {
                         const newTripData = await res.json();
-
-                        // 2. Add it to our local state so the Modal works
                         setTrips([{
                           cartId: newTripData.cart.id,
                           tripName: newTripData.trip.name,
@@ -257,8 +273,6 @@ const Navbar: React.FC = () => {
                           approxPrice: 0,
                           participants: [{ name: "Me" }]
                         }]);
-
-                        // 3. Set the active cart ID to instantly swap the view!
                         setActiveCartId(newTripData.cart.id);
                       }
                     } catch (error) {
