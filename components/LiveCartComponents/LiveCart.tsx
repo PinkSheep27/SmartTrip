@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ShoppingCart, Plane, Hotel, X, Trash2 } from "lucide-react";
+import { ShoppingCart, Plane, Hotel, Trash2 } from "lucide-react"; // Removed X import here
 import CartSwitcherModal from "./CartSwitcherModal";
 
 type CartItem = {
@@ -13,12 +13,10 @@ type CartItem = {
 
 export default function LiveCart({
   cartId,
-  onClose,
   onSwitchCart,
   trips,
 }: {
   cartId: number;
-  onClose?: () => void;
   onSwitchCart: (newCartId: number) => void;
   trips: any[];
 }) {
@@ -57,7 +55,7 @@ export default function LiveCart({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [cartId]);
+  }, [cartId, supabase]);
 
   async function deleteItem(itemId: number) {
     try {
@@ -98,14 +96,7 @@ export default function LiveCart({
               Live
             </span>
           </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-400" />
-            </button>
-          )}
+          {/* REMOVED CLOSE BUTTON FROM HERE */}
         </div>
       </div>
 
