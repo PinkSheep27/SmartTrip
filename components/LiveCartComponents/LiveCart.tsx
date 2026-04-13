@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ShoppingCart, Plane, Hotel, Trash2 } from "lucide-react"; // Removed X import here
 import CartSwitcherModal from "./CartSwitcherModal";
+import Link from "next/link";
 
 type CartItem = {
   id: number;
@@ -179,6 +180,14 @@ export default function LiveCart({
                 .toFixed(2)}
             </span>
           </div>
+
+          <Link
+            href="/ManageCartPage"
+            className="block w-full py-3 mb-3 bg-[#94C3D2] rounded-xl font-bold text-center hover:opacity-80 transition-all active:scale-95"
+          >
+            Manage
+          </Link>
+
           <button className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95">
             Checkout
           </button>
