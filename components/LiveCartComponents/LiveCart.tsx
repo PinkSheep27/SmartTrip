@@ -73,6 +73,9 @@ export default function LiveCart({
     }
   }
 
+  const currentTrip = trips.find((t: any) => t.cartId === cartId || t.id === cartId);
+  const tripName = currentTrip?.name || currentTrip?.tripName || "Trip Itinerary";
+
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 w-full max-h-[80vh] overflow-y-auto flex flex-col">
       <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
@@ -81,7 +84,7 @@ export default function LiveCart({
           className="text-xl font-bold flex items-center gap-2 text-gray-800 hover:text-blue-600 transition-colors p-2 -ml-2 rounded-lg hover:bg-gray-50 cursor-pointer"
         >
           <ShoppingCart className="w-5 h-5 text-blue-600" />
-          Trip Itinerary
+          {tripName}
           <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-md ml-2">
             Switch
           </span>
@@ -167,8 +170,15 @@ export default function LiveCart({
         <div className="border-t border-gray-100 p-4 mt-auto">
           {/* Subtotal row (keep your existing one) */}
           <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-600 font-medium">Subtotal</span>
-            <span className="text-xl font-bold text-gray-900">$850.00</span>
+            <span className="text-gray-500 font-medium">
+              Total
+              <span className="text-gray-600 text-xs flex flex-col">
+                <span>(Excluding Dining and Experiences)</span>
+              </span>
+            </span>
+            <span className="text-xl font-bold text-gray-900">
+              ${items.reduce((acc, item) => acc + (Number(item.data?.price) || 0), 0).toFixed(2)}
+            </span>
           </div>
 
           {/* NEW: The Manage Trip Button */}
