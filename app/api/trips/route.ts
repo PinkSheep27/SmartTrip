@@ -19,25 +19,60 @@ export async function GET(request: NextRequest) {
     const [currentUser] = await db.select().from(users).where(eq(users.email, user.email));
     if (!currentUser) return NextResponse.json([]);
 
-    const userParticipations = await db.select({ tripId: participants.tripId }).from(participants).where(eq(participants.userId, currentUser.id));
-    const tripIds = userParticipations.map(p => p.tripId);
+    // 1. Only fetch trips where the user has ACCEPTED the invite (or is the owner)
+    const userParticipations = await db.select({ tripId: participants.tripId })
+      .from(participants)
+      .where(and(
+        eq(participants.userId, currentUser.id),
+        eq(participants.status, 'accepted')
+      ));
 
+    const tripIds = userParticipations.map(p => p.tripId);
     if (tripIds.length === 0) return NextResponse.json([]);
 
+    // 2. Fetch the base trips and their active carts
     const myTrips = await db
       .select({
         id: trips.id,
         name: trips.name,
         destination: trips.destination,
-        startDate: trips.startDate, // <-- Now fetching dates
-        endDate: trips.endDate,     // <-- Now fetching dates
-        cartId: carts.id, 
+        startDate: trips.startDate,
+        endDate: trips.endDate,
+        cartId: carts.id,
       })
       .from(trips)
       .leftJoin(carts, eq(trips.id, carts.tripId))
       .where(inArray(trips.id, tripIds));
 
-    return NextResponse.json(myTrips);
+    // 3. Fetch all accepted participants for these trips so the UI can show avatars
+    const allParticipants = await db
+      .select({
+        tripId: participants.tripId,
+        userId: participants.userId,
+        role: participants.role,
+        userName: users.name,
+        userEmail: users.email
+      })
+      .from(participants)
+      .leftJoin(users, eq(participants.userId, users.id))
+      .where(and(
+        inArray(participants.tripId, tripIds),
+        eq(participants.status, 'accepted')
+      ));
+
+    // 4. Stitch the participants into the trip objects
+    const tripsWithParticipants = myTrips.map(trip => ({
+      ...trip,
+      participants: allParticipants
+        .filter(p => p.tripId === trip.id)
+        .map(p => ({
+          id: p.userId,
+          name: p.userName || p.userEmail,
+          role: p.role
+        }))
+    }));
+
+    return NextResponse.json(tripsWithParticipants);
   } catch (error) {
     console.error("Trips API GET Error:", error);
     return NextResponse.json({ error: "Failed to fetch trips" }, { status: 500 });
@@ -103,20 +138,20 @@ export async function PUT(request: NextRequest) {
     if (!id) return NextResponse.json({ error: "Trip ID is required" }, { status: 400 });
 
     const [currentUser] = await db.select().from(users).where(eq(users.email, user.email));
-    if(!currentUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!currentUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const [participation] = await db
       .select()
       .from(participants)
       .where(
-         and(
-            eq(participants.tripId, Number(id)), // Forced to Number for safety
-            eq(participants.userId, currentUser.id)
-         )
+        and(
+          eq(participants.tripId, Number(id)), // Forced to Number for safety
+          eq(participants.userId, currentUser.id)
+        )
       );
 
     if (!participation) {
-        return NextResponse.json({ error: "Unauthorized to edit this trip" }, { status: 403 });
+      return NextResponse.json({ error: "Unauthorized to edit this trip" }, { status: 403 });
     }
 
     const [updatedTrip] = await db.update(trips)
@@ -154,20 +189,20 @@ export async function DELETE(request: NextRequest) {
     if (!id) return NextResponse.json({ error: "Trip ID is required" }, { status: 400 });
 
     const [currentUser] = await db.select().from(users).where(eq(users.email, user.email));
-    if(!currentUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!currentUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const [participation] = await db
       .select()
       .from(participants)
       .where(
-         and(
-            eq(participants.tripId, Number(id)),
-            eq(participants.userId, currentUser.id)
-         )
+        and(
+          eq(participants.tripId, Number(id)),
+          eq(participants.userId, currentUser.id)
+        )
       );
 
     if (!participation || participation.role !== 'owner') {
-        return NextResponse.json({ error: "Only the owner can delete this trip" }, { status: 403 });
+      return NextResponse.json({ error: "Only the owner can delete this trip" }, { status: 403 });
     }
 
     await db.delete(trips).where(eq(trips.id, Number(id)));
