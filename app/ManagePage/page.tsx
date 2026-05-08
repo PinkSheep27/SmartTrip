@@ -66,9 +66,11 @@ export default function ManageTripPage() {
 
       if (items) {
         setCartItems({
-          flights: items.filter(item => item.category === 'flight'),
-          hotels: items.filter(item => item.category === 'hotel'),
-          experiences: items.filter(item => !['flight', 'hotel'].includes(item.category))
+          flights: items.filter(item => item.category?.toLowerCase() === 'flight'),
+          hotels: items.filter(item => item.category?.toLowerCase() === 'hotel'),
+          experiences: items.filter(item =>
+            !['flight', 'hotel'].includes(item.category?.toLowerCase())
+          )
         });
       }
     } catch (error) {
@@ -305,9 +307,11 @@ export default function ManageTripPage() {
                 </div>
 
                 <p className="text-gray-500 font-medium flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   {tripDetails?.startDate && tripDetails?.endDate
-                    ? `${new Date(tripDetails.startDate).toLocaleDateString()} - ${new Date(tripDetails.endDate).toLocaleDateString()}`
+                    ? `${new Date(tripDetails.startDate).toLocaleDateString('en-US', { timeZone: 'UTC' })} - ${new Date(tripDetails.endDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}`
                     : "Dates TBD"}
                   • {tripDetails?.destination || "Destination TBD"}
                 </p>
@@ -406,7 +410,17 @@ export default function ManageTripPage() {
                         <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 shrink-0">✈️</div>
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-900">{flight.data.departAirport} ➔ {flight.data.arriveAirport} <span className="text-sm font-normal text-gray-500 ml-2">{flight.data.airline}</span></h3>
-                          <p className="text-sm text-gray-500 mt-1">Times TBD</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {flight.data.departureTime
+                              ? new Date(flight.data.departureTime).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })
+                              : "Time TBD"}
+                          </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col items-end mr-4">
@@ -450,7 +464,14 @@ export default function ManageTripPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-900">{hotel.data.name}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{hotel.data.nights} night{hotel.data.nights > 1 ? 's' : ''}</p>
+                          <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                            {/* Displaying Location instead of Nights/Dates */}
+                            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {hotel.data.location || "Location TBD"}
+                          </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col items-end mr-4">

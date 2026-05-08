@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ShoppingCart, Plane, Hotel, Trash2 } from "lucide-react"; // Removed X import here
+import { ShoppingCart, Plane, Hotel, Trash2, Utensils, Ticket } from "lucide-react"; // Removed X import here
 import CartSwitcherModal from "./CartSwitcherModal";
 import Link from "next/link";
 
@@ -100,7 +100,6 @@ export default function LiveCart({
               Live
             </span>
           </div>
-          {/* REMOVED CLOSE BUTTON FROM HERE */}
         </div>
       </div>
 
@@ -113,56 +112,69 @@ export default function LiveCart({
             </p>
           </div>
         ) : (
-          items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all group"
-            >
-              <div className="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-                {item.category === "flight" ? (
-                  <Plane className="w-4 h-4 text-blue-500" />
-                ) : (
-                  <Hotel className="w-4 h-4 text-orange-500" />
-                )}
-              </div>
+          items.map((item) => {
+            // 1. Parse data safely in case it's stored as a JSON string
+            const displayData = typeof item.data === 'string' ? JSON.parse(item.data) : item.data;
 
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm truncate">
-                  {item.category === "flight"
-                    ? item.data.airline
-                    : item.data.name}
-                </p>
-                <p className="text-xs text-gray-500 capitalize">
-                  {/* Updated display logic for hotels */}
-                  {item.category === "flight"
-                    ? `${item.data.departAirport} → ${item.data.arriveAirport}`
-                    : item.category === "hotel" && item.data.nights
-                      ? `${item.data.nights} night${item.data.nights > 1 ? "s" : ""
-                      }`
-                      : item.category}
-                </p>
-              </div>
-
-              <div className="font-bold text-gray-900 text-sm">
-                {item.category === "Attraction"
-                  ? "~$25"
-                  : item.category === "Restaurant"
-                    ? item.data.price === "$"
-                      ? "~$10–$25"
-                      : item.data.price === "$$"
-                        ? "~$25–$50"
-                        : "~$50–$100"
-                    : ""}
-              </div>
-              <button
-                onClick={() => deleteItem(item.id)}
-                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                title="Remove item"
+            return (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all group"
               >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))
+                {/* ICON SECTION */}
+                <div className="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform flex-shrink-0">
+                  {(() => {
+                    // Normalize category for consistent checking
+                    const category = item.category.toLowerCase();
+
+                    if (category === "flight") {
+                      return <Plane className="w-4 h-4 text-blue-500" />;
+                    } else if (category === "hotel") {
+                      return <Hotel className="w-4 h-4 text-orange-500" />;
+                    } else if (category === "restaurant" || category === "dining") {
+                      return <Utensils className="w-4 h-4 text-emerald-500" />;
+                    } else {
+                      // Default icon for Experiences and Attractions
+                      return <Ticket className="w-4 h-4 text-purple-500" />;
+                    }
+                  })()}
+                </div>
+
+                {/* MIDDLE SECTION: Big Airline/Name / Small Route/Location layout */}
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <p className="font-bold text-gray-900 text-sm truncate leading-tight">
+                    {item.category.toLowerCase() === "flight"
+                      ? (displayData.airline || "Unknown Airline")
+                      : (displayData.name || "Unknown Item")}
+                  </p>
+
+                  <p className="text-[10px] text-gray-500 truncate mt-0.5 uppercase tracking-wide">
+                    {item.category.toLowerCase() === "flight"
+                      ? `${displayData.departAirport || '???'} → ${displayData.arriveAirport || '???'}`
+                      : (item.category.toLowerCase() === "experience" || item.category === "Attraction")
+                        ? (displayData.address || displayData.locationName || "EXPERIENCE")
+                        : (displayData.location || item.category)}
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE: Price and Delete */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="font-bold text-gray-900 text-sm">
+                    {displayData.price ? `$${displayData.price}` :
+                      item.category === "Attraction" ? "~$25" :
+                        item.category === "Restaurant" ? (displayData.price === "$" ? "~$10–$25" : displayData.price === "$$" ? "~$25–$50" : "~$50–$100") : ""}
+                  </div>
+                  <button
+                    onClick={() => deleteItem(item.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Remove item"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 
