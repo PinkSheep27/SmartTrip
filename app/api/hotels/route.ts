@@ -1,55 +1,90 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Duffel } from "@duffel/api";
-
-const duffel = new Duffel({
-  token: process.env.DUFFEL_ACCESS_TOKEN!,
-});
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const originalLng = Number(searchParams.get("lng"));
-  const originalLat = Number(searchParams.get("lat"));
+  const lng = Number(searchParams.get("lng"));
+  const lat = Number(searchParams.get("lat"));
 
-  if (isNaN(originalLng) || isNaN(originalLat)) {
-    return NextResponse.json({ error: "Missing required parameters: lng, lat" }, { status: 400 });
+  if (isNaN(lng) || isNaN(lat)) {
+    return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
 
   try {
+    // ---------------------------------------------------------
+    // STEP 1: Convert Map Coordinates to a City Name (Free)
+    // ---------------------------------------------------------
+    const geoRes = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      { headers: { "User-Agent": "SmartTripApp/1.0" } }
+    );
+    const geoData = await geoRes.json();
+    
+    // Extract the city, town, or default to a safe fallback
+    const cityName = geoData.address?.city || geoData.address?.town || geoData.address?.village || "New York";
+
+    // ---------------------------------------------------------
+    // STEP 2: Get the dest_id from RapidAPI
+    // ---------------------------------------------------------
+    const destRes = await fetch(
+      `https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination?query=${encodeURIComponent(cityName)}`,
+      {
+        headers: {
+          'x-rapidapi-key': process.env.RAPIDAPI_KEY!,
+          'x-rapidapi-host': 'booking-com15.p.rapidapi.com'
+        }
+      }
+    );
+    const destData = await destRes.json();
+    
+    // Grab the first valid destination ID
+    const firstDest = destData?.data?.[0];
+    if (!firstDest || !firstDest.dest_id) {
+      return NextResponse.json({ error: "Could not find a valid destination ID" }, { status: 404 });
+    }
+
+    const destId = firstDest.dest_id;
+    const searchType = firstDest.search_type || "CITY";
+
+    // ---------------------------------------------------------
+    // STEP 3: Search Hotels with the dest_id and Mock Dates
+    // ---------------------------------------------------------
+    // Generate fallback dates (+7 and +8 days) to ensure Booking.com returns availability
     const checkIn = new Date();
     checkIn.setDate(checkIn.getDate() + 7);
     const checkOut = new Date();
     checkOut.setDate(checkOut.getDate() + 8);
+    const checkInStr = checkIn.toISOString().split("T")[0];
+    const checkOutStr = checkOut.toISOString().split("T")[0];
 
-    // 1. Force the Duffel search to the ONLY coordinates their test sandbox supports
-    const response = await duffel.stays.search({
-      location: {
-        radius: 2,
-        geographic_coordinates: { latitude: -24.38, longitude: -128.32 },
-      },
-      check_in_date: checkIn.toISOString().split("T")[0],
-      check_out_date: checkOut.toISOString().split("T")[0],
-      rooms: 1,
-      guests: [{ type: "adult" }],
-    });
+    const hotelsRes = await fetch(
+      `https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels?dest_id=${destId}&search_type=${searchType}&arrival_date=${checkInStr}&departure_date=${checkOutStr}&adults=1&room_qty=1&currency_code=USD`,
+      {
+        headers: {
+          'x-rapidapi-key': process.env.RAPIDAPI_KEY!,
+          'x-rapidapi-host': 'booking-com15.p.rapidapi.com'
+        }
+      }
+    );
+    const hotelsData = await hotelsRes.json();
 
-    const results = response.data.results || [];
-    
-    // 2. Map the test hotels back to the user's requested location so the map works!
-    const allHotels = results.map((result: any, i: number) => {
-      const hotel = result.accommodation;
+    // ---------------------------------------------------------
+    // DATA MAPPING
+    // ---------------------------------------------------------
+    // RapidAPI wrappers nest data differently. This safely checks multiple common paths.
+    const resultsArray = hotelsData?.data?.hotels || hotelsData?.data || [];
+
+    const allHotels = resultsArray.map((hotel: any) => {
+      // Handle the "property" nested object if the API uses it, otherwise fall back to top-level
+      const prop = hotel.property || hotel; 
       
-      // Add a slight random offset so hotels don't stack perfectly on top of each other
-      const latOffset = (Math.random() - 0.5) * 0.02;
-      const lngOffset = (Math.random() - 0.5) * 0.02;
-
       return {
-        id: hotel.id,
-        // Make the fake test hotel name sound real
-        name: hotel.name.includes("Duffel") ? `Plaza Hotel & Suites ${i + 1}` : hotel.name,
-        image: hotel.photos?.[0]?.url || `https://via.placeholder.com/800x600?text=${encodeURIComponent(hotel.name)}`,
-        location: "City Center",
-        latitude: originalLat + latOffset,
-        longitude: originalLng + lngOffset,
+        id: prop.hotel_id?.toString() || prop.id?.toString(),
+        name: prop.hotel_name || prop.name || "Unknown Hotel",
+        image: prop.max_photo_url || prop.photoUrls?.[0] || `https://via.placeholder.com/800x600?text=Hotel`,
+        location: cityName,
+        latitude: prop.latitude || lat,
+        longitude: prop.longitude || lng,
+        price: prop.min_total_price || prop.priceBreakdown?.grossPrice?.value || null,
       };
     });
 
@@ -60,30 +95,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("Hotels search error:", error);
-    
-    // 3. Bulletproof Fallback: If Duffel test servers go down completely, return high-quality mock data
-    return NextResponse.json({
-      allHotels: [
-        {
-          id: "mock_hotel_1",
-          name: "The Grand Skyline Hotel",
-          image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-          location: "Downtown",
-          latitude: originalLat + 0.002,
-          longitude: originalLng + 0.001,
-        },
-        {
-          id: "mock_hotel_2",
-          name: "Metropolis Boutique Suites",
-          image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-          location: "City Center",
-          latitude: originalLat - 0.003,
-          longitude: originalLng - 0.002,
-        }
-      ],
-      totalHotels: 2,
-      allHotelIds: ["mock_hotel_1", "mock_hotel_2"]
-    });
+    console.error("RapidAPI Chained Fetch Error:", error);
+    return NextResponse.json({ error: "Failed to fetch hotels" }, { status: 500 });
   }
 }
