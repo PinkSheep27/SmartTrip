@@ -244,30 +244,32 @@ function HotelsPage() {
     guests,
   ]);
 
-  async function addToCart(event: Hotels) {
-    try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cartId: activeCartId,
-          category: "Hotel",
-          externalId: event.id,
-          data: event,
-        }),
-      });
+  async function addToCart(hotel: Hotels) {
+  try {
+    const nightsCount = (checkIn && checkOut) 
+      ? differenceInCalendarDays(new Date(checkOut), new Date(checkIn)) 
+      : 0;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add to cart");
-      }
+    const response = await fetch("/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cartId: activeCartId,
+        category: "hotel",
+        externalId: hotel.id,
+        data: {
+          ...hotel,
+          nights: nightsCount
+        },
+      }),
+    });
 
-      alert("Hotel added to cart!");
-    } catch (error) {
-      console.log(error);
-      alert("Error adding Hotel. Check console.");
-    }
+    if (!response.ok) throw new Error("Failed to add to cart");
+    alert("Hotel added to cart!");
+  } catch (error) {
+    console.error(error);
   }
+}
 
   useEffect(() => {
     if (isInitialMount.current) {
