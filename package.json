@@ -12,6 +12,7 @@
     "db:seed": "npx tsx db/seed.ts"
   },
   "dependencies": {
+    "@duffel/api": "^4.25.0",
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.2",

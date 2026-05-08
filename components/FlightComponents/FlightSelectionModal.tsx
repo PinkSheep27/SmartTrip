@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// 1. Update the interface to include onAddToCart
 interface FlightSelectionModalProps {
   flight: any;
   onClose: () => void;
@@ -32,20 +31,20 @@ const CLASS_OPTIONS = [
   { type: "FIRST CLASS", priceFactor: 4.0 },
 ];
 
-// 2. Destructure the new prop here
 const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onClose, onAddToCart }) => {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number | string>(1);
   const [selectedClass, setSelectedClass] = useState(CLASS_OPTIONS[0]);
 
   const basePrice = parseFloat(flight.price);
-  const totalTicketPrice = basePrice * selectedClass.priceFactor * quantity;
+  
+  const safeQuantity = typeof quantity === 'number' ? quantity : 1;
+  const totalTicketPrice = basePrice * selectedClass.priceFactor * safeQuantity;
 
-  // 3. Create the checkout handler
   const handleCheckout = () => {
     const finalFlightData = {
       ...flight,
       price: totalTicketPrice.toFixed(2),
-      quantity: quantity,
+      quantity: safeQuantity,
       travelClass: selectedClass.type
     };
 
@@ -97,7 +96,10 @@ const FlightSelectionModal: React.FC<FlightSelectionModalProps> = ({ flight, onC
               type="number"
               min="1"
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value)))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setQuantity(val === '' ? '' : Math.max(1, parseInt(val)));
+              }}
               className="p-2 border rounded-lg w-20 text-center cursor-pointer"
             />
           </div>

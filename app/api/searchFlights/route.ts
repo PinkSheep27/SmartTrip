@@ -1,52 +1,32 @@
+// app/api/searchFlights/route.ts
 import { NextResponse } from "next/server";
+import { Duffel } from "@duffel/api";
 
-const AMADEUS_AUTH_URL = "https://test.api.amadeus.com/v1/security/oauth2/token";
-const AMADEUS_FLIGHT_URL = "https://test.api.amadeus.com/v2/shopping/flight-offers";
+const duffel = new Duffel({
+  token: process.env.DUFFEL_ACCESS_TOKEN!,
+});
 
+function simplifyFlights(offers: any[]) {
+  if (!offers) return [];
 
-async function getAccessToken() {
-  const res = await fetch(AMADEUS_AUTH_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "client_credentials",
-      client_id: process.env.AMADEUS_API_KEY!,
-      client_secret: process.env.AMADEUS_API_SECRET!,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    console.error("Amadeus Auth Error:", data);
-    throw new Error("Failed to fetch Amadeus token");
-  }
-
-  return data.access_token;
-}
-
-// 🔹 Shape the Amadeus response into simple flight data
-function simplifyFlights(data: any) {
-  if (!data.data) return [];
-
-  return data.data.map((offer: any) => {
-    const itinerary = offer.itineraries[0];
-    const firstSegment = itinerary.segments[0];
-    const lastSegment = itinerary.segments[itinerary.segments.length - 1];
+  return offers.map((offer: any) => {
+    const firstSlice = offer.slices[0];
+    const firstSegment = firstSlice.segments[0];
+    const lastSegment = firstSlice.segments[firstSlice.segments.length - 1];
 
     return {
-      airline: firstSegment.carrierCode,
-      price: offer.price.total,
-      departAirport: firstSegment.departure.iataCode,
-      arriveAirport: lastSegment.arrival.iataCode,
-      departureTime: firstSegment.departure.at,
-      arrivalTime: lastSegment.arrival.at,
-      duration: itinerary.duration,
+      airline: offer.owner.name, 
+      
+      price: offer.total_amount,
+      departAirport: firstSegment.origin.iata_code,
+      arriveAirport: lastSegment.destination.iata_code,
+      departureTime: firstSegment.departing_at,
+      arrivalTime: lastSegment.arriving_at,
+      duration: firstSlice.duration,
     };
   });
 }
 
-// 🔹 API Route: searchFlights
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const search = url.searchParams;
@@ -56,62 +36,45 @@ export async function GET(req: Request) {
   const arriving = search.get("arriving")!;
   const departureDate = search.get("departureDate")!;
   const returnDate = search.get("returnDate") || "";
-  const adults = "1";
+
+  if (!arriving || arriving.length !== 3) {
+    return NextResponse.json({ flights: [], error: "Arrival airport must be a 3-letter code" }, { status: 400 });
+  }
+
+  if (tripType === "roundtrip" && !returnDate) {
+    return NextResponse.json({ flights: [], error: "Return date required for roundtrip" }, { status: 400 });
+  }
 
   try {
-    const token = await getAccessToken();
-
-    // Build Amadeus query parameters
-    const params: any = {
-      originLocationCode: departing,
-      destinationLocationCode: arriving,
-      departureDate,
-      adults,
-      max: "10",
-    };
-
-    // Validate arriving airport
-if (!arriving || arriving.length !== 3) {
-  return NextResponse.json(
-    { flights: [], error: "Arrival airport must be a 3-letter code" },
-    { status: 400 }
-  );
-}
-
-params.destinationLocationCode = arriving;
-
-// Only add returnDate for roundtrip
-if (tripType === "roundtrip") {
-  if (!returnDate) {
-    return NextResponse.json(
-      { flights: [], error: "Return date required for roundtrip" },
-      { status: 400 }
-    );
-  }
-  params.returnDate = returnDate;
-}
-
-    // Call Amadeus API
-    const res = await fetch(
-      `${AMADEUS_FLIGHT_URL}?${new URLSearchParams(params).toString()}`,
+    const slices: any[] = [
       {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+        origin: departing,
+        destination: arriving,
+        departure_date: departureDate,
+      },
+    ];
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Amadeus Flight Error:", data);
-      return NextResponse.json({ flights: [], error: data }, { status: 400 });
+    if (tripType === "roundtrip") {
+      slices.push({
+        origin: arriving,
+        destination: departing,
+        departure_date: returnDate,
+      });
     }
 
-    // Make the results usable for your frontend
-    const simplified = simplifyFlights(data);
+    // Call Duffel API
+    const offerRequest = await duffel.offerRequests.create({
+      // 2. Add 'as any' here to bypass the strict type check
+      slices: slices as any,
+      passengers: [{ type: "adult" }],
+      cabin_class: "economy",
+      return_offers: true,
+    });
 
+    const simplified = simplifyFlights(offerRequest.data.offers);
     return NextResponse.json({ flights: simplified });
   } catch (err) {
-    console.error("Server Error:", err);
-    return NextResponse.json({ error: "Server failed" }, { status: 500 });
+    console.error("Duffel Flight Error:", err);
+    return NextResponse.json({ error: "Server failed to fetch flights" }, { status: 500 });
   }
 }
