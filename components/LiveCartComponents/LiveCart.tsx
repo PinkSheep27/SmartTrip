@@ -73,7 +73,7 @@ export default function LiveCart({
     }
   }
 
-  const currentTrip = trips.find((t: any) => t.cartId === cartId || t.id === cartId);
+  const currentTrip = (trips || []).find((t: any) => t.cartId === cartId || t.id === cartId);
   const tripName = currentTrip?.name || currentTrip?.tripName || "Trip Itinerary";
 
   return (

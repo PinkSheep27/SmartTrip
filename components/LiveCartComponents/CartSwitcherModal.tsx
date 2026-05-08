@@ -31,23 +31,23 @@ export default function CartSwitcherModal({
   // We need to wait for the component to mount before using createPortal (Next.js rule)
   const [mounted, setMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   useEffect(() => {
     setMounted(true);
-    
+
     // Prevent scrolling on the main page when modal is open
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-    
+
     return () => {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
-  const TRIPS_PER_PAGE = 9; 
+  const TRIPS_PER_PAGE = 9;
   const totalPages = Math.ceil(trips.length / TRIPS_PER_PAGE) || 1;
   const startIndex = (currentPage - 1) * TRIPS_PER_PAGE;
   const visibleTrips = trips.slice(startIndex, startIndex + TRIPS_PER_PAGE);
@@ -57,12 +57,11 @@ export default function CartSwitcherModal({
 
   // This is the actual modal content
   const modalContent = (
-    // The fluid, 50% transparent gray backdrop with a blur effect
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-gray-600/50 backdrop-blur-sm animate-in fade-in duration-200">
+    // ADD THE ID HERE: id="cart-switcher-modal"
+    <div id="cart-switcher-modal" className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-gray-600/50 backdrop-blur-sm animate-in fade-in duration-200">
       
       {/* The Centered Box - Fluid max height and width */}
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-        
         {/* Header */}
         <div className="flex justify-between items-center p-6 bg-white border-b border-gray-100 shrink-0">
           <h2 className="text-2xl font-bold text-gray-800">Your Trips</h2>
@@ -74,7 +73,7 @@ export default function CartSwitcherModal({
         {/* Grid Content - This section scrolls if there are too many items on small screens */}
         <div className="p-6 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-            
+
             {/* Create a Cart Button - Always First on Page 1 */}
             {currentPage === 1 && (
               <button
@@ -115,9 +114,9 @@ export default function CartSwitcherModal({
                     <div
                       key={i}
                       className="inline-flex h-8 w-8 rounded-full ring-2 ring-white bg-blue-100 items-center justify-center text-xs font-bold text-blue-800"
-                      title={p.name}
+                      title={p.name || "Unknown User"}
                     >
-                      {p.name.charAt(0)}
+                      {(p.name || "?").charAt(0).toUpperCase()}
                     </div>
                   ))}
                   {trip.participants.length > 3 && (
@@ -141,7 +140,7 @@ export default function CartSwitcherModal({
             >
               <ChevronLeft className="w-4 h-4" /> Previous
             </button>
-            
+
             <span className="text-sm text-gray-500 font-medium">
               Page {currentPage} of {totalPages}
             </span>

@@ -61,6 +61,8 @@ export const participants = pgTable(
       .notNull()
       .references(() => trips.id, {onDelete: "cascade"}),
     role: text("role").default("member"), // 'owner', 'editor', 'viewer'
+    // NEW: Added status to track pending invites vs accepted users
+    status: text("status").default("accepted"), // 'pending', 'accepted'
     joinedAt: timestamp("joined_at").defaultNow().notNull(),
   },
   (t) => ({
@@ -83,9 +85,26 @@ export const events = pgTable("events", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// NEW: Notifications table to power the Inbox
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }), // The person receiving the notification
+  senderId: uuid("sender_id").references(() => users.id, { onDelete: "set null" }), // The person who triggered it (optional)
+  tripId: integer("trip_id").references(() => trips.id, { onDelete: "cascade" }), // The related trip
+  type: text("type").notNull(), // 'trip_invite', 'invite_accepted', 'invite_declined'
+  message: text("message").notNull(), // The text shown in the inbox
+  status: text("status").default("unread"), // 'unread', 'read', 'actioned'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ==========================================
+// RELATIONS
+// ==========================================
+
 export const usersRelations = relations(users, ({ many }) => ({
   ownedTrips: many(trips),
   sharedTrips: many(participants),
+  notifications: many(notifications, { relationName: "receivedNotifications" }),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
@@ -112,6 +131,24 @@ export const participantsRelations = relations(participants, ({ one }) => ({
   }),
   trip: one(trips, {
     fields: [participants.tripId],
+    references: [trips.id],
+  }),
+}));
+
+// NEW: Relations for notifications
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+    relationName: "receivedNotifications"
+  }),
+  sender: one(users, {
+    fields: [notifications.senderId],
+    references: [users.id],
+    relationName: "sentNotifications"
+  }),
+  trip: one(trips, {
+    fields: [notifications.tripId],
     references: [trips.id],
   }),
 }));

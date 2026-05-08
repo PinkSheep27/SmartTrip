@@ -9,7 +9,8 @@ import LoginButton from "../../components/NavBarComponents/LoginButton";
 import SignUpButton from "../../components/NavBarComponents/SignUpButton";
 import Profile from "../../components/NavBarComponents/Profile";
 import LiveCart from "../../components/LiveCartComponents/LiveCart";
-import { ShoppingCart } from "lucide-react"; // Removed X import here
+import { ShoppingCart } from "lucide-react";
+import InboxDropdown from "../../components/NavBarComponents/InboxDropdown";
 
 import smartTripLogo from "../../assets/logos/smarttrip-transparent-logo.png";
 import flightsIconOutlinedImg from "../../assets/favicons/flights-outlined-100px.png";
@@ -41,6 +42,10 @@ const Navbar: React.FC = () => {
   // Outside click listener for the Cart
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // NEW: If they clicked inside the modal portal, do absolutely nothing
+      if ((event.target as Element).closest('#cart-switcher-modal')) {
+        return;
+      }
       if (
         activeDropdown === 'cart' &&
         cartDropdownRef.current &&
@@ -93,7 +98,7 @@ const Navbar: React.FC = () => {
             startDate: trip.startDate,
             endDate: trip.endDate,
             approxPrice: 0,
-            participants: (trip.contributors || []).map((c: any) => ({ name: c.userName })),
+            participants: (trip.participants || []).map((c: any) => ({ name: c.name || "Unknown" })),
           }));
 
           setTrips(formattedTrips);
@@ -185,21 +190,28 @@ const Navbar: React.FC = () => {
             ))}
           </ul>
 
+
           {/* Right Side Actions */}
           <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] shrink-0">
-            {/* Cart Icon */}
+            
             {user && (
-              <button
-                ref={cartButtonRef}
-                onClick={() => setActiveDropdown(prev => prev === 'cart' ? null : 'cart')}
-                className={`relative p-[clamp(0.5rem,1vw,0.625rem)] rounded-full transition-all cursor-pointer ${
-                  activeDropdown === 'cart'
-                    ? "bg-gray-100 text-black"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
-                }`}
-              >
-                <ShoppingCart className="w-5 h-5" />
-              </button>
+              <>
+                {/* NEW: Inbox/Notifications Dropdown */}
+                <InboxDropdown />
+
+                {/* EXISTING: Cart Icon */}
+                <button
+                  ref={cartButtonRef}
+                  onClick={() => setActiveDropdown(prev => prev === 'cart' ? null : 'cart')}
+                  className={`relative p-[clamp(0.5rem,1vw,0.625rem)] rounded-full transition-all cursor-pointer ${
+                    activeDropdown === 'cart'
+                      ? "bg-gray-100 text-black"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-[#94C3D2]"
+                  }`}
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                </button>
+              </>
             )}
 
             <div className="h-[clamp(1.25rem,2.5vh,1.5rem)] w-px bg-gray-200 mx-[clamp(0.25rem,1vw,0.5rem)] hidden md:block"></div>
@@ -240,10 +252,7 @@ const Navbar: React.FC = () => {
                 trips={trips}
               />
             ) : (
-              /* Empty State */
               <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 w-full flex flex-col items-center justify-center text-center relative">
-                
-                {/* REMOVED CLOSE BUTTON FROM HERE */}
 
                 <div className="bg-blue-50 p-4 rounded-full mb-4 mt-2">
                   <ShoppingCart className="w-8 h-8 text-blue-500" />
