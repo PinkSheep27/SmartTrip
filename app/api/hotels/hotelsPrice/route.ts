@@ -1,126 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Token caching
-let cachedToken: string | null = null;
-let tokenExpiry: number = 0;
-
-async function getAccessToken() {
-  if (cachedToken && Date.now() < tokenExpiry) {
-    return cachedToken;
-  }
-
-  const apiKey = process.env.AMADEUS_API_KEY;
-  const apiSecret = process.env.AMADEUS_API_SECRET;
-
-  if (!apiKey || !apiSecret) {
-    throw new Error("Amadeus API credentials not configured");
-  }
-
-  const response = await fetch(
-    "https://test.api.amadeus.com/v1/security/oauth2/token",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: apiKey,
-        client_secret: apiSecret,
-      }),
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error_description || "Failed to get token");
-  }
-
-  cachedToken = data.access_token;
-  tokenExpiry = Date.now() + data.expires_in * 1000 - 60000;
-
-  return cachedToken;
-}
-
-// Search provided hotel IDs for prices
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const hotelIds = searchParams.get("hotelIds");
+  const hotelIdsStr = searchParams.get("hotelIds");
   const checkInDate = searchParams.get("checkInDate");
   const checkOutDate = searchParams.get("checkOutDate");
-  const adults = searchParams.get("adults") || "2";
+  const adultsStr = searchParams.get("adults") || "1";
 
-  if (!hotelIds || !checkInDate || !checkOutDate) {
-    return NextResponse.json(
-      { error: "Missing required parameters" },
-      { status: 400 }
-    );
+  if (!hotelIdsStr || !checkInDate || !checkOutDate) {
+    return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
   }
 
   try {
-    const token = await getAccessToken();
+    // Keep the limit of 5 for now to protect your 500 requests/mo limit
+    const ids = hotelIdsStr.split(",").slice(0, 5);
 
-    const offersUrl = `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${hotelIds}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`;
+    const hotelPromises = ids.map(async (id) => {
+      try {
+        // Updated to your specific host and endpoint structure
+        const res = await fetch(
+          `https://booking-com15.p.rapidapi.com/api/v1/hotels/getHotelDetails?hotel_id=${id}&arrival_date=${checkInDate}&departure_date=${checkOutDate}&adults=${adultsStr}&children_age=1%2C17&room_qty=1&languagecode=en-us&currency_code=USD`,
+          {
+            headers: {
+              'x-rapidapi-key': process.env.RAPIDAPI_KEY!,
+              'x-rapidapi-host': 'booking-com15.p.rapidapi.com'
+            }
+          }
+        );
+        
+        const json = await res.json();
+        const data = json.data;
 
-    console.log(`Fetching offers for hotels...`);
-
-    const offersResponse = await fetch(offersUrl, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const offersData = await offersResponse.json();
-
-    if (!offersResponse.ok) {
-      console.warn("Offers API error:", offersData.errors);
-      return NextResponse.json({ hotels: [] });
-    }
-
-    if (!offersData.data || offersData.data.length === 0) {
-      console.warn("No offers returned for these hotels");
-      return NextResponse.json({ hotels: [] });
-    }
-
-    console.log(`✅ Found ${offersData.data.length} hotels with offers`);
-
-    // Only return hotels that have valid offers with prices
-    const hotels = offersData.data
-      .filter((hotelOffer: any) => {
-        const offer = hotelOffer.offers?.[0];
-        return offer && offer.price && offer.price.total;
-      })
-      .map((hotelOffer: any) => {
-        const hotel = hotelOffer.hotel;
-        const offer = hotelOffer.offers[0];
+        if (!data) return null;
 
         return {
-          id: hotel.hotelId,
-          name: hotel.name,
-          image: `https://via.placeholder.com/800x600?text=${encodeURIComponent(
-            hotel.name
-          )}`,
-          rating: hotel.rating || 0,
-          price: Math.round(parseFloat(offer.price.total)),
-          location: hotel.address?.cityName || "Unknown location",
-          latitude: hotel.latitude,
-          longitude: hotel.longitude,
-          currency: offer.price.currency || "USD",
+          id: id,
+          name: data.hotel_name || "Hotel Details",
+          image: data.main_photo_url || data.rooms?.[0]?.photos?.[0]?.url_maxres || `https://via.placeholder.com/800x600?text=Hotel`,
+          rating: data.review_score || 4.0,
+          
+          // REAL PRICE: Pulling from the product_price or composite price field
+          // We default to 0 if neither exists so you can clearly see if a price is missing
+          price: Math.round(data.product_price?.item?.amount_rounded || data.composite_price_breakdown?.all_inclusive_amount?.value || 0),
+          
+          location: data.city || "City Center",
+          latitude: data.latitude,
+          longitude: data.longitude,
+          currency: "USD",
         };
-      });
+      } catch (e) {
+        console.error(`Error fetching hotel ${id}:`, e);
+        return null;
+      }
+    });
 
-    console.log(`📦 Returning ${hotels.length} hotels with valid prices`);
+    const hotels = (await Promise.all(hotelPromises)).filter(Boolean);
 
     return NextResponse.json({ hotels });
+    
   } catch (error) {
     console.error("Hotels price search error:", error);
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to search hotel offers",
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch prices" }, { status: 500 });
   }
 }
