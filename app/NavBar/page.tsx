@@ -42,6 +42,10 @@ const Navbar: React.FC = () => {
   // Outside click listener for the Cart
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // NEW: If they clicked inside the modal portal, do absolutely nothing
+      if ((event.target as Element).closest('#cart-switcher-modal')) {
+        return;
+      }
       if (
         activeDropdown === 'cart' &&
         cartDropdownRef.current &&
@@ -94,7 +98,7 @@ const Navbar: React.FC = () => {
             startDate: trip.startDate,
             endDate: trip.endDate,
             approxPrice: 0,
-            participants: (trip.participants || []).map((c: any) => ({ name: c.userName })),
+            participants: (trip.participants || []).map((c: any) => ({ name: c.name || "Unknown" })),
           }));
 
           setTrips(formattedTrips);

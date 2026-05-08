@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function InboxDropdown() {
@@ -8,6 +8,20 @@ export default function InboxDropdown() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -53,7 +67,7 @@ export default function InboxDropdown() {
   const unreadCount = notifications.filter(n => n.status === 'unread').length;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       {/* Inbox Bell Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
